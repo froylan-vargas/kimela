@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<KimelaDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

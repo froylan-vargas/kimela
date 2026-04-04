@@ -1,0 +1,8 @@
+services:
+  api:
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+
+  web:
+    volumes:
+      - ./apps/web/src:/app/apps/web/src

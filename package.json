@@ -1,0 +1,22 @@
+{
+  "name": "kimela",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @kimela/api dev",
+    "dev:web": "pnpm --filter @kimela/web dev",
+    "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
+    "test": "pnpm --filter './apps/*' test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate": "pnpm --filter @kimela/api db:migrate",
+    "db:studio": "pnpm --filter @kimela/api db:studio",
+    "db:generate": "pnpm --filter @kimela/api db:generate"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/engines",
+      "prisma"
+    ]
+  }
+}

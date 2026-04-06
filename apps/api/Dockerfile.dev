@@ -1,0 +1,12 @@
+FROM node:20-alpine
+RUN npm install -g pnpm
+
+WORKDIR /app
+COPY . .
+RUN pnpm install
+RUN pnpm --filter @kimela/api db:generate
+
+EXPOSE 3000
+EXPOSE 9229
+
+CMD ["pnpm", "--filter", "@kimela/api", "start:debug"]

@@ -1,8 +1,17 @@
 services:
   api:
+    build:
+      dockerfile: apps/api/Dockerfile.dev
+    ports:
+      - "9229:9229"
     volumes:
       - ./apps/api/src:/app/apps/api/src
+      - ./apps/api/dist:/app/apps/api/dist
 
   web:
+    build:
+      dockerfile: apps/web/Dockerfile.dev
+    ports:
+      - "9230:9229"
     volumes:
       - ./apps/web/src:/app/apps/web/src

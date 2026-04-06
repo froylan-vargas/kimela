@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "KimelaStatus" AS ENUM ('ACTIVE', 'CLOSED', 'UPCOMING', 'CANCELLED', 'PAUSED');
+CREATE TYPE "KimelaStatus" AS ENUM ('ACTIVE', 'COMPLETED', 'UPCOMING', 'CANCELLED', 'PAUSED');
 
 -- CreateTable
 CREATE TABLE "users" (

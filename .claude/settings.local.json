@@ -4,7 +4,10 @@
       "Bash(chmod +x:*)",
       "Bash(pnpm:*)",
       "Bash(export PATH=\"$HOME/.nvm/versions/node/v24.14.1/bin:$PATH\")",
-      "Bash($PNPM:*)"
+      "Bash($PNPM:*)",
+      "Bash(npx jest:*)",
+      "Bash(node -e \"const {PrismaClient} = require\\('@prisma/client'\\); const p = new PrismaClient\\({datasourceUrl: process.env.DATABASE_URL}\\); console.log\\('ok'\\)\")",
+      "Bash(docker compose:*)"
     ]
   }
 }

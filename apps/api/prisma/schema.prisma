@@ -54,7 +54,7 @@ model Subscription {
 
 enum KimelaStatus {
   ACTIVE
-  CLOSED
+  COMPLETED
   UPCOMING
   CANCELLED
   PAUSED

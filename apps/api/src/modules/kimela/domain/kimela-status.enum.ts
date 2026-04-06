@@ -1,0 +1,7 @@
+export enum KimelaStatus {
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+  UPCOMING = 'UPCOMING',
+  CANCELLED = 'CANCELLED',
+  PAUSED = 'PAUSED',
+}

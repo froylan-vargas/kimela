@@ -1,0 +1,1 @@
+- [Kimela project overview](project_kimela_overview.md) — DDD architecture, Prisma v7 adapter pattern, KimelaStatus enum, mock auth user id

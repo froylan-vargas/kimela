@@ -1,0 +1,47 @@
+@use "../../styles/variables" as *;
+
+.verificationBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  background: #fff9e5;
+  border-bottom: 1px solid #ffd100;
+  padding: $spacing-sm $spacing-lg;
+  font-size: 14px;
+  color: $color-text-main;
+  flex-wrap: wrap;
+
+  p {
+    margin: 0;
+  }
+
+  button {
+    padding: 6px $spacing-md;
+    background: $color-primary;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: $font-family-base;
+    color: $color-text-main;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-hover;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.resendSuccess {
+  font-size: 14px;
+  color: #389e0d;
+  font-weight: 500;
+}

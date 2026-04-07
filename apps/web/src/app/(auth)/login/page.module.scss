@@ -1,0 +1,140 @@
+@use "../../../styles/variables" as *;
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-bg;
+  padding: $spacing-lg;
+}
+
+.card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: $color-text-main;
+  }
+
+  p {
+    color: $color-text-secondary;
+    font-size: 14px;
+    margin-top: $spacing-xs;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-text-main;
+  }
+
+  input {
+    padding: 10px $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-size: $font-size-base;
+    font-family: $font-family-base;
+    background: #fff;
+    color: $color-text-main;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+
+    &::placeholder {
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.error {
+  background: #fff1f0;
+  border: 1px solid #ffa39e;
+  border-radius: $radius-sm;
+  padding: $spacing-sm $spacing-md;
+  font-size: 14px;
+  color: #cf1322;
+}
+
+.submit {
+  width: 100%;
+  padding: 12px;
+  background: $color-primary;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: $font-family-base;
+  color: $color-text-main;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: $spacing-xs;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.forgotLink {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: $color-text-secondary;
+  text-decoration: none;
+  margin-top: $spacing-xs;
+
+  &:hover {
+    color: $color-text-main;
+    text-decoration: underline;
+  }
+}
+
+.footer {
+  text-align: center;
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin-top: $spacing-md;
+
+  a {
+    color: $color-text-main;
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import type { Kimela, KimelaRole } from "@/types/kimela";
 
 interface KimelaContextValue {
@@ -34,6 +29,7 @@ export function KimelaProvider({ children }: { children: ReactNode }) {
 
 export function useKimelaContext(): KimelaContextValue {
   const ctx = useContext(KimelaContext);
-  if (!ctx) throw new Error("useKimelaContext must be used inside KimelaProvider");
+  if (!ctx)
+    throw new Error("useKimelaContext must be used inside KimelaProvider");
   return ctx;
 }

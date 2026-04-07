@@ -12,6 +12,9 @@ const config: Config = {
       },
     ],
   },
+  moduleNameMapper: {
+    '^uuid$': '<rootDir>/../__mocks__/uuid.ts',
+  },
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',

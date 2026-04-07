@@ -1,0 +1,29 @@
+@use "../styles/variables" as *;
+
+.dashboard {
+  padding: $spacing-lg 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.headerSection {
+  margin-bottom: $spacing-sm;
+
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    color: $color-text-secondary;
+    font-size: $font-size-base;
+  }
+}
+
+.empty {
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+}

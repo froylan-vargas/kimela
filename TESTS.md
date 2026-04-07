@@ -52,6 +52,54 @@ npx jest kimela.controller
 
 ---
 
+## Web (UI) Tests
+
+All test commands are run from the **web app directory** or via the workspace root.
+
+### Prerequisites
+
+```bash
+# Install all dependencies from the workspace root
+pnpm install
+```
+
+### Run all UI tests
+
+```bash
+# From workspace root
+pnpm --filter @kimela/web test
+
+# Or from the web app directory
+cd apps/web
+npx vitest run
+```
+
+### Run tests in watch mode
+
+```bash
+cd apps/web
+npx vitest
+```
+
+### Run a specific test file
+
+```bash
+cd apps/web
+npx vitest KimelaDropdown
+npx vitest KimelaSelector
+npx vitest useKimelas
+npx vitest page
+```
+
+### Run tests with coverage
+
+```bash
+cd apps/web
+npx vitest run --coverage
+```
+
+---
+
 ## Integration Tests (requires PostgreSQL)
 
 Integration tests hit a real database. They are located at:

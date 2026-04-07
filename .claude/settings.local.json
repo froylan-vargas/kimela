@@ -7,7 +7,8 @@
       "Bash($PNPM:*)",
       "Bash(npx jest:*)",
       "Bash(node -e \"const {PrismaClient} = require\\('@prisma/client'\\); const p = new PrismaClient\\({datasourceUrl: process.env.DATABASE_URL}\\); console.log\\('ok'\\)\")",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Bash(xargs ls:*)"
     ]
   }
 }

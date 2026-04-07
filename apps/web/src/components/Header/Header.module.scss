@@ -1,0 +1,15 @@
+@use "../../styles/variables" as *;
+
+.navbar {
+  background: $color-navbar-bg;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $color-border;
+  padding: $spacing-md 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: $z-navbar;
+}

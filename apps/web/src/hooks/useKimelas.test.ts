@@ -49,7 +49,10 @@ describe("useKimelas", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:3000/kimelas");
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:3000/kimelas",
+      expect.objectContaining({ credentials: "include" }),
+    );
   });
 
   it("returns parsed kimela data on success", async () => {
@@ -71,6 +74,7 @@ describe("useKimelas", () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: false,
       status: 500,
+      statusText: "Internal Server Error",
       json: async () => ({}),
     } as Response);
 
@@ -78,7 +82,7 @@ describe("useKimelas", () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
-    expect(result.current.error?.message).toContain("500");
+    expect(result.current.error?.message).toContain("Internal Server Error");
     expect(result.current.data).toBeUndefined();
   });
 });

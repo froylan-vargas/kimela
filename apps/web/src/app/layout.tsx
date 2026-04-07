@@ -3,7 +3,6 @@ import { Outfit } from "next/font/google";
 import Script from "next/script";
 import "../styles/globals.scss";
 import Providers from "./providers";
-import Header from "@/components/Header/Header";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -31,7 +30,6 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
-          <Header />
           {children}
         </Providers>
       </body>

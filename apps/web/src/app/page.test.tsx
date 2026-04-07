@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import Home from "./page";
+import Home from "./(app)/dashboard/page";
 import { useKimelaContext } from "@/context/KimelaContext";
 import type { Kimela } from "@/types/kimela";
 

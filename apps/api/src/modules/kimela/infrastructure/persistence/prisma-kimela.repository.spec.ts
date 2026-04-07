@@ -44,7 +44,7 @@ describe('PrismaKimelaRepository (integration)', () => {
   });
 
   const createUser = (id: string, email: string) =>
-    prisma.user.create({ data: { id, email, name: 'Test User' } });
+    prisma.user.create({ data: { id, email, name: 'Test User', passwordHash: 'hashed-password' } });
 
   const createKimela = (creatorId: string, overrides: Partial<{ name: string; status: string }> = {}) =>
     prisma.kimela.create({

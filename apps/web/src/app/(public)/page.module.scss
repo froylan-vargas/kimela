@@ -1,0 +1,212 @@
+@use "../../styles/variables" as *;
+
+.landing {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Navbar ─────────────────────────────────────────────────────────────── */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.navLogo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+  text-decoration: none;
+
+  span {
+    color: $color-primary;
+  }
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.navLink {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.navCta {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a0a0a;
+  background: $color-primary;
+  border: none;
+  border-radius: $radius-pill;
+  padding: 8px 20px;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: $color-primary-hover;
+    transform: translateY(-1px);
+  }
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────────── */
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 $spacing-lg;
+  position: relative;
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 209, 0, 0.12) 0%,
+    rgba(255, 209, 0, 0.04) 40%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+}
+
+.headline {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: $spacing-md;
+  color: #fff;
+}
+
+.subheadline {
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+  margin-bottom: $spacing-xl;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ctaGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.ctaPrimary {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: $font-family-base;
+  color: #0a0a0a;
+  background: $color-primary;
+  border: none;
+  border-radius: $radius-md;
+  padding: 16px 40px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 24px rgba(255, 209, 0, 0.25);
+
+  &:hover {
+    background: $color-primary-hover;
+    transform: translateY(-2px);
+    box-shadow: 0 0 32px rgba(255, 209, 0, 0.4);
+  }
+}
+
+.ctaDivider {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ctaSecondary {
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: $font-family-base;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: $radius-md;
+  padding: 12px 32px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: $spacing-lg 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.footerCopy {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: $spacing-md $spacing-md;
+  }
+
+  .hero {
+    padding: 0 $spacing-md;
+  }
+
+  .footer {
+    padding: $spacing-md;
+  }
+}

@@ -1,0 +1,118 @@
+@use "../../../styles/variables" as *;
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-bg;
+  padding: $spacing-lg;
+}
+
+.card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: $color-text-main;
+  }
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+  text-align: center;
+}
+
+.statusText {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+}
+
+.successText {
+  font-size: $font-size-base;
+  color: #389e0d;
+  font-weight: 500;
+}
+
+.error {
+  background: #fff1f0;
+  border: 1px solid #ffa39e;
+  border-radius: $radius-sm;
+  padding: $spacing-sm $spacing-md;
+  font-size: 14px;
+  color: #cf1322;
+  width: 100%;
+  text-align: center;
+}
+
+.submit {
+  width: 100%;
+  padding: 12px;
+  background: $color-primary;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: $font-family-base;
+  color: $color-text-main;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: $spacing-xs;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.actionLink {
+  display: inline-block;
+  padding: 12px $spacing-lg;
+  background: $color-primary;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $color-text-main;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  margin-top: $spacing-xs;
+
+  &:hover {
+    background: $color-primary-hover;
+  }
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

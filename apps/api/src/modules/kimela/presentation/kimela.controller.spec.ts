@@ -4,8 +4,16 @@ import { GetKimelasForUserUseCase } from '../application/use-cases/get-kimelas-f
 import { KIMELA_REPOSITORY } from '../domain/kimela.repository';
 import { KimelaStatus } from '../domain/kimela-status.enum';
 import { PaginatedKimelaResponse } from '../application/dtos/kimela.dto';
+import { CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
+import { UserRole } from '../../users/domain/user-role.enum';
 
 const MOCK_USER_ID = 'e471c62d-6015-4ab9-b930-79db54ea75c0';
+const MOCK_USER: CurrentUserPayload = {
+  id: MOCK_USER_ID,
+  email: 'test@example.com',
+  role: UserRole.USER,
+  emailVerifiedAt: null,
+};
 
 const mockPaginatedResponse: PaginatedKimelaResponse = {
   data: [
@@ -51,7 +59,7 @@ describe('KimelaController', () => {
       useCase.execute.mockResolvedValue(mockPaginatedResponse);
 
       // Act
-      await controller.getKimelas({ id: MOCK_USER_ID }, {});
+      await controller.getKimelas(MOCK_USER, {});
 
       // Assert
       expect(useCase.execute).toHaveBeenCalledWith({
@@ -66,7 +74,7 @@ describe('KimelaController', () => {
 
       // Act
       await controller.getKimelas(
-        { id: MOCK_USER_ID },
+        MOCK_USER,
         { status: KimelaStatus.ACTIVE },
       );
 
@@ -82,7 +90,7 @@ describe('KimelaController', () => {
       useCase.execute.mockResolvedValue(mockPaginatedResponse);
 
       // Act
-      const result = await controller.getKimelas({ id: MOCK_USER_ID }, {});
+      const result = await controller.getKimelas(MOCK_USER, {});
 
       // Assert
       expect(result).toEqual(mockPaginatedResponse);
@@ -97,7 +105,7 @@ describe('KimelaController', () => {
       useCase.execute.mockResolvedValue(emptyResponse);
 
       // Act
-      const result = await controller.getKimelas({ id: MOCK_USER_ID }, {});
+      const result = await controller.getKimelas(MOCK_USER, {});
 
       // Assert
       expect(result.data).toEqual([]);

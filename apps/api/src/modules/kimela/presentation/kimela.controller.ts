@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Logger } from '@nestjs/common';
 import { GetKimelasForUserUseCase } from '../application/use-cases/get-kimelas-for-user.use-case';
 import { PaginatedKimelaResponse } from '../application/dtos/kimela.dto';
-import { CurrentUser, CurrentUserPayload } from './decorators/current-user.decorator';
+import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetKimelasRequestDto } from './dtos/get-kimelas-request.dto';
 
 @Controller('kimelas')

@@ -111,7 +111,7 @@ describe('SendVerificationEmailUseCase', () => {
 
     it('calls emailService.sendVerificationEmail with correct email and name', async () => {
       // Arrange
-      const user = makeUser({ email: 'user@kimela.com', name: 'KimelaUser' });
+      const user = makeUser({ email: 'user@qimela.com', name: 'QimelaUser' });
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
       mockEmailService.sendVerificationEmail.mockResolvedValue(undefined);

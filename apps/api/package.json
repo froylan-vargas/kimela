@@ -1,5 +1,5 @@
 {
-  "name": "@kimela/api",
+  "name": "@qimela/api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -17,7 +17,7 @@
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {
-    "@kimela/types": "workspace:*",
+    "@qimela/types": "workspace:*",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/jwt": "^11.0.2",

@@ -4,9 +4,9 @@ RUN npm install -g pnpm
 WORKDIR /app
 COPY . .
 RUN pnpm install
-RUN pnpm --filter @kimela/api db:generate
+RUN pnpm --filter @qimela/api db:generate
 
 EXPOSE 3000
 EXPOSE 9229
 
-CMD ["pnpm", "--filter", "@kimela/api", "start:debug"]
+CMD ["pnpm", "--filter", "@qimela/api", "start:debug"]

@@ -9,12 +9,12 @@ RUN pnpm install
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app .
-RUN pnpm --filter @kimela/types build
+RUN pnpm --filter @qimela/types build
 # Generate Prisma client before compiling (requires schema to exist)
-RUN pnpm --filter @kimela/api db:generate
-RUN pnpm --filter @kimela/api build
-# Self-contained prod bundle: resolves @kimela/types as a real package (no symlinks)
-RUN pnpm deploy --filter @kimela/api --prod /deploy
+RUN pnpm --filter @qimela/api db:generate
+RUN pnpm --filter @qimela/api build
+# Self-contained prod bundle: resolves @qimela/types as a real package (no symlinks)
+RUN pnpm deploy --filter @qimela/api --prod /deploy
 # pnpm deploy isolates dependencies but drops the dynamically generated Prisma client. Regenerate it!
 RUN cp -r apps/api/prisma /deploy/prisma && cd /deploy && npx prisma generate
 

@@ -12,7 +12,7 @@ export function VerificationEmail({ name, confirmUrl }: VerificationEmailProps) 
     <Html>
       <Section>
         <Heading>¡Hola {name}!</Heading>
-        <Text>Confirma tu correo electrónico para acceder a todas las funciones de Kimela.</Text>
+        <Text>Confirma tu correo electrónico para acceder a todas las funciones de Qimela.</Text>
         <Button href={confirmUrl}>Confirmar correo</Button>
         <Text>Este enlace expira en 24 horas.</Text>
       </Section>

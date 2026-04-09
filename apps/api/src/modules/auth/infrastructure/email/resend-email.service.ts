@@ -18,9 +18,9 @@ export class ResendEmailService implements EmailService {
     this.logger.log(`Sending verification email to: ${to}`);
     console.log("process.env.NODE_ENV", process.env.NODE_ENV);
     await this.resend.emails.send({
-      from: "Kimela <noreply@qimela.com>",
+      from: "Qimela <noreply@qimela.com>",
       to,
-      subject: "Confirma tu correo — Kimela",
+      subject: "Confirma tu correo — Qimela",
       html,
     });
   }
@@ -33,9 +33,9 @@ export class ResendEmailService implements EmailService {
     const html = await renderPasswordResetEmail({ name, resetUrl });
     this.logger.log(`Sending password reset email to: ${to}`);
     await this.resend.emails.send({
-      from: "Kimela <noreply@qimela.com>",
+      from: "Qimela <noreply@qimela.com>",
       to,
-      subject: "Restablece tu contraseña — Kimela",
+      subject: "Restablece tu contraseña — Qimela",
       html,
     });
   }

@@ -1,0 +1,7 @@
+export enum QimelaStatus {
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+  UPCOMING = 'UPCOMING',
+  CANCELLED = 'CANCELLED',
+  PAUSED = 'PAUSED',
+}

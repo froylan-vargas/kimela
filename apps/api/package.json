@@ -1,12 +1,12 @@
 {
-  "name": "@kimela/api",
+  "name": "@qimela/api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug 0.0.0.0 --watch",
-    "start": "node dist/main",
+    "start": "node dist/src/main",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "test": "jest",
@@ -17,7 +17,7 @@
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {
-    "@kimela/types": "workspace:*",
+    "@qimela/types": "workspace:*",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/jwt": "^11.0.2",
@@ -29,6 +29,8 @@
     "@react-email/components": "^1.0.11",
     "@react-email/render": "^2.0.5",
     "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.0",
     "passport": "^0.7.0",
@@ -37,6 +39,8 @@
     "pg": "^8.20.0",
     "pg-boss": "^12.15.0",
     "prisma": "^7.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "reflect-metadata": "^0.2.0",
     "resend": "^6.10.0",
     "rxjs": "^7.8.1",
@@ -56,8 +60,6 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/uuid": "^11.0.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.15.1",
     "jest": "^30.3.0",
     "ts-jest": "^29.4.9",
     "typescript": "^5.8.0"

@@ -12,7 +12,7 @@ export function PasswordResetEmail({ name, resetUrl }: PasswordResetEmailProps) 
     <Html>
       <Section>
         <Heading>¡Hola {name}!</Heading>
-        <Text>Recibimos una solicitud para restablecer tu contraseña en Kimela.</Text>
+        <Text>Recibimos una solicitud para restablecer tu contraseña en Qimela.</Text>
         <Button href={resetUrl}>Restablecer contraseña</Button>
         <Text>Este enlace expira en 1 hora. Si no solicitaste esto, ignora este correo.</Text>
       </Section>

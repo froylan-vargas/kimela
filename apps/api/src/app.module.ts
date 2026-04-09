@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './shared/prisma/prisma.module';
-import { KimelaModule } from './modules/kimela/kimela.module';
+import { QimelaModule } from './modules/qimela/qimela.module';
 import { AuthModule } from './modules/auth/presentation/auth.module';
 import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/presentation/guards/roles.guard';
+import { HealthController } from './health.controller';
+import { JobsModule } from './modules/jobs/jobs.module';
 
 @Module({
   imports: [
@@ -16,10 +18,11 @@ import { RolesGuard } from './modules/auth/presentation/guards/roles.guard';
       },
     ]),
     PrismaModule,
-    KimelaModule,
+    QimelaModule,
     AuthModule,
+    JobsModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_GUARD,

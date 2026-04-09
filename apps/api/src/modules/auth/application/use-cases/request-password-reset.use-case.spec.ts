@@ -144,7 +144,7 @@ describe('RequestPasswordResetUseCase', () => {
 
     it('calls emailService.sendPasswordResetEmail with correct email', async () => {
       // Arrange
-      const user = makeUser({ email: 'reset@kimela.com' });
+      const user = makeUser({ email: 'reset@qimela.com' });
       mockUserRepo.findByEmail.mockResolvedValue(user);
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
@@ -155,7 +155,7 @@ describe('RequestPasswordResetUseCase', () => {
 
       // Assert
       expect(mockEmailService.sendPasswordResetEmail).toHaveBeenCalledWith(
-        'reset@kimela.com',
+        'reset@qimela.com',
         expect.any(String),
         expect.any(String),
       );

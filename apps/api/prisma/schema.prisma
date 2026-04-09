@@ -24,7 +24,7 @@ model User {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  kimelas                  Kimela[]                  @relation("KimelaCreator")
+  qimelas                  Qimela[]                  @relation("QimelaCreator")
   subscriptions            Subscription[]
   refreshTokens            RefreshToken[]
   emailVerificationTokens  EmailVerificationToken[]
@@ -45,20 +45,20 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model Kimela {
+model Qimela {
   id          String        @id @default(uuid())
   name        String
   description String?
   sport       String
-  status      KimelaStatus  @default(ACTIVE)
+  status      QimelaStatus  @default(ACTIVE)
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
   creatorId     String         @map("creator_id")
-  creator       User           @relation("KimelaCreator", fields: [creatorId], references: [id])
+  creator       User           @relation("QimelaCreator", fields: [creatorId], references: [id])
   subscriptions Subscription[]
 
-  @@map("kimelas")
+  @@map("qimelas")
 }
 
 model Subscription {
@@ -69,10 +69,10 @@ model Subscription {
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
 
-  kimelaId  String   @map("kimela_id")
-  kimela    Kimela   @relation(fields: [kimelaId], references: [id])
+  qimelaId  String   @map("qimela_id")
+  qimela    Qimela   @relation(fields: [qimelaId], references: [id])
 
-  @@unique([userId, kimelaId])
+  @@unique([userId, qimelaId])
   @@map("subscriptions")
 }
 
@@ -100,7 +100,7 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-enum KimelaStatus {
+enum QimelaStatus {
   ACTIVE
   COMPLETED
   UPCOMING

@@ -1,5 +1,5 @@
 {
-  "name": "@kimela/web",
+  "name": "@qimela/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@kimela/types": "workspace:*",
+    "@qimela/types": "workspace:*",
     "@tanstack/react-query": "^5.96.2",
     "next": "^15.0.0",
     "react": "^19.0.0",

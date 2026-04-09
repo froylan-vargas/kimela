@@ -1,16 +1,16 @@
 {
-  "name": "kimela",
+  "name": "qimela",
   "private": true,
   "scripts": {
-    "dev:api": "pnpm --filter @kimela/api dev",
-    "dev:web": "pnpm --filter @kimela/web dev",
+    "dev:api": "pnpm --filter @qimela/api dev",
+    "dev:web": "pnpm --filter @qimela/web dev",
     "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
     "test": "pnpm --filter './apps/*' test",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "db:migrate": "pnpm --filter @kimela/api db:migrate",
-    "db:studio": "pnpm --filter @kimela/api db:studio",
-    "db:generate": "pnpm --filter @kimela/api db:generate"
+    "db:migrate": "pnpm --filter @qimela/api db:migrate",
+    "db:studio": "pnpm --filter @qimela/api db:studio",
+    "db:generate": "pnpm --filter @qimela/api db:generate"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

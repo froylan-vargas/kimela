@@ -2,15 +2,15 @@
 
 ## 1. Overview
 
-Build a sticky, frosted-glass header for the Kimela dashboard. The header has three zones:
+Build a sticky, frosted-glass header for the Qimela dashboard. The header has three zones:
 
-- **Left** — logo (trophy icon that in future will be the kimela logo, the logo will include the app name so don't use text)
-- **Center** — a pill-shaped kimela selector button that opens a dropdown listing the user's kimelas in two sections: "Participando" (subscriber) and "Creadas" (creator)
+- **Left** — logo (trophy icon that in future will be the qimela logo, the logo will include the app name so don't use text)
+- **Center** — a pill-shaped qimela selector button that opens a dropdown listing the user's qimelas in two sections: "Participando" (subscriber) and "Creadas" (creator)
 - **Right** — bell icon + user avatar with initials
 
-Selecting a kimela updates a React Context that is consumed by the page's main content area, which renders only the kimela name and description for now.
+Selecting a qimela updates a React Context that is consumed by the page's main content area, which renders only the qimela name and description for now.
 
-The dropdown data comes from the real API (`GET /kimelas`) fetched with a custom `useKimelas` hook backed by TanStack Query. No mock data.
+The dropdown data comes from the real API (`GET /qimelas`) fetched with a custom `useQimelas` hook backed by TanStack Query. No mock data.
 
 ---
 
@@ -19,56 +19,56 @@ The dropdown data comes from the real API (`GET /kimelas`) fetched with a custom
 ```
 src/
   app/
-    layout.tsx                    ← wrap children in <KimelaProvider>
-    page.tsx                      ← consume KimelaContext, render name + description
+    layout.tsx                    ← wrap children in <QimelaProvider>
+    page.tsx                      ← consume QimelaContext, render name + description
   components/
     Header/
-      Header.tsx                  ← <header> root, composes Logo + KimelaSelector + UserProfile
+      Header.tsx                  ← <header> root, composes Logo + QimelaSelector + UserProfile
       Header.module.scss
-      Logo.tsx                    ← trophy icon + "Kimela" text
+      Logo.tsx                    ← trophy icon + "Qimela" text
       Logo.module.scss
-      KimelaSelector/
-        KimelaSelector.tsx        ← pill button + renders <KimelaDropdown> when open
-        KimelaSelector.module.scss
-        KimelaDropdown.tsx        ← positioned dropdown with two sections + divider
-        KimelaDropdown.module.scss
+      QimelaSelector/
+        QimelaSelector.tsx        ← pill button + renders <QimelaDropdown> when open
+        QimelaSelector.module.scss
+        QimelaDropdown.tsx        ← positioned dropdown with two sections + divider
+        QimelaDropdown.module.scss
       UserProfile.tsx             ← bell icon + avatar
       UserProfile.module.scss
   context/
-    KimelaContext.tsx             ← context + provider + useKimelaContext hook
+    QimelaContext.tsx             ← context + provider + useQimelaContext hook
   hooks/
-    useKimelas.ts                 ← TanStack Query fetch hook
+    useQimelas.ts                 ← TanStack Query fetch hook
   types/
-    kimela.ts                     ← shared TypeScript interfaces
+    qimela.ts                     ← shared TypeScript interfaces
 ```
 
 ### Props interfaces
 
 ```ts
-// src/types/kimela.ts
+// src/types/qimela.ts
 
-export type KimelaRole = "CREATOR" | "SUBSCRIBER";
-export type KimelaStatus = "ACTIVE" | "INACTIVE" | string;
+export type QimelaRole = "CREATOR" | "SUBSCRIBER";
+export type QimelaStatus = "ACTIVE" | "INACTIVE" | string;
 
-export interface Kimela {
+export interface Qimela {
   id: string;
   name: string;
   description: string;
   sport: string;
-  status: KimelaStatus;
-  role: KimelaRole;
+  status: QimelaStatus;
+  role: QimelaRole;
   creatorId: string;
 }
 
-export interface KimelasMeta {
+export interface QimelasMeta {
   total: number;
   page: number;
   limit: number;
 }
 
-export interface KimelasResponse {
-  data: Kimela[];
-  meta: KimelasMeta;
+export interface QimelasResponse {
+  data: Qimela[];
+  meta: QimelasMeta;
 }
 ```
 
@@ -79,15 +79,15 @@ interface HeaderProps {} // no props — reads everything from context/hooks int
 // Logo.tsx
 interface LogoProps {} // no props
 
-// KimelaSelector.tsx
-interface KimelaSelectorProps {} // no props — reads from KimelaContext + useKimelas
+// QimelaSelector.tsx
+interface QimelaSelectorProps {} // no props — reads from QimelaContext + useQimelas
 
-// KimelaDropdown.tsx
-interface KimelaDropdownProps {
-  subscriberKimelas: Kimela[];
-  creatorKimelas: Kimela[];
+// QimelaDropdown.tsx
+interface QimelaDropdownProps {
+  subscriberQimelas: Qimela[];
+  creatorQimelas: Qimela[];
   selectedId: string | null;
-  onSelect: (kimela: Kimela) => void;
+  onSelect: (qimela: Qimela) => void;
   onClose: () => void;
 }
 
@@ -180,8 +180,8 @@ body {
 | ----------------------------------------------------------------- | ---------------------------------------------------- |
 | `src/components/Header/Header.module.scss`                        | Sticky navbar shell, backdrop-filter, border-bottom  |
 | `src/components/Header/Logo.module.scss`                          | Logo flex row, icon yellow color, mobile hide text   |
-| `src/components/Header/KimelaSelector/KimelaSelector.module.scss` | Pill button, hover state with yellow border and glow |
-| `src/components/Header/KimelaSelector/KimelaDropdown.module.scss` | Dropdown panel, section titles, divider, item hover  |
+| `src/components/Header/QimelaSelector/QimelaSelector.module.scss` | Pill button, hover state with yellow border and glow |
+| `src/components/Header/QimelaSelector/QimelaDropdown.module.scss` | Dropdown panel, section titles, divider, item hover  |
 | `src/components/Header/UserProfile.module.scss`                   | Bell icon size/color, avatar circle                  |
 
 Key CSS rules to implement:
@@ -204,7 +204,7 @@ Key CSS rules to implement:
 }
 ```
 
-**KimelaSelector.module.scss — pill trigger button**
+**QimelaSelector.module.scss — pill trigger button**
 
 ```scss
 .selectorPill {
@@ -242,7 +242,7 @@ Key CSS rules to implement:
 }
 ```
 
-**KimelaDropdown.module.scss**
+**QimelaDropdown.module.scss**
 
 ```scss
 .dropdown {
@@ -338,34 +338,34 @@ Key CSS rules to implement:
 ### Install TanStack Query
 
 ```bash
-pnpm --filter @kimela/web add @tanstack/react-query
+pnpm --filter @qimela/web add @tanstack/react-query
 ```
 
-### `src/hooks/useKimelas.ts`
+### `src/hooks/useQimelas.ts`
 
 ```ts
 import { useQuery } from "@tanstack/react-query";
-import type { KimelasResponse } from "@/types/kimela";
+import type { QimelasResponse } from "@/types/qimela";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
-async function fetchKimelas(): Promise<KimelasResponse> {
-  const res = await fetch(`${API_URL}/kimelas`);
-  if (!res.ok) throw new Error(`Failed to fetch kimelas: ${res.status}`);
+async function fetchQimelas(): Promise<QimelasResponse> {
+  const res = await fetch(`${API_URL}/qimelas`);
+  if (!res.ok) throw new Error(`Failed to fetch qimelas: ${res.status}`);
   return res.json();
 }
 
-export function useKimelas() {
-  return useQuery<KimelasResponse, Error>({
-    queryKey: ["kimelas"],
-    queryFn: fetchKimelas,
+export function useQimelas() {
+  return useQuery<QimelasResponse, Error>({
+    queryKey: ["qimelas"],
+    queryFn: fetchQimelas,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
 // Return shape (from useQuery):
 // {
-//   data: KimelasResponse | undefined
+//   data: QimelasResponse | undefined
 //   isLoading: boolean
 //   isError: boolean
 //   error: Error | null
@@ -374,15 +374,15 @@ export function useKimelas() {
 
 ### Where the fetch is called
 
-`useKimelas` is called inside `KimelaSelector.tsx`. That component reads `data.data`, splits by role, and passes both arrays down to `KimelaDropdown`. The hook result also drives loading and error UI inside the selector pill (e.g. "Loading..." text while fetching, a subtle error state if the request fails).
+`useQimelas` is called inside `QimelaSelector.tsx`. That component reads `data.data`, splits by role, and passes both arrays down to `QimelaDropdown`. The hook result also drives loading and error UI inside the selector pill (e.g. "Loading..." text while fetching, a subtle error state if the request fails).
 
-The fetch must NOT be called in `page.tsx` or `layout.tsx`. Data ownership lives in the selector — the selected kimela object is lifted into context from there.
+The fetch must NOT be called in `page.tsx` or `layout.tsx`. Data ownership lives in the selector — the selected qimela object is lifted into context from there.
 
 ---
 
-## 5. State — KimelaContext
+## 5. State — QimelaContext
 
-### `src/context/KimelaContext.tsx`
+### `src/context/QimelaContext.tsx`
 
 ```ts
 'use client';
@@ -394,61 +394,61 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import type { Kimela } from '@/types/kimela';
+import type { Qimela } from '@/types/qimela';
 
-interface KimelaContextValue {
-  selectedKimela: Kimela | null;
-  setSelectedKimela: (kimela: Kimela) => void;
+interface QimelaContextValue {
+  selectedQimela: Qimela | null;
+  setSelectedQimela: (qimela: Qimela) => void;
 }
 
-const KimelaContext = createContext<KimelaContextValue | null>(null);
+const QimelaContext = createContext<QimelaContextValue | null>(null);
 
-export function KimelaProvider({
+export function QimelaProvider({
   children,
-  initialKimela,
+  initialQimela,
 }: {
   children: ReactNode;
-  initialKimela?: Kimela | null;
+  initialQimela?: Qimela | null;
 }) {
-  const [selectedKimela, setSelectedKimela] = useState<Kimela | null>(
-    initialKimela ?? null,
+  const [selectedQimela, setSelectedQimela] = useState<Qimela | null>(
+    initialQimela ?? null,
   );
 
   return (
-    <KimelaContext.Provider value={{ selectedKimela, setSelectedKimela }}>
+    <QimelaContext.Provider value={{ selectedQimela, setSelectedQimela }}>
       {children}
-    </KimelaContext.Provider>
+    </QimelaContext.Provider>
   );
 }
 
-export function useKimelaContext(): KimelaContextValue {
-  const ctx = useContext(KimelaContext);
-  if (!ctx) throw new Error('useKimelaContext must be used inside KimelaProvider');
+export function useQimelaContext(): QimelaContextValue {
+  const ctx = useContext(QimelaContext);
+  if (!ctx) throw new Error('useQimelaContext must be used inside QimelaProvider');
   return ctx;
 }
 ```
 
 ### Default selection logic
 
-`KimelaSelector` calls `useKimelas()`. Once data loads, it derives:
+`QimelaSelector` calls `useQimelas()`. Once data loads, it derives:
 
 ```ts
-const subscriberKimelas = data.data.filter((k) => k.role === "SUBSCRIBER");
-const creatorKimelas = data.data.filter((k) => k.role === "CREATOR");
-const defaultKimela = subscriberKimelas.at(-1) ?? null; // last SUBSCRIBER item
+const subscriberQimelas = data.data.filter((k) => k.role === "SUBSCRIBER");
+const creatorQimelas = data.data.filter((k) => k.role === "CREATOR");
+const defaultQimela = subscriberQimelas.at(-1) ?? null; // last SUBSCRIBER item
 ```
 
-A `useEffect` inside `KimelaSelector` sets the default once:
+A `useEffect` inside `QimelaSelector` sets the default once:
 
 ```ts
 useEffect(() => {
-  if (!selectedKimela && defaultKimela) {
-    setSelectedKimela(defaultKimela);
+  if (!selectedQimela && defaultQimela) {
+    setSelectedQimela(defaultQimela);
   }
-}, [defaultKimela]); // run only when data first arrives
+}, [defaultQimela]); // run only when data first arrives
 ```
 
-`KimelaProvider` wraps the whole app in `layout.tsx` with no `initialKimela` (starts as `null`). The selector hydrates it after the first fetch.
+`QimelaProvider` wraps the whole app in `layout.tsx` with no `initialQimela` (starts as `null`). The selector hydrates it after the first fetch.
 
 ---
 
@@ -456,7 +456,7 @@ useEffect(() => {
 
 ### Open / close toggle
 
-`KimelaSelector` owns an `isOpen: boolean` local state (via `useState`). The pill button toggles it on click.
+`QimelaSelector` owns an `isOpen: boolean` local state (via `useState`). The pill button toggles it on click.
 
 ### Click-outside to close
 
@@ -480,18 +480,18 @@ useEffect(() => {
 
 Inside the same (or a separate) `useEffect`, listen for `keydown` on `document` and close if `e.key === 'Escape'`.
 
-### Selecting a kimela
+### Selecting a qimela
 
-`KimelaDropdown` receives an `onSelect: (kimela: Kimela) => void` prop. On item click:
+`QimelaDropdown` receives an `onSelect: (qimela: Qimela) => void` prop. On item click:
 
-1. Call `setSelectedKimela(kimela)` (from context).
+1. Call `setSelectedQimela(qimela)` (from context).
 2. Call `onClose()` (from the dropdown prop) to set `isOpen = false` in the parent.
 
 The pill button shows:
 
 - "Loading..." (`isLoading === true`)
-- The selected kimela's `name` once available
-- "Select a kimela" if data is loaded but nothing is selected yet
+- The selected qimela's `name` once available
+- "Select a qimela" if data is loaded but nothing is selected yet
 
 ---
 
@@ -502,21 +502,21 @@ The pill button shows:
 ```tsx
 "use client";
 
-import { useKimelaContext } from "@/context/KimelaContext";
+import { useQimelaContext } from "@/context/QimelaContext";
 import styles from "./page.module.scss";
 
 export default function Home() {
-  const { selectedKimela } = useKimelaContext();
+  const { selectedQimela } = useQimelaContext();
 
   return (
     <main className={styles.dashboard}>
-      {selectedKimela ? (
+      {selectedQimela ? (
         <section className={styles.headerSection}>
-          <h1>{selectedKimela.name}</h1>
-          <p>{selectedKimela.description}</p>
+          <h1>{selectedQimela.name}</h1>
+          <p>{selectedQimela.description}</p>
         </section>
       ) : (
-        <p className={styles.empty}>Select a kimela to get started.</p>
+        <p className={styles.empty}>Select a qimela to get started.</p>
       )}
     </main>
   );
@@ -561,31 +561,31 @@ A new `src/app/page.module.scss` provides spacing that mirrors the mockup's `.da
 
 Work through files in this order to keep the build green at each step:
 
-1. **`apps/web/src/types/kimela.ts`** — create; defines `Kimela`, `KimelaRole`, `KimelasResponse`, `KimelasMeta`. No dependencies.
+1. **`apps/web/src/types/qimela.ts`** — create; defines `Qimela`, `QimelaRole`, `QimelasResponse`, `QimelasMeta`. No dependencies.
 
 2. **`apps/web/src/styles/_variables.scss`** — replace current content with the full token set from section 3a.
 
 3. **`apps/web/src/styles/globals.scss`** — update body defaults to use new token variable names; add `overflow-x: hidden` and `min-height: 100vh` to body.
 
-4. **`apps/web/src/app/layout.tsx`** — add `<link>` tags for Outfit font from Google Fonts and the Phosphor Icons CDN script in `<head>`. Wrap `{children}` with `<QueryClientProvider>` (TanStack Query) and `<KimelaProvider>`. Mark the layout with `'use client'` only if needed — prefer keeping it a Server Component by moving providers into a separate `src/components/Providers.tsx` Client Component.
+4. **`apps/web/src/app/layout.tsx`** — add `<link>` tags for Outfit font from Google Fonts and the Phosphor Icons CDN script in `<head>`. Wrap `{children}` with `<QueryClientProvider>` (TanStack Query) and `<QimelaProvider>`. Mark the layout with `'use client'` only if needed — prefer keeping it a Server Component by moving providers into a separate `src/components/Providers.tsx` Client Component.
 
-5. **`apps/web/src/context/KimelaContext.tsx`** — create context, provider, and `useKimelaContext` hook (section 5).
+5. **`apps/web/src/context/QimelaContext.tsx`** — create context, provider, and `useQimelaContext` hook (section 5).
 
-6. **`apps/web/src/hooks/useKimelas.ts`** — create the TanStack Query hook (section 4). No UI dependency.
+6. **`apps/web/src/hooks/useQimelas.ts`** — create the TanStack Query hook (section 4). No UI dependency.
 
 7. **`apps/web/src/components/Header/Logo.tsx` + `Logo.module.scss`** — static component, no data, easiest to build and test in isolation.
 
 8. **`apps/web/src/components/Header/UserProfile.tsx` + `UserProfile.module.scss`** — static for now, hardcode initials `"FV"`.
 
-9. **`apps/web/src/components/Header/KimelaSelector/KimelaDropdown.tsx` + `KimelaDropdown.module.scss`** — pure presentational; receives all data via props. Build and verify the two-section layout with static data before wiring it up.
+9. **`apps/web/src/components/Header/QimelaSelector/QimelaDropdown.tsx` + `QimelaDropdown.module.scss`** — pure presentational; receives all data via props. Build and verify the two-section layout with static data before wiring it up.
 
-10. **`apps/web/src/components/Header/KimelaSelector/KimelaSelector.tsx` + `KimelaSelector.module.scss`** — wire `useKimelas`, `useKimelaContext`, open/close state, click-outside, Escape key, and default-selection `useEffect`.
+10. **`apps/web/src/components/Header/QimelaSelector/QimelaSelector.tsx` + `QimelaSelector.module.scss`** — wire `useQimelas`, `useQimelaContext`, open/close state, click-outside, Escape key, and default-selection `useEffect`.
 
-11. **`apps/web/src/components/Header/Header.tsx` + `Header.module.scss`** — compose Logo + KimelaSelector + UserProfile inside the sticky `<header>` element.
+11. **`apps/web/src/components/Header/Header.tsx` + `Header.module.scss`** — compose Logo + QimelaSelector + UserProfile inside the sticky `<header>` element.
 
 12. **`apps/web/src/app/layout.tsx`** (update) — import and render `<Header />` above `{children}`.
 
-13. **`apps/web/src/app/page.tsx` + `page.module.scss`** — convert to Client Component, consume `useKimelaContext`, render kimela name and description.
+13. **`apps/web/src/app/page.tsx` + `page.module.scss`** — convert to Client Component, consume `useQimelaContext`, render qimela name and description.
 
 14. **Tests** — write tests after each component is stable (see below).
 
@@ -593,12 +593,12 @@ Work through files in this order to keep the build green at each step:
 
 | Test file                                                      | What to cover                                                                                                                                                |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/components/Header/KimelaSelector/KimelaDropdown.test.tsx` | Renders subscriber section, creator section, divider; calls `onSelect` and `onClose` on item click; highlights selected item                                 |
-| `src/components/Header/KimelaSelector/KimelaSelector.test.tsx` | Opens dropdown on pill click; closes on Escape; closes on outside click; sets default to last SUBSCRIBER kimela via mocked `useKimelas`; shows loading state |
-| `src/hooks/useKimelas.test.ts`                                 | Calls correct URL; returns parsed data; throws on non-OK response                                                                                            |
-| `src/app/page.test.tsx`                                        | Shows kimela name and description when context has a selected kimela; shows fallback when context is empty                                                   |
+| `src/components/Header/QimelaSelector/QimelaDropdown.test.tsx` | Renders subscriber section, creator section, divider; calls `onSelect` and `onClose` on item click; highlights selected item                                 |
+| `src/components/Header/QimelaSelector/QimelaSelector.test.tsx` | Opens dropdown on pill click; closes on Escape; closes on outside click; sets default to last SUBSCRIBER qimela via mocked `useQimelas`; shows loading state |
+| `src/hooks/useQimelas.test.ts`                                 | Calls correct URL; returns parsed data; throws on non-OK response                                                                                            |
+| `src/app/page.test.tsx`                                        | Shows qimela name and description when context has a selected qimela; shows fallback when context is empty                                                   |
 
-Test setup: wrap each render in a `QueryClientProvider` with a fresh `QueryClient` and `KimelaProvider`. Use `vi.fn()` to mock `fetch` in hook tests.
+Test setup: wrap each render in a `QueryClientProvider` with a fresh `QueryClient` and `QimelaProvider`. Use `vi.fn()` to mock `fetch` in hook tests.
 
 ---
 
@@ -611,7 +611,7 @@ The following items from the mockup are explicitly NOT part of this task:
 - **Background decoration shapes** — the blurred gradient blobs behind the content
 - **Authentication** — login, session management, real user initials from a session, auth-gated routes
 - **Bell notifications** — the notification panel or badge count on the bell icon
-- **Pagination / filtering of kimelas** — the `meta` object from `GET /kimelas` is fetched but not used to paginate
-- **Creating a new kimela** — no UI flow for kimela creation
-- **Kimela detail page** — clicking a kimela only updates context; no navigation to a dedicated route
+- **Pagination / filtering of qimelas** — the `meta` object from `GET /qimelas` is fetched but not used to paginate
+- **Creating a new qimela** — no UI flow for qimela creation
+- **Qimela detail page** — clicking a qimela only updates context; no navigation to a dedicated route
 - **Error boundary** — global error UI for failed fetches beyond a local error state in the selector

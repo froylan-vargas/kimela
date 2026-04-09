@@ -36,18 +36,18 @@ From Studio you can browse tables, filter rows, and edit records without writing
 
 If you prefer a SQL client, connect with any tool that supports PostgreSQL (TablePlus, DBeaver, psql) using these credentials (from `.env`):
 
-| Field    | Value          |
-|----------|----------------|
-| Host     | `localhost`    |
-| Port     | `5432`         |
-| Database | `kimela_db`    |
-| User     | `kimela`       |
-| Password | `kimela_secret`|
+| Field    | Value           |
+| -------- | --------------- |
+| Host     | `localhost`     |
+| Port     | `5432`          |
+| Database | `qimela_db`     |
+| User     | `qimela`        |
+| Password | `qimela_secret` |
 
 Example with `psql` (if installed locally):
 
 ```bash
-psql postgresql://kimela:kimela_secret@localhost:5432/kimela_db
+psql postgresql://qimela:qimela_secret@localhost:5432/qimela_db
 ```
 
 Sample queries after running migrations:
@@ -56,13 +56,13 @@ Sample queries after running migrations:
 -- List all users
 SELECT * FROM users;
 
--- List open kimelas
-SELECT * FROM kimelas WHERE status = 'OPEN';
+-- List open qimelas
+SELECT * FROM qimelas WHERE status = 'OPEN';
 
--- Count subscriptions per kimela
+-- Count subscriptions per qimela
 SELECT k.name, COUNT(s.id) AS subscriptions
-FROM kimelas k
-LEFT JOIN subscriptions s ON s.kimela_id = k.id
+FROM qimelas k
+LEFT JOIN subscriptions s ON s.qimela_id = k.id
 GROUP BY k.name;
 ```
 

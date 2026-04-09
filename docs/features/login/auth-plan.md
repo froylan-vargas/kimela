@@ -1,13 +1,13 @@
-# Authentication Implementation Plan — Kimela
+# Authentication Implementation Plan — Qimela
 
 ## Overview
 
-Kimela currently has zero authentication. The `CurrentUser` decorator returns a hardcoded UUID and the `User` Prisma model has no credentials or role fields. This plan covers the full implementation across architecture, backend, and frontend.
+Qimela currently has zero authentication. The `CurrentUser` decorator returns a hardcoded UUID and the `User` Prisma model has no credentials or role fields. This plan covers the full implementation across architecture, backend, and frontend.
 
 **Two principal types:**
 
-- **Participant/Creator (USER):** Self-registered. Can create kimelas and subscribe to them. The creator/participant distinction is kimela-scoped (via `Kimela.creatorId` and `Subscription`), not a system role.
-- **Admin:** Platform operator. Creates leagues, updates event results, defines sport rules, manages all kimelas. Provisioned manually — never self-registered.
+- **Participant/Creator (USER):** Self-registered. Can create qimelas and subscribe to them. The creator/participant distinction is qimela-scoped (via `Qimela.creatorId` and `Subscription`), not a system role.
+- **Admin:** Platform operator. Creates leagues, updates event results, defines sport rules, manages all qimelas. Provisioned manually — never self-registered.
 
 ---
 
@@ -35,13 +35,13 @@ Permission matrix:
 | Action               | USER | ADMIN            |
 | -------------------- | ---- | ---------------- |
 | Register / Login     | Yes  | No (provisioned) |
-| Create kimela        | Yes  | Yes              |
-| Subscribe to kimela  | Yes  | No               |
-| View own kimelas     | Yes  | Yes (all)        |
+| Create qimela        | Yes  | Yes              |
+| Subscribe to qimela  | Yes  | No               |
+| View own qimelas     | Yes  | Yes (all)        |
 | Create league        | No   | Yes              |
 | Update event results | No   | Yes              |
 | Define sport rules   | No   | Yes              |
-| Manage any kimela    | No   | Yes              |
+| Manage any qimela    | No   | Yes              |
 
 ### Token Storage Decision
 
@@ -83,7 +83,7 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  kimelas       Kimela[]       @relation("KimelaCreator")
+  qimelas       Qimela[]       @relation("QimelaCreator")
   subscriptions Subscription[]
   refreshTokens RefreshToken[]
 
@@ -106,7 +106,7 @@ model RefreshToken {
 Run migrations:
 
 ```bash
-pnpm --filter @kimela/api db:migrate
+pnpm --filter @qimela/api db:migrate
 # migration names: add_auth_fields_to_users, add_refresh_tokens
 ```
 
@@ -117,13 +117,13 @@ pnpm --filter @kimela/api db:migrate
 ### 3a. New Dependencies
 
 ```bash
-pnpm --filter @kimela/api add @nestjs/jwt @nestjs/passport @nestjs/throttler passport passport-local passport-jwt bcrypt cookie-parser
-pnpm --filter @kimela/api add -D @types/passport-local @types/passport-jwt @types/bcrypt @types/cookie-parser
+pnpm --filter @qimela/api add @nestjs/jwt @nestjs/passport @nestjs/throttler passport passport-local passport-jwt bcrypt cookie-parser
+pnpm --filter @qimela/api add -D @types/passport-local @types/passport-jwt @types/bcrypt @types/cookie-parser
 ```
 
 ### 3b. File Structure
 
-Follow the existing hexagonal pattern from `KimelaModule`:
+Follow the existing hexagonal pattern from `QimelaModule`:
 
 ```
 apps/api/src/modules/
@@ -166,7 +166,7 @@ apps/api/src/modules/
     │   └── auth.infrastructure.module.ts
     └── presentation/
         ├── decorators/
-        │   ├── current-user.decorator.ts   # replaces mock in kimela/
+        │   ├── current-user.decorator.ts   # replaces mock in qimela/
         │   ├── roles.decorator.ts
         │   └── public.decorator.ts
         ├── guards/
@@ -177,7 +177,7 @@ apps/api/src/modules/
         └── auth.module.ts
 ```
 
-> The mock `current-user.decorator.ts` in `kimela/presentation/decorators/` is removed. `KimelaController` updates its import to the real decorator.
+> The mock `current-user.decorator.ts` in `qimela/presentation/decorators/` is removed. `QimelaController` updates its import to the real decorator.
 
 ### 3c. Domain Layer
 
@@ -424,7 +424,7 @@ The `refresh_token` cookie uses `Path: '/auth/refresh'` and `maxAge: 7 * 24 * 60
 
 ```ts
 @Module({
-  imports: [PrismaModule, KimelaModule, UsersModule, AuthModule],
+  imports: [PrismaModule, QimelaModule, UsersModule, AuthModule],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
@@ -458,7 +458,7 @@ JWT_REFRESH_SECRET=<min 32 chars>
 
 ### 4a. What Already Exists
 
-- `QueryClientProvider > KimelaProvider > children` — `AuthProvider` slots in between.
+- `QueryClientProvider > QimelaProvider > children` — `AuthProvider` slots in between.
 - `Header` hardcodes `UserProfile initials="FV"` — needs live auth state.
 - API calls use plain `fetch` with no `credentials` option.
 - No `middleware.ts`, no auth pages, no auth context exist.
@@ -477,10 +477,10 @@ apps/web/src/
 ├── lib/
 │   └── apiClient.ts                       # NEW — fetch wrapper + authApi
 ├── context/
-│   ├── KimelaContext.tsx                  # existing (unchanged)
+│   ├── QimelaContext.tsx                  # existing (unchanged)
 │   └── AuthContext.tsx                    # NEW — AuthProvider + context
 ├── hooks/
-│   ├── useKimelas.ts                      # existing (update to add credentials)
+│   ├── useQimelas.ts                      # existing (update to add credentials)
 │   └── useAuth.ts                         # NEW — useAuth, useRequireAuth, useRequireRole
 ├── components/
 │   ├── auth/
@@ -580,7 +580,7 @@ export function useRequireRole(role: AuthRole): AuthUser; // redirects if wrong 
   <AuthProvider>
     {" "}
     {/* wraps everything — fetches /auth/me on mount */}
-    <KimelaProvider>{children}</KimelaProvider>
+    <QimelaProvider>{children}</QimelaProvider>
   </AuthProvider>
 </QueryClientProvider>
 ```
@@ -730,7 +730,7 @@ In `AuthContext.logout()`:
 6. Build `AuthController` with all endpoints
 7. Register global guards in `AppModule`
 8. Add `cookie-parser` and fix CORS in `main.ts`
-9. Update `KimelaController` to use real `@CurrentUser` decorator
+9. Update `QimelaController` to use real `@CurrentUser` decorator
 10. Add rate limiting to login/register
 11. Write tests
 

@@ -88,7 +88,7 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <h1>Kimela</h1>
+          <h1>Qimela</h1>
           <p>Inicia sesión en tu cuenta</p>
         </div>
 

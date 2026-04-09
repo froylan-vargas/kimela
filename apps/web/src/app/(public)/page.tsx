@@ -16,7 +16,7 @@ export default async function LandingPage() {
       {/* ── Navbar ──────────────────────────────────────────────────────── */}
       <nav className={styles.navbar}>
         <Link href="/" className={styles.navLogo}>
-          Kimela<span>.</span>
+          Qimela<span>.</span>
         </Link>
 
         <div className={styles.navLinks}>
@@ -57,7 +57,7 @@ export default async function LandingPage() {
       {/* ── Footer ─────────────────────────────────────────────────────── */}
       <footer className={styles.footer}>
         <span className={styles.footerCopy}>
-          © {new Date().getFullYear()} Kimela. Todos los derechos reservados.
+          © {new Date().getFullYear()} Qimela. Todos los derechos reservados.
         </span>
       </footer>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Logo from "./Logo";
-import KimelaSelector from "./KimelaSelector/KimelaSelector";
+import QimelaSelector from "./QimelaSelector/QimelaSelector";
 import UserProfile from "./UserProfile";
 import styles from "./Header.module.scss";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +12,7 @@ export default function Header() {
   return (
     <header className={styles.navbar}>
       <Logo />
-      <KimelaSelector />
+      <QimelaSelector />
       {user && <UserProfile name={user.name} />}
     </header>
   );

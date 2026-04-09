@@ -11,7 +11,7 @@ All test commands are run from the **API app directory** or via the workspace ro
 pnpm install
 
 # Generate the Prisma client (required before running any tests)
-pnpm --filter @kimela/api db:generate
+pnpm --filter @qimela/api db:generate
 ```
 
 ### Unit Tests (no database required)
@@ -20,34 +20,34 @@ Unit tests cover the mapper, use case, and controller with mocked dependencies.
 
 ```bash
 # From workspace root
-pnpm --filter @kimela/api test
+pnpm --filter @qimela/api test
 
 # Or run directly from the API app directory
 cd apps/api
-npx jest --testPathIgnorePatterns="prisma-kimela.repository.spec.ts"
+npx jest --testPathIgnorePatterns="prisma-qimela.repository.spec.ts"
 ```
 
 ### Run tests in watch mode
 
 ```bash
 cd apps/api
-npx jest --watch --testPathIgnorePatterns="prisma-kimela.repository.spec.ts"
+npx jest --watch --testPathIgnorePatterns="prisma-qimela.repository.spec.ts"
 ```
 
 ### Run tests with coverage
 
 ```bash
 cd apps/api
-npx jest --coverage --testPathIgnorePatterns="prisma-kimela.repository.spec.ts"
+npx jest --coverage --testPathIgnorePatterns="prisma-qimela.repository.spec.ts"
 ```
 
 ### Run a specific test file
 
 ```bash
 cd apps/api
-npx jest kimela.mapper
-npx jest get-kimelas-for-user.use-case
-npx jest kimela.controller
+npx jest qimela.mapper
+npx jest get-qimelas-for-user.use-case
+npx jest qimela.controller
 ```
 
 ---
@@ -67,7 +67,7 @@ pnpm install
 
 ```bash
 # From workspace root
-pnpm --filter @kimela/web test
+pnpm --filter @qimela/web test
 
 # Or from the web app directory
 cd apps/web
@@ -85,9 +85,9 @@ npx vitest
 
 ```bash
 cd apps/web
-npx vitest KimelaDropdown
-npx vitest KimelaSelector
-npx vitest useKimelas
+npx vitest QimelaDropdown
+npx vitest QimelaSelector
+npx vitest useQimelas
 npx vitest page
 ```
 
@@ -105,7 +105,7 @@ npx vitest run --coverage
 Integration tests hit a real database. They are located at:
 
 ```
-apps/api/src/modules/kimela/infrastructure/persistence/prisma-kimela.repository.spec.ts
+apps/api/src/modules/qimela/infrastructure/persistence/prisma-qimela.repository.spec.ts
 ```
 
 ### Setup
@@ -120,20 +120,20 @@ docker compose up -d
 2. Run the initial migration:
 
 ```bash
-pnpm --filter @kimela/api db:migrate
+pnpm --filter @qimela/api db:migrate
 ```
 
 3. Ensure `apps/api/.env` has the correct `DATABASE_URL`:
 
 ```env
-DATABASE_URL=postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public
+DATABASE_URL=postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public
 ```
 
 4. Run the integration tests:
 
 ```bash
 cd apps/api
-npx jest prisma-kimela.repository
+npx jest prisma-qimela.repository
 ```
 
 ### Run all tests (unit + integration)
@@ -145,7 +145,7 @@ npx jest
 
 ### Notes
 
-- Integration tests clean the `subscriptions`, `kimelas`, and `users` tables in `beforeEach` to ensure a fresh state.
+- Integration tests clean the `subscriptions`, `qimelas`, and `users` tables in `beforeEach` to ensure a fresh state.
 - Do **not** run integration tests against a production database.
 - The `DATABASE_URL` must point to the running PostgreSQL instance with the Prisma schema applied.
 - Prisma v7 uses driver adapters (`@prisma/adapter-pg`). The `DATABASE_URL` env var is read from `apps/api/.env`.

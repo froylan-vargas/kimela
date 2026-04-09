@@ -52,7 +52,7 @@ function ConfirmEmailContent() {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logo}>
-            <h1>Kimela</h1>
+            <h1>Qimela</h1>
           </div>
           <div className={styles.status}>
             <div className={styles.spinner} aria-label="Verificando" />
@@ -68,7 +68,7 @@ function ConfirmEmailContent() {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logo}>
-            <h1>Kimela</h1>
+            <h1>Qimela</h1>
           </div>
           <div className={styles.status}>
             <p className={styles.successText}>
@@ -88,7 +88,7 @@ function ConfirmEmailContent() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <h1>Kimela</h1>
+          <h1>Qimela</h1>
         </div>
         <div className={styles.status}>
           <div className={styles.error}>

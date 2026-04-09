@@ -1,1 +1,1 @@
-- [Kimela Codebase Architecture Snapshot](project_architecture.md) — hexagonal module structure, Prisma schema entities, auth placeholder state, missing packages
+- [Qimela Codebase Architecture Snapshot](project_architecture.md) — hexagonal module structure, Prisma schema entities, auth placeholder state, missing packages

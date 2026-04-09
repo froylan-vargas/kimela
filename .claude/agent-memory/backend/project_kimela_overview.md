@@ -1,10 +1,10 @@
 ---
-name: Kimela project overview
-description: Core architecture decisions, stack details, and key patterns established in the Kimela backend
+name: Qimela project overview
+description: Core architecture decisions, stack details, and key patterns established in the Qimela backend
 type: project
 ---
 
-Sports pool management system (kimela = sports pool).
+Sports pool management system (qimela = sports pool).
 
 **Why:** System to create, manage and participate in sports pools.
 
@@ -20,8 +20,8 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 ```
 `DATABASE_URL` is read from `apps/api/.env` (loaded via `dotenv` or `prisma.config.ts`).
-The api `.env` has `DATABASE_URL=postgresql://kimela:kimela_secret@postgres:5432/kimela_db?schema=public` (Docker hostname).
-For local migration runs, override: `DATABASE_URL="postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public" ./node_modules/.bin/prisma migrate dev`.
+The api `.env` has `DATABASE_URL=postgresql://qimela:qimela_secret@postgres:5432/qimela_db?schema=public` (Docker hostname).
+For local migration runs, override: `DATABASE_URL="postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public" ./node_modules/.bin/prisma migrate dev`.
 
 **Architecture pattern (DDD):**
 - `domain/` — entities, enums, abstract repository interfaces, errors
@@ -45,12 +45,12 @@ For local migration runs, override: `DATABASE_URL="postgresql://kimela:kimela_se
 - `tsx` email templates compiled by adding `"jsx": "react"` to `apps/api/tsconfig.json` and `@types/react` as devDependency
 - `revokeAllByUserId` added to `RefreshTokenRepository` — used by `ResetPasswordUseCase` to force re-login after password reset
 
-**KimelaStatus enum:** ACTIVE, COMPLETED, UPCOMING, CANCELLED, PAUSED.
+**QimelaStatus enum:** ACTIVE, COMPLETED, UPCOMING, CANCELLED, PAUSED.
 
 **Entities use explicit property assignment** in constructors (not `Object.assign`) because `strict: true` is set in tsconfig.
 
 **DTOs use `!` definite assignment assertions** on properties decorated with class-validator decorators.
 
-**Integration tests** (`prisma-kimela.repository.spec.ts`) require DB at `postgres:5432` (Docker hostname) — they fail on the host machine without Docker network. This is expected behavior.
+**Integration tests** (`prisma-qimela.repository.spec.ts`) require DB at `postgres:5432` (Docker hostname) — they fail on the host machine without Docker network. This is expected behavior.
 
 **How to apply:** Follow the same DDD folder structure and layering for any new module. Always use `PrismaPg` adapter when constructing PrismaClient.

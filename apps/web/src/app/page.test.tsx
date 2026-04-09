@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import Home from "./(app)/dashboard/page";
-import { useKimelaContext } from "@/context/KimelaContext";
-import type { Kimela } from "@/types/kimela";
+import { useQimelaContext } from "@/context/QimelaContext";
+import type { Qimela } from "@/types/qimela";
 
-vi.mock("@/context/KimelaContext");
+vi.mock("@/context/QimelaContext");
 
-const subscriberKimela: Kimela = {
+const subscriberQimela: Qimela = {
   id: "s1",
   name: "Liga MX",
   description: "Fútbol mexicano",
@@ -16,7 +16,7 @@ const subscriberKimela: Kimela = {
   creatorId: "u1",
 };
 
-const creatorKimela: Kimela = {
+const creatorQimela: Qimela = {
   id: "c1",
   name: "NBA Pool",
   description: "Basketball pool",
@@ -27,11 +27,11 @@ const creatorKimela: Kimela = {
 };
 
 describe("Home page", () => {
-  it("renders ParticipantDashboard when selectedKimela with viewAs SUBSCRIBER", () => {
-    vi.mocked(useKimelaContext).mockReturnValue({
-      selectedKimela: subscriberKimela,
+  it("renders ParticipantDashboard when selectedQimela with viewAs SUBSCRIBER", () => {
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: subscriberQimela,
       viewAs: "SUBSCRIBER",
-      selectKimela: vi.fn(),
+      selectQimela: vi.fn(),
     });
 
     render(<Home />);
@@ -39,11 +39,11 @@ describe("Home page", () => {
     expect(screen.getByText("Liga MX - Participant")).toBeInTheDocument();
   });
 
-  it("renders CreatorDashboard when selectedKimela with viewAs CREATOR", () => {
-    vi.mocked(useKimelaContext).mockReturnValue({
-      selectedKimela: creatorKimela,
+  it("renders CreatorDashboard when selectedQimela with viewAs CREATOR", () => {
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: creatorQimela,
       viewAs: "CREATOR",
-      selectKimela: vi.fn(),
+      selectQimela: vi.fn(),
     });
 
     render(<Home />);
@@ -51,25 +51,25 @@ describe("Home page", () => {
     expect(screen.getByText("NBA Pool - Creator")).toBeInTheDocument();
   });
 
-  it("renders fallback text when no kimela is selected", () => {
-    vi.mocked(useKimelaContext).mockReturnValue({
-      selectedKimela: null,
+  it("renders fallback text when no qimela is selected", () => {
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: null,
       viewAs: null,
-      selectKimela: vi.fn(),
+      selectQimela: vi.fn(),
     });
 
     render(<Home />);
 
     expect(
-      screen.getByText("Select a kimela to get started."),
+      screen.getByText("Select a qimela to get started."),
     ).toBeInTheDocument();
   });
 
-  it("does not render any dashboard when selectedKimela is null", () => {
-    vi.mocked(useKimelaContext).mockReturnValue({
-      selectedKimela: null,
+  it("does not render any dashboard when selectedQimela is null", () => {
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: null,
       viewAs: null,
-      selectKimela: vi.fn(),
+      selectQimela: vi.fn(),
     });
 
     render(<Home />);

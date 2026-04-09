@@ -28,7 +28,7 @@ flyctl auth login
 cd apps/api
 
 flyctl launch \
-  --name kimela-api \
+  --name qimela-api \
   --region mia \        # Miami — más cercano a México
   --no-deploy           # no deployar aún, primero configurar
 ```
@@ -36,7 +36,7 @@ flyctl launch \
 Esto genera un `fly.toml` en `apps/api/`. Revísalo y ajusta:
 
 ```toml
-app = 'kimela-api'
+app = 'qimela-api'
 primary_region = 'mia'
 
 [build]
@@ -68,28 +68,28 @@ primary_region = 'mia'
 
 ```bash
 flyctl postgres create \
-  --name kimela-db \
+  --name qimela-db \
   --region mia \
   --initial-cluster-size 1 \
   --vm-size shared-cpu-1x \
   --volume-size 1          # 1GB — más que suficiente para 1000 usuarios
 ```
 
-Fly crea una app separada `kimela-db` con Postgres. El DB **solo es accesible dentro de la red privada de Fly** (6PN) — nunca expuesto a internet por defecto.
+Fly crea una app separada `qimela-db` con Postgres. El DB **solo es accesible dentro de la red privada de Fly** (6PN) — nunca expuesto a internet por defecto.
 
 ### Conectar la API al DB
 
 ```bash
-flyctl postgres attach kimela-db --app kimela-api
+flyctl postgres attach qimela-db --app qimela-api
 ```
 
-Esto inyecta automáticamente `DATABASE_URL` como secret en `kimela-api` con la URL privada interna:
+Esto inyecta automáticamente `DATABASE_URL` como secret en `qimela-api` con la URL privada interna:
 
 ```
-postgres://kimela_api:<password>@kimela-db.flycast:5432/kimela_api
+postgres://qimela_api:<password>@qimela-db.flycast:5432/qimela_api
 ```
 
-El hostname `kimela-db.flycast` solo resuelve dentro de la red privada de Fly. Desde fuera no existe.
+El hostname `qimela-db.flycast` solo resuelve dentro de la red privada de Fly. Desde fuera no existe.
 
 ---
 
@@ -102,30 +102,30 @@ pg-boss crea su propio schema `pgboss` en tu DB automáticamente al iniciar. No 
 Conéctate al DB desde tu máquina via proxy:
 
 ```bash
-flyctl proxy 5432 -a kimela-db
+flyctl proxy 5432 -a qimela-db
 ```
 
 En otra terminal:
 
 ```bash
-psql postgres://kimela_api:<password>@localhost:5432/kimela_api
+psql postgres://qimela_api:<password>@localhost:5432/qimela_api
 ```
 
 Verifica permisos:
 
 ```sql
 -- El usuario debe tener estos permisos (attach los da automáticamente)
-\du kimela_api
+\du qimela_api
 
 -- Si necesitas darlos manualmente:
-GRANT CREATE ON DATABASE kimela_api TO kimela_api;
+GRANT CREATE ON DATABASE qimela_api TO qimela_api;
 ```
 
 ### Configurar pg-boss en NestJS
 
 ```bash
-pnpm --filter @kimela/api add pg-boss
-pnpm --filter @kimela/api add -D @types/pg-boss
+pnpm --filter @qimela/api add pg-boss
+pnpm --filter @qimela/api add -D @types/pg-boss
 ```
 
 Crea `apps/api/src/modules/shared/pg-boss/pg-boss.module.ts`:
@@ -171,9 +171,9 @@ flyctl secrets set \
   JWT_PUBLIC_KEY="$(cat public.pem)" \
   JWT_REFRESH_SECRET="tu-secret-minimo-32-chars" \
   RESEND_API_KEY="re_xxxxxxxxxxxx" \
-  FRONTEND_URL="https://kimela.app" \
+  FRONTEND_URL="https://qimela.app" \
   NODE_ENV="production" \
-  --app kimela-api
+  --app qimela-api
 ```
 
 > `DATABASE_URL` ya fue inyectada por `flyctl postgres attach`.
@@ -181,7 +181,7 @@ flyctl secrets set \
 Verifica todos los secrets:
 
 ```bash
-flyctl secrets list --app kimela-api
+flyctl secrets list --app qimela-api
 ```
 
 ---
@@ -194,20 +194,20 @@ cd /ruta/al/monorepo
 flyctl deploy \
   --config apps/api/fly.toml \
   --dockerfile apps/api/Dockerfile \
-  --app kimela-api
+  --app qimela-api
 ```
 
 Verifica que levantó:
 
 ```bash
-flyctl status --app kimela-api
-flyctl logs --app kimela-api
+flyctl status --app qimela-api
+flyctl logs --app qimela-api
 ```
 
 Prueba el endpoint de salud:
 
 ```bash
-curl https://kimela-api.fly.dev/auth/me
+curl https://qimela-api.fly.dev/auth/me
 # Debe retornar 401 (correcto — no hay token)
 ```
 
@@ -220,7 +220,7 @@ Durante los partidos habrá picos de tráfico. La configuración del `fly.toml` 
 ### Antes del Mundial (activar scaling agresivo)
 
 ```bash
-flyctl scale count 1 --app kimela-api   # baseline: 1 VM activa
+flyctl scale count 1 --app qimela-api   # baseline: 1 VM activa
 ```
 
 Cuando empiece la fase de grupos, baja el `soft_limit` para que escale antes:
@@ -233,7 +233,7 @@ Cuando empiece la fase de grupos, baja el `soft_limit` para que escale antes:
 ```
 
 ```bash
-flyctl deploy --config apps/api/fly.toml --app kimela-api
+flyctl deploy --config apps/api/fly.toml --app qimela-api
 ```
 
 ### Durante partidos (escala manual preventiva)
@@ -241,20 +241,20 @@ flyctl deploy --config apps/api/fly.toml --app kimela-api
 30 minutos antes de un partido importante, puedes pre-escalar:
 
 ```bash
-flyctl scale count 2 --app kimela-api   # levanta 2 VMs proactivamente
+flyctl scale count 2 --app qimela-api   # levanta 2 VMs proactivamente
 ```
 
 Después del partido:
 
 ```bash
-flyctl scale count 1 --app kimela-api   # vuelve a 1
+flyctl scale count 1 --app qimela-api   # vuelve a 1
 ```
 
 ### Monitorear en tiempo real
 
 ```bash
-flyctl status --app kimela-api          # ver VMs activas
-flyctl logs --app kimela-api            # logs en vivo
+flyctl status --app qimela-api          # ver VMs activas
+flyctl logs --app qimela-api            # logs en vivo
 ```
 
 ---
@@ -271,7 +271,7 @@ flyctl logs --app kimela-api            # logs en vivo
 
 ```bash
 # Upgrade a 512MB — ~$2/mes por VM adicional respecto al free tier
-flyctl scale memory 512 --app kimela-api
+flyctl scale memory 512 --app qimela-api
 ```
 
 O edita `fly.toml`:
@@ -283,7 +283,7 @@ O edita `fly.toml`:
 ```
 
 ```bash
-flyctl deploy --config apps/api/fly.toml --app kimela-api
+flyctl deploy --config apps/api/fly.toml --app qimela-api
 ```
 
 > Las 3 VMs del free tier cambian a 512MB. El costo sube de $0 a ~$6/mes total (3 × $2). Sigue siendo muy barato.
@@ -294,10 +294,10 @@ Si el DB crece más de 1GB o ves queries lentas:
 
 ```bash
 # Ver uso actual
-flyctl postgres db-size kimela-db
+flyctl postgres db-size qimela-db
 
 # Ampliar volumen
-flyctl volumes extend <volume-id> --size-gb 5 --app kimela-db
+flyctl volumes extend <volume-id> --size-gb 5 --app qimela-db
 ```
 
 ---
@@ -306,10 +306,10 @@ flyctl volumes extend <volume-id> --size-gb 5 --app kimela-db
 
 ```bash
 # Proxy local al DB de producción
-flyctl proxy 5432 -a kimela-db
+flyctl proxy 5432 -a qimela-db
 
 # En otra terminal
-psql postgres://kimela_api:<password>@localhost:5432/kimela_api
+psql postgres://qimela_api:<password>@localhost:5432/qimela_api
 
 # Ver jobs de pg-boss
 SELECT id, name, state, createdon, completedon

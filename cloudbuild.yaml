@@ -1,0 +1,67 @@
+substitutions:
+  _REGION: us-central1
+  _REPO: us-central1-docker.pkg.dev/${PROJECT_ID}/qimela
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  # ── API ──────────────────────────────────────────────────────────────
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build-api
+    args:
+      - build
+      - -f
+      - apps/api/Dockerfile
+      - -t
+      - ${_REPO}/api:${SHORT_SHA}
+      - -t
+      - ${_REPO}/api:latest
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-api
+    waitFor: [build-api]
+    args: [push, --all-tags, ${_REPO}/api]
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy-api
+    waitFor: [push-api]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - qimela-api
+      - --image=${_REPO}/api:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+
+  # ── Web ──────────────────────────────────────────────────────────────
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build-web
+    args:
+      - build
+      - -f
+      - apps/web/Dockerfile
+      - -t
+      - ${_REPO}/web:${SHORT_SHA}
+      - -t
+      - ${_REPO}/web:latest
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-web
+    waitFor: [build-web]
+    args: [push, --all-tags, ${_REPO}/web]
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy-web
+    waitFor: [push-web]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - qimela-web
+      - --image=${_REPO}/web:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed

@@ -1,29 +1,29 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useKimelas } from "@/hooks/useKimelas";
-import { useKimelaContext } from "@/context/KimelaContext";
-import KimelaDropdown from "./KimelaDropdown";
-import styles from "./KimelaSelector.module.scss";
+import { useQimelas } from "@/hooks/useQimelas";
+import { useQimelaContext } from "@/context/QimelaContext";
+import QimelaDropdown from "./QimelaDropdown";
+import styles from "./QimelaSelector.module.scss";
 
-export default function KimelaSelector() {
+export default function QimelaSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, isError } = useKimelas();
-  const { selectedKimela, viewAs, selectKimela } = useKimelaContext();
+  const { data, isLoading, isError } = useQimelas();
+  const { selectedQimela, viewAs, selectQimela } = useQimelaContext();
 
-  const participatingKimelas = data?.data ?? [];
-  const creatorKimelas = data?.data.filter((k) => k.role === "CREATOR") ?? [];
+  const participatingQimelas = data?.data ?? [];
+  const creatorQimelas = data?.data.filter((k) => k.role === "CREATOR") ?? [];
 
-  // Default: last kimela with SUBSCRIBER role — never a creator-only kimela
-  const defaultKimela = data?.data.findLast((k) => k.role === "SUBSCRIBER") ?? null;
+  // Default: last qimela with SUBSCRIBER role — never a creator-only qimela
+  const defaultQimela = data?.data.findLast((k) => k.role === "SUBSCRIBER") ?? null;
 
   useEffect(() => {
-    if (!selectedKimela && defaultKimela) {
-      selectKimela(defaultKimela, "SUBSCRIBER");
+    if (!selectedQimela && defaultQimela) {
+      selectQimela(defaultQimela, "SUBSCRIBER");
     }
-  }, [defaultKimela]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [defaultQimela]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Click-outside to close
   useEffect(() => {
@@ -51,8 +51,8 @@ export default function KimelaSelector() {
   function getPillLabel(): string {
     if (isLoading) return "Loading...";
     if (isError) return "Error loading";
-    if (selectedKimela) return selectedKimela.name;
-    return "Select a kimela";
+    if (selectedQimela) return selectedQimela.name;
+    return "Select a qimela";
   }
 
   return (
@@ -64,7 +64,7 @@ export default function KimelaSelector() {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className={styles.selectorLabel}>Kimela</span>
+        <span className={styles.selectorLabel}>Qimela</span>
         <span className={styles.selectorValue}>{getPillLabel()}</span>
         <i
           className={`ph-bold ${isOpen ? "ph-caret-up" : "ph-caret-down"} ${styles.caretIcon}`}
@@ -72,12 +72,12 @@ export default function KimelaSelector() {
       </button>
 
       {isOpen && (
-        <KimelaDropdown
-          participatingKimelas={participatingKimelas}
-          creatorKimelas={creatorKimelas}
-          selectedId={selectedKimela?.id ?? null}
+        <QimelaDropdown
+          participatingQimelas={participatingQimelas}
+          creatorQimelas={creatorQimelas}
+          selectedId={selectedQimela?.id ?? null}
           selectedViewAs={viewAs}
-          onSelect={selectKimela}
+          onSelect={selectQimela}
           onClose={() => setIsOpen(false)}
         />
       )}

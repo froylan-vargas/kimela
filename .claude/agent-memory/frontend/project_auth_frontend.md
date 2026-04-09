@@ -17,7 +17,7 @@ Key decisions and structure:
 - Root `layout.tsx` no longer renders Header — `(app)/layout.tsx` does
 - `providers.tsx` wraps with `AuthProvider` inside `QueryClientProvider`
 - `Header.tsx` and `UserProfile.tsx` use real user from `useAuth()`, derive initials from name, have logout button
-- All fetch calls go through `apiFetch` (useKimelas updated)
+- All fetch calls go through `apiFetch` (useQimelas updated)
 
 Email verification + password recovery also implemented:
 - `(auth)/confirm-email` — auto-confirms token from `?token=` on mount; shows resend button if authenticated

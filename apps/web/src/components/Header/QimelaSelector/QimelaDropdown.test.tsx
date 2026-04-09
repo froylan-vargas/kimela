@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import KimelaDropdown from "./KimelaDropdown";
-import type { Kimela } from "@/types/kimela";
+import QimelaDropdown from "./QimelaDropdown";
+import type { Qimela } from "@/types/qimela";
 
-const sub1: Kimela = {
+const sub1: Qimela = {
   id: "s1",
   name: "Liga MX",
   description: "Fútbol mexicano",
@@ -13,7 +13,7 @@ const sub1: Kimela = {
   creatorId: "u1",
 };
 
-const sub2: Kimela = {
+const sub2: Qimela = {
   id: "s2",
   name: "Premier League",
   description: "English football",
@@ -23,7 +23,7 @@ const sub2: Kimela = {
   creatorId: "u1",
 };
 
-const cre1: Kimela = {
+const cre1: Qimela = {
   id: "c1",
   name: "NBA Pool",
   description: "Basketball",
@@ -35,25 +35,25 @@ const cre1: Kimela = {
 
 function renderDropdown(overrides = {}) {
   const defaults = {
-    participatingKimelas: [sub1, sub2],
-    creatorKimelas: [cre1],
+    participatingQimelas: [sub1, sub2],
+    creatorQimelas: [cre1],
     selectedId: null,
     selectedViewAs: null,
     onSelect: vi.fn(),
     onClose: vi.fn(),
   };
-  return render(<KimelaDropdown {...defaults} {...overrides} />);
+  return render(<QimelaDropdown {...defaults} {...overrides} />);
 }
 
-describe("KimelaDropdown", () => {
-  it("renders the Participando section with subscriber kimelas", () => {
+describe("QimelaDropdown", () => {
+  it("renders the Participando section with subscriber qimelas", () => {
     renderDropdown();
     expect(screen.getByText("Participando")).toBeInTheDocument();
     expect(screen.getByText("Liga MX")).toBeInTheDocument();
     expect(screen.getByText("Premier League")).toBeInTheDocument();
   });
 
-  it("renders the Creadas section with creator kimelas", () => {
+  it("renders the Creadas section with creator qimelas", () => {
     renderDropdown();
     expect(screen.getByText("Creadas")).toBeInTheDocument();
     expect(screen.getByText("NBA Pool")).toBeInTheDocument();
@@ -68,18 +68,18 @@ describe("KimelaDropdown", () => {
     expect(container.querySelector('[class*="divider"]')).toBeInTheDocument();
   });
 
-  it("does not render Creadas section when creatorKimelas is empty", () => {
-    renderDropdown({ creatorKimelas: [] });
+  it("does not render Creadas section when creatorQimelas is empty", () => {
+    renderDropdown({ creatorQimelas: [] });
     expect(screen.queryByText("Creadas")).not.toBeInTheDocument();
   });
 
-  it("does not render Participando section when participatingKimelas is empty", () => {
-    renderDropdown({ participatingKimelas: [] });
+  it("does not render Participando section when participatingQimelas is empty", () => {
+    renderDropdown({ participatingQimelas: [] });
     expect(screen.queryByText("Participando")).not.toBeInTheDocument();
   });
 
   it("does not render a divider when only one section is present", () => {
-    const { container } = renderDropdown({ creatorKimelas: [] });
+    const { container } = renderDropdown({ creatorQimelas: [] });
     expect(container.querySelector('[class*="divider"]')).not.toBeInTheDocument();
   });
 

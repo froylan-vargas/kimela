@@ -5,18 +5,18 @@ I need your support imagining an intuitive ui design, be very creative an modern
 
 # Suggestions I need
 
-- What is the best way to select a kimela? (a user can have many kimelas), but I want the user to be able to select a kimela and see only details of that kimela in a kind of dashboard that will show sections described in "Sections the user will see once the kimela is created."
-- What is the best way to show the sections? I want a dashboard initially with a small summary of only 3 or 5 next matches, with a click button that can expand to show all matches. Besides the small summary of next matches, I also want a small summaty of subscribers, showing the leaderboard of the kimela, with a click button that can expand to show all subscribers and other options like filters and comparisons.
+- What is the best way to select a qimela? (a user can have many qimelas), but I want the user to be able to select a qimela and see only details of that qimela in a kind of dashboard that will show sections described in "Sections the user will see once the qimela is created."
+- What is the best way to show the sections? I want a dashboard initially with a small summary of only 3 or 5 next matches, with a click button that can expand to show all matches. Besides the small summary of next matches, I also want a small summaty of subscribers, showing the leaderboard of the qimela, with a click button that can expand to show all subscribers and other options like filters and comparisons.
 
 ## Context
 
-### What is a kimela?
+### What is a qimela?
 
-Im creating a system to create, manage, and participate in sports pools. The pools are called kimelas.
+Im creating a system to create, manage, and participate in sports pools. The pools are called qimelas.
 
-A kimela is the product name of this application, it is the representation of a single sport pool, a kimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.
+A qimela is the product name of this application, it is the representation of a single sport pool, a qimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.
 
-### Sections the user will see once the kimela is created.
+### Sections the user will see once the qimela is created.
 
 - Next event matches (editable results)
 - Top 10 positions (show user, positions and points)

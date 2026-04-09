@@ -9,4 +9,4 @@ EXPOSE 3000
 EXPOSE 9230
 
 WORKDIR /app
-CMD ["pnpm", "--filter", "@kimela/web", "run", "dev"]
+CMD ["pnpm", "--filter", "@qimela/web", "run", "dev"]

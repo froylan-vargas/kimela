@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
-import { KimelaProvider } from "@/context/KimelaContext";
+import { QimelaProvider } from "@/context/QimelaContext";
 import { AuthProvider } from "@/context/AuthContext";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -20,7 +20,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <KimelaProvider>{children}</KimelaProvider>
+        <QimelaProvider>{children}</QimelaProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

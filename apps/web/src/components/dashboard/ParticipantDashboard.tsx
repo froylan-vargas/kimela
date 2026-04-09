@@ -1,15 +1,15 @@
 "use client";
 
-import type { Kimela } from "@/types/kimela";
+import type { Qimela } from "@/types/qimela";
 
 interface ParticipantDashboardProps {
-  kimela: Kimela;
+  qimela: Qimela;
 }
 
-export default function ParticipantDashboard({ kimela }: ParticipantDashboardProps) {
+export default function ParticipantDashboard({ qimela }: ParticipantDashboardProps) {
   return (
     <div>
-      <h1>{kimela.name} - Participant</h1>
+      <h1>{qimela.name} - Participant</h1>
     </div>
   );
 }

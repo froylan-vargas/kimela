@@ -9,18 +9,20 @@
       "Bash(node -e \"const {PrismaClient} = require\\('@prisma/client'\\); const p = new PrismaClient\\({datasourceUrl: process.env.DATABASE_URL}\\); console.log\\('ok'\\)\")",
       "Bash(docker compose:*)",
       "Bash(xargs ls:*)",
-      "Bash(DATABASE_URL=\"postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public\" prisma migrate dev --name add_auth_fields)",
-      "Bash(DATABASE_URL=\"postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public\" ./node_modules/.bin/prisma migrate dev --name add_auth_fields)",
-      "Bash(DATABASE_URL=\"postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public\" ./node_modules/.bin/prisma migrate dev --name add_auth_fields --create-only)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" prisma migrate dev --name add_auth_fields)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" ./node_modules/.bin/prisma migrate dev --name add_auth_fields)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" ./node_modules/.bin/prisma migrate dev --name add_auth_fields --create-only)",
       "Bash(openssl genrsa:*)",
       "Bash(openssl rsa:*)",
-      "Bash(DATABASE_URL=\"postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public\" ./node_modules/.bin/prisma generate)",
-      "Bash(./node_modules/.bin/jest --testPathIgnorePatterns=\"prisma-kimela.repository.spec\")",
-      "Bash(ls /Users/fvg/Source/kimela/docker-compose*.yml)",
-      "Bash(DATABASE_URL=\"postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public\" npx prisma migrate dev --name add_email_verification_and_password_reset)",
-      "Bash(DATABASE_URL=\"postgresql://kimela:kimela_secret@localhost:5432/kimela_db?schema=public\" npx prisma generate)",
-      "Bash(ls /Users/fvg/Source/kimela/apps/web/src/hooks/*.test.ts)",
-      "Bash(ls /Users/fvg/Source/kimela/apps/web/src/components/**/*.test.tsx)"
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" ./node_modules/.bin/prisma generate)",
+      "Bash(./node_modules/.bin/jest --testPathIgnorePatterns=\"prisma-qimela.repository.spec\")",
+      "Bash(ls /Users/fvg/Source/qimela/docker-compose*.yml)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" npx prisma migrate dev --name add_email_verification_and_password_reset)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" npx prisma generate)",
+      "Bash(ls /Users/fvg/Source/qimela/apps/web/src/hooks/*.test.ts)",
+      "Bash(ls /Users/fvg/Source/qimela/apps/web/src/components/**/*.test.tsx)",
+      "Bash(find:*)",
+      "Bash(cat /Users/fvg/Source/kimela/packages/*/package.json)"
     ]
   }
 }

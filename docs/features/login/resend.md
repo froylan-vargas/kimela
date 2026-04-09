@@ -4,10 +4,10 @@
 
 1. Go to [Resend.com](https://resend.com) and click **Get Started** to create a free account.
 2. Once logged in, navigate to the **API Keys** section in the dashboard sidebar.
-3. Click **Create API Key**. Give it a descriptive name (e.g., `kimela-dev`) and keep the default permissions (Full Access).
+3. Click **Create API Key**. Give it a descriptive name (e.g., `qimela-dev`) and keep the default permissions (Full Access).
 4. **Copy the API key immediately** and store it safely in your password manager. It will begin with `re_` and you won't be able to see it again.
 5. *(Optional for Dev, Required for Prod)* Navigate to the **Domains** section.
-6. Click **Add Domain** and enter the domain you want to send emails from (e.g., `kimela.app`).
+6. Click **Add Domain** and enter the domain you want to send emails from (e.g., `qimela.app`).
 7. Resend will provide you with several DNS records (SPF, DKIM, Return-Path).
 8. Log in to your domain registrar's DNS settings (e.g., Vercel, Cloudflare, GoDaddy) and add these exact records.
 9. Click **Verify** in Resend. This process can take anywhere from a few minutes to up to 48 hours to propagate.
@@ -24,7 +24,7 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxx
 
 # Frontend URL (Used by the backend to construct the confirmation/reset links)
 # Production:
-# FRONTEND_URL=https://kimela.app
+# FRONTEND_URL=https://qimela.app
 # Development:
 FRONTEND_URL=http://localhost:3001
 ```
@@ -38,7 +38,7 @@ The best way to craft beautiful, responsive emails with Resend in a modern Node.
 Since this library will be used by the backend service to generate HTML strings, install it in the API application:
 
 ```bash
-pnpm --filter @kimela/api add @react-email/components @react-email/render
+pnpm --filter @qimela/api add @react-email/components @react-email/render
 ```
 
 ### 3b. Example: Verification Email Template
@@ -68,12 +68,12 @@ export const VerificationEmail = ({ name, confirmUrl }: VerificationEmailProps) 
   return (
     <Html>
       <Head />
-      <Preview>Confirma tu correo electrónico en Kimela</Preview>
+      <Preview>Confirma tu correo electrónico en Qimela</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>¡Hola {name}!</Heading>
           <Text style={text}>
-            Gracias por registrarte en Kimela. Por favor, confirma tu correo electrónico haciendo clic en el siguiente botón:
+            Gracias por registrarte en Qimela. Por favor, confirma tu correo electrónico haciendo clic en el siguiente botón:
           </Text>
           <Section style={btnContainer}>
             <Button style={button} href={confirmUrl}>
@@ -124,7 +124,7 @@ const btnContainer = {
 };
 
 const button = {
-  backgroundColor: '#FFD100', // Kimela Gold
+  backgroundColor: '#FFD100', // Qimela Gold
   borderRadius: '4px',
   color: '#0a0a0a',
   fontSize: '16px',
@@ -159,13 +159,13 @@ export class ResendEmailService implements EmailService {
 
     // 2. Send via Resend
     await this.resend.emails.send({
-      from: 'Kimela <noreply@kimela.app>',
+      from: 'Qimela <noreply@qimela.app>',
       to,
-      subject: 'Confirma tu correo — Kimela',
+      subject: 'Confirma tu correo — Qimela',
       html: htmlBody,
     });
   }
 }
 ```
 
-This fully integrates Resend and provides an unopinionated, modern workflow for designing scalable transactional emails locally for Kimela!
+This fully integrates Resend and provides an unopinionated, modern workflow for designing scalable transactional emails locally for Qimela!

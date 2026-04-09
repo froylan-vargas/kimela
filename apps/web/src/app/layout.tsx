@@ -11,7 +11,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Kimela",
+  title: "Qimela",
   description: "Sports pools platform",
 };
 

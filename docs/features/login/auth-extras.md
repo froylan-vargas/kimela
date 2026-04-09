@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan adds two features to Kimela's existing JWT/cookie authentication:
+This plan adds two features to Qimela's existing JWT/cookie authentication:
 
 1. **Email confirmation** — Verify the user owns the email they registered with before granting full access.
 2. **Password recovery** — Let users reset a forgotten password via a time-limited email link.
@@ -18,7 +18,7 @@ Both features require a **transactional email provider**. Recommendations are in
 ```
 Register → auto-login (restricted)
     ↓
-Email with confirmation link → https://kimela.app/confirm-email?token=<TOKEN>
+Email with confirmation link → https://qimela.app/confirm-email?token=<TOKEN>
     ↓
 User clicks link → API verifies token → emailVerifiedAt = now()
     ↓
@@ -27,7 +27,7 @@ Full access granted
 
 **Key decisions:**
 
-- Users **can log in immediately** after registration but are in a **restricted state** (can see the dashboard, but cannot create or join kimelas) until they verify their email.
+- Users **can log in immediately** after registration but are in a **restricted state** (can see the dashboard, but cannot create or join qimelas) until they verify their email.
 - The confirmation link expires in **24 hours**.
 - Users can **request a new confirmation email** from a banner shown on every page while unverified.
 
@@ -243,7 +243,7 @@ export class EmailVerifiedGuard implements CanActivate {
 }
 ```
 
-Apply to routes that require verified email (create kimela, subscribe, etc.).
+Apply to routes that require verified email (create qimela, subscribe, etc.).
 
 > **Important:** The JWT payload needs `emailVerifiedAt` added so the guard can check without a DB call. Or, add it to the `/auth/me` response and check on the frontend.
 
@@ -282,7 +282,7 @@ Login page → "¿Olvidaste tu contraseña?" link
     ↓
 /forgot-password → enter email → POST /auth/forgot-password
     ↓
-Email with reset link → https://kimela.app/reset-password?token=<TOKEN>
+Email with reset link → https://qimela.app/reset-password?token=<TOKEN>
     ↓
 /reset-password → enter new password + confirm → POST /auth/reset-password
     ↓
@@ -509,15 +509,15 @@ apps/api/src/modules/auth/infrastructure/email/templates/
 **Dependencies:**
 
 ```bash
-pnpm --filter @kimela/api add @react-email/components @react-email/render
+pnpm --filter @qimela/api add @react-email/components @react-email/render
 ```
 
 Both email types need:
 
 | Email          | Subject                             | Body essentials                                                     |
 | -------------- | ----------------------------------- | ------------------------------------------------------------------- |
-| Verification   | "Confirma tu correo — Kimela"       | Greeting, CTA button, expiry note (24h)                             |
-| Password reset | "Restablece tu contraseña — Kimela" | Greeting, CTA button, expiry note (1h), "if you didn't request this..." |
+| Verification   | "Confirma tu correo — Qimela"       | Greeting, CTA button, expiry note (24h)                             |
+| Password reset | "Restablece tu contraseña — Qimela" | Greeting, CTA button, expiry note (1h), "if you didn't request this..." |
 
 **Template example (`verification-email.tsx`):**
 
@@ -534,7 +534,7 @@ export function VerificationEmail({ name, confirmUrl }: VerificationEmailProps) 
   return (
     <Html>
       <Heading>¡Hola {name}!</Heading>
-      <Text>Confirma tu correo electrónico para acceder a todas las funciones de Kimela.</Text>
+      <Text>Confirma tu correo electrónico para acceder a todas las funciones de Qimela.</Text>
       <Button href={confirmUrl}>Confirmar correo</Button>
       <Text>Este enlace expira en 24 horas.</Text>
     </Html>
@@ -552,9 +552,9 @@ import { renderVerificationEmail } from './templates/verification-email';
 
 async sendVerificationEmail(to: string, name: string, confirmUrl: string): Promise<void> {
   await this.resend.emails.send({
-    from: 'Kimela <noreply@kimela.app>',
+    from: 'Qimela <noreply@qimela.app>',
     to,
-    subject: 'Confirma tu correo — Kimela',
+    subject: 'Confirma tu correo — Qimela',
     html: await renderVerificationEmail({ name, confirmUrl }),
   });
 }
@@ -582,10 +582,10 @@ See `docs/cloud-provider.md` for pg-boss setup and configuration.
 
 ## 4. Email Provider — Resend
 
-Kimela uses **Resend** as the email provider. Free tier: 3,000 emails/month — more than enough for early stage.
+Qimela uses **Resend** as the email provider. Free tier: 3,000 emails/month — more than enough for early stage.
 
 ```bash
-pnpm --filter @kimela/api add resend
+pnpm --filter @qimela/api add resend
 ```
 
 ```ts
@@ -597,9 +597,9 @@ export class ResendEmailService implements EmailService {
 
   async sendVerificationEmail(to: string, name: string, confirmUrl: string): Promise<void> {
     await this.resend.emails.send({
-      from: 'Kimela <noreply@kimela.app>',
+      from: 'Qimela <noreply@qimela.app>',
       to,
-      subject: 'Confirma tu correo — Kimela',
+      subject: 'Confirma tu correo — Qimela',
       html: `
         <h2>¡Hola ${name}!</h2>
         <p>Confirma tu correo electrónico haciendo clic en el siguiente enlace:</p>
@@ -611,9 +611,9 @@ export class ResendEmailService implements EmailService {
 
   async sendPasswordResetEmail(to: string, name: string, resetUrl: string): Promise<void> {
     await this.resend.emails.send({
-      from: 'Kimela <noreply@kimela.app>',
+      from: 'Qimela <noreply@qimela.app>',
       to,
-      subject: 'Restablece tu contraseña — Kimela',
+      subject: 'Restablece tu contraseña — Qimela',
       html: `
         <h2>¡Hola ${name}!</h2>
         <p>Recibimos una solicitud para restablecer tu contraseña:</p>
@@ -632,7 +632,7 @@ export class ResendEmailService implements EmailService {
 ```env
 # Email provider
 RESEND_API_KEY=re_xxxxxxxxxxxx
-FRONTEND_URL=https://kimela.app        # used to build confirmation/reset links
+FRONTEND_URL=https://qimela.app        # used to build confirmation/reset links
 
 # For development
 FRONTEND_URL=http://localhost:3001

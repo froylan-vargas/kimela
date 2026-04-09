@@ -1,4 +1,4 @@
-# Kimela
+# Qimela
 system to create, manage and participate in sports pools
 
 ## System Architecture

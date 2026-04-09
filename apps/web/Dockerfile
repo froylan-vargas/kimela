@@ -9,8 +9,8 @@ RUN pnpm install
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app .
-RUN pnpm --filter @kimela/types build
-RUN pnpm --filter @kimela/web build
+RUN pnpm --filter @qimela/types build
+RUN pnpm --filter @qimela/web build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

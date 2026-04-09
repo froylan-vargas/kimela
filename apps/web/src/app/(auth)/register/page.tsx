@@ -98,7 +98,7 @@ export default function RegisterPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <h1>Kimela</h1>
+          <h1>Qimela</h1>
           <p>Crea tu cuenta</p>
         </div>
 

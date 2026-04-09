@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactNode } from "react";
 import { createElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useKimelas } from "./useKimelas";
-import type { KimelasResponse } from "@/types/kimela";
+import { useQimelas } from "./useQimelas";
+import type { QimelasResponse } from "@/types/qimela";
 
-const mockResponse: KimelasResponse = {
+const mockResponse: QimelasResponse = {
   data: [
     {
       id: "1",
@@ -30,7 +30,7 @@ function makeWrapper() {
   };
 }
 
-describe("useKimelas", () => {
+describe("useQimelas", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
   });
@@ -45,23 +45,23 @@ describe("useKimelas", () => {
       json: async () => mockResponse,
     } as Response);
 
-    const { result } = renderHook(() => useKimelas(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useQimelas(), { wrapper: makeWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(fetch).toHaveBeenCalledWith(
-      "http://localhost:3000/kimelas",
+      "http://localhost:3000/qimelas",
       expect.objectContaining({ credentials: "include" }),
     );
   });
 
-  it("returns parsed kimela data on success", async () => {
+  it("returns parsed qimela data on success", async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     } as Response);
 
-    const { result } = renderHook(() => useKimelas(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useQimelas(), { wrapper: makeWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -78,7 +78,7 @@ describe("useKimelas", () => {
       json: async () => ({}),
     } as Response);
 
-    const { result } = renderHook(() => useKimelas(), { wrapper: makeWrapper() });
+    const { result } = renderHook(() => useQimelas(), { wrapper: makeWrapper() });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 

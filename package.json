@@ -10,7 +10,8 @@
     "typecheck": "pnpm -r typecheck",
     "db:migrate": "pnpm --filter @qimela/api db:migrate",
     "db:studio": "pnpm --filter @qimela/api db:studio",
-    "db:generate": "pnpm --filter @qimela/api db:generate"
+    "db:generate": "pnpm --filter @qimela/api db:generate",
+    "db:seed": "pnpm --filter @qimela/api db:seed"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

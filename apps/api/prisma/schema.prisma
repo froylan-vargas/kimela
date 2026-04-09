@@ -29,6 +29,7 @@ model User {
   refreshTokens            RefreshToken[]
   emailVerificationTokens  EmailVerificationToken[]
   passwordResetTokens      PasswordResetToken[]
+  picks                    UserPick[]
 
   @@map("users")
 }
@@ -57,6 +58,9 @@ model Qimela {
   creatorId     String         @map("creator_id")
   creator       User           @relation("QimelaCreator", fields: [creatorId], references: [id])
   subscriptions Subscription[]
+
+  eventId       String?        @map("event_id")
+  event         Event?         @relation(fields: [eventId], references: [id])
 
   @@map("qimelas")
 }
@@ -106,4 +110,242 @@ enum QimelaStatus {
   UPCOMING
   CANCELLED
   PAUSED
+}
+
+model Sport {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  imgUrl    String?  @map("img_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leagues        League[]
+  pickCategories PickCategory[]
+
+  @@map("sports")
+}
+
+model League {
+  id        String   @id @default(uuid())
+  name      String
+  imgUrl    String?  @map("img_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sportId    String             @map("sport_id")
+  sport      Sport              @relation(fields: [sportId], references: [id])
+  contenders ContenderLeague[]
+  events     Event[]
+
+  @@unique([name, sportId])
+  @@map("leagues")
+}
+
+model Contender {
+  id        String   @id @default(uuid())
+  name      String
+  imgUrl    String?  @map("img_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leagues               ContenderLeague[]
+  sessionParticipations SessionContender[]
+  sessionResults        SessionResult[]
+  pickedInPicks         UserPick[]         @relation("PickedContender")
+
+  @@map("contenders")
+}
+
+model ContenderLeague {
+  contenderId String    @map("contender_id")
+  contender   Contender @relation(fields: [contenderId], references: [id], onDelete: Cascade)
+
+  leagueId    String    @map("league_id")
+  league      League    @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+
+  @@id([contenderId, leagueId])
+  @@map("contender_leagues")
+}
+
+// ─── Event / Phase / Session ──────────────────────────────────────────────────
+
+enum EventStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PhaseType {
+  REGULAR_SEASON
+  PLAYOFFS
+  OTHER
+}
+
+enum SessionStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+  POSTPONED
+}
+
+model Event {
+  id        String      @id @default(uuid())
+  name      String
+  startsAt  DateTime    @map("starts_at")
+  endsAt    DateTime?   @map("ends_at")
+  status    EventStatus @default(UPCOMING)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  leagueId  String  @map("league_id")
+  league    League  @relation(fields: [leagueId], references: [id])
+
+  phases    Phase[]
+  qimelas   Qimela[]
+
+  @@map("events")
+}
+
+model Phase {
+  id        String    @id @default(uuid())
+  name      String
+  order     Int
+  type      PhaseType @default(OTHER)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  eventId   String  @map("event_id")
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  sessions  Session[]
+
+  @@unique([eventId, order])
+  @@map("phases")
+}
+
+model Session {
+  id          String        @id @default(uuid())
+  name        String
+  scheduledAt DateTime      @map("scheduled_at")
+  status      SessionStatus @default(SCHEDULED)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  phaseId   String  @map("phase_id")
+  phase     Phase   @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+
+  contenders         SessionContender[]
+  results            SessionResult[]
+  sessionCategories  SessionPickCategory[]
+  picks              UserPick[]
+
+  @@map("sessions")
+}
+
+// ─── Session Contender participation ─────────────────────────────────────────
+
+model SessionContender {
+  id   String  @id @default(uuid())
+  role String? // sport-specific: "home", "away", "driver", null — stored as data, not enum
+
+  sessionId   String  @map("session_id")
+  session     Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  contenderId String    @map("contender_id")
+  contender   Contender @relation(fields: [contenderId], references: [id])
+
+  @@unique([sessionId, contenderId])
+  @@map("session_contenders")
+}
+
+// ─── Pick Categories (sport-level slot definitions) ──────────────────────────
+
+enum PickCategoryValueType {
+  CONTENDER // result/pick is expressed as a contender FK
+  SCALAR    // result/pick is expressed as a plain string/number value
+}
+
+model PickCategory {
+  id        String                @id @default(uuid())
+  name      String                // e.g. "winner", "fastest_lap", "score_home", "pole_position"
+  label     String                // human-readable: "Race Winner", "Fastest Lap"
+  valueType PickCategoryValueType @map("value_type")
+  points    Int                   @default(1)
+  createdAt DateTime              @default(now()) @map("created_at")
+  updatedAt DateTime              @updatedAt @map("updated_at")
+
+  sportId String @map("sport_id")
+  sport   Sport  @relation(fields: [sportId], references: [id])
+
+  sessionCategories SessionPickCategory[]
+  results           SessionResult[]
+  picks             UserPick[]
+
+  @@unique([sportId, name])
+  @@map("pick_categories")
+}
+
+// ─── Per-session optional categories (append-only — required categories are sport-level) ─
+
+model SessionPickCategory {
+  sessionId      String  @map("session_id")
+  session        Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  pickCategoryId String       @map("pick_category_id")
+  pickCategory   PickCategory @relation(fields: [pickCategoryId], references: [id])
+
+  @@id([sessionId, pickCategoryId])
+  @@map("session_pick_categories")
+}
+
+// ─── Session Results (actual outcomes, sport-agnostic) ────────────────────────
+
+model SessionResult {
+  id        String   @id @default(uuid())
+  value     String?  // used when pickCategory.valueType = SCALAR (e.g. "2" for a score)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sessionId      String  @map("session_id")
+  session        Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  pickCategoryId String       @map("pick_category_id")
+  pickCategory   PickCategory @relation(fields: [pickCategoryId], references: [id])
+
+  // The contender who achieved this result slot (used when valueType = CONTENDER)
+  // For SCALAR categories this is null; for CONTENDER categories this IS the result
+  contenderId String?    @map("contender_id")
+  contender   Contender? @relation(fields: [contenderId], references: [id])
+
+  @@unique([sessionId, pickCategoryId])
+  @@map("session_results")
+}
+
+// ─── User Picks ───────────────────────────────────────────────────────────────
+
+model UserPick {
+  id        String   @id @default(uuid())
+  value     String?  // used when pickCategory.valueType = SCALAR
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId    String @map("user_id")
+  user      User   @relation(fields: [userId], references: [id])
+
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  pickCategoryId String       @map("pick_category_id")
+  pickCategory   PickCategory @relation(fields: [pickCategoryId], references: [id])
+
+  // The contender the user predicts for this slot (used when valueType = CONTENDER)
+  pickedContenderId String?    @map("picked_contender_id")
+  pickedContender   Contender? @relation("PickedContender", fields: [pickedContenderId], references: [id])
+
+  @@unique([userId, sessionId, pickCategoryId])
+  @@map("user_picks")
 }

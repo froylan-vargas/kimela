@@ -101,7 +101,7 @@ gcloud services vpc-peerings connect \
 ### 3a. Create the instance
 
 ```bash
-gcloud sql instances create qimela-db \
+gcloud sql instances create qimela-a \
   --database-version=POSTGRES_16 \
   --tier=db-f1-micro \
   --edition=ENTERPRISE \
@@ -123,7 +123,7 @@ gcloud sql instances create qimela-db \
 ### 3b. Get the Private IP
 
 ```bash
-gcloud sql instances describe qimela-db --format="value(ipAddresses[0].ipAddress)"
+gcloud sql instances describe qimela-a --format="value(ipAddresses[0].ipAddress)"
 # Save this — you will use it in DATABASE_URL
 # Example: 10.100.0.3
 ```
@@ -132,10 +132,10 @@ gcloud sql instances describe qimela-db --format="value(ipAddresses[0].ipAddress
 
 ```bash
 # Create the application user
-gcloud sql users create qimela_app --instance=qimela-db --password=<STRONG_PASSWORD>
+gcloud sql users create qimela_app --instance=qimela-a --password=<STRONG_PASSWORD>
 
 # Create the database
-gcloud sql databases create qimela --instance=qimela-db
+gcloud sql databases create qimela --instance=qimela-a
 ```
 
 ---
@@ -146,9 +146,13 @@ gcloud sql databases create qimela --instance=qimela-db
 # DATABASE_URL — connection_limit=3 is critical for f1-micro
 echo -n "postgresql://qimela_app:<PASSWORD>@<PRIVATE_IP>:5432/qimela?connection_limit=3&pool_timeout=20" | gcloud secrets versions add DATABASE_URL --data-file=-
 
-echo -n "<your-jwt-secret>" | gcloud secrets create JWT_SECRET --data-file=-
+# Generate RSA keys:
+# ssh-keygen -t rsa -b 2048 -m PEM -f jwtRS256.key -q -N ""
+# openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 
-echo -n "<your-jwt-refresh-secret>" | gcloud secrets versions add JWT_REFRESH_SECRET --data-file=-
+cat jwtRS256.key | gcloud secrets create JWT_PRIVATE_KEY --data-file=-
+
+cat jwtRS256.key.pub | gcloud secrets create JWT_PUBLIC_KEY --data-file=-
 
 echo -n "<your-resend-api-key>" | gcloud secrets create RESEND_API_KEY --data-file=-
 
@@ -310,10 +314,10 @@ gcloud run deploy qimela-api \
   --network=qimela-vpc \
   --subnet=qimela-subnet \
   --vpc-egress=private-ranges-only \
-  --set-secrets="DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,JWT_REFRESH_SECRET=JWT_REFRESH_SECRET:latest,RESEND_API_KEY=RESEND_API_KEY:latest,CORS_ORIGIN=CORS_ORIGIN:latest,FRONTEND_URL=FRONTEND_URL:latest" \
+  --set-secrets="DATABASE_URL=DATABASE_URL:latest,JWT_PRIVATE_KEY=JWT_PRIVATE_KEY:latest,JWT_PUBLIC_KEY=JWT_PUBLIC_KEY:latest,RESEND_API_KEY=RESEND_API_KEY:latest,CORS_ORIGIN=CORS_ORIGIN:latest,FRONTEND_URL=FRONTEND_URL:latest" \
   --set-env-vars="NODE_ENV=production" \
   --port=3000 \
-  --health-check-http-path=/health
+  --liveness-probe=httpGet.path=/health
 ```
 
 > `--no-allow-unauthenticated` means only internal traffic (from the web service and Cloud Scheduler) can reach the API. The web frontend calls it via its internal URL.
@@ -502,11 +506,11 @@ PROJECT_ID=qimela
 REPO=us-central1-docker.pkg.dev/${PROJECT_ID}/qimela
 
 # API
-docker build -f apps/api/Dockerfile -t ${REPO}/api:latest .
+docker build --platform linux/amd64 -f apps/api/Dockerfile -t ${REPO}/api:latest .
 docker push ${REPO}/api:latest
 
 # Web
-docker build -f apps/web/Dockerfile -t ${REPO}/web:latest .
+docker build --platform linux/amd64 -f apps/web/Dockerfile -t ${REPO}/web:latest .
 docker push ${REPO}/web:latest
 ```
 
@@ -523,7 +527,7 @@ To connect to the production DB from your machine without whitelisting your IP:
 brew install cloud-sql-proxy
 
 # Start it (runs in background, listens on 127.0.0.1:5433)
-cloud-sql-proxy qimela:us-central1:qimela-db --port=5433 &
+cloud-sql-proxy qimela:us-central1:qimela-a --port=5433 &
 
 # Use a local .env with the proxy URL
 DATABASE_URL="postgresql://qimela_app:<PASSWORD>@127.0.0.1:5433/qimela?connection_limit=3"
@@ -558,7 +562,7 @@ gcloud run services logs read qimela-api --region=us-central1 --limit=50
 gcloud run services logs read qimela-web --region=us-central1 --limit=50
 
 # List Cloud SQL connections (check active connections vs limit=3)
-gcloud sql operations list --instance=qimela-db --limit=5
+gcloud sql operations list --instance=qimela-a --limit=5
 
 # Manually trigger pgboss scheduler
 gcloud scheduler jobs run qimela-pgboss-trigger --location=us-central1

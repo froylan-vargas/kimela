@@ -14,7 +14,7 @@ I need your support imagining an intuitive ui design, be very creative an modern
 
 Im creating a system to create, manage, and participate in sports pools. The pools are called qimelas.
 
-A qimela is the product name of this application, it is the representation of a single sport pool, a qimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.
+A qimela is the representation of a single sport pool, a qimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.
 
 ### Sections the user will see once the qimela is created.
 

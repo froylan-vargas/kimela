@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard'
 import { RolesGuard } from './modules/auth/presentation/guards/roles.guard';
 import { HealthController } from './health.controller';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { AdminModule } from './modules/admin/presentation/admin.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { JobsModule } from './modules/jobs/jobs.module';
     QimelaModule,
     AuthModule,
     JobsModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -1,0 +1,90 @@
+@use "../../../styles/variables" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  padding: $spacing-xl $spacing-lg;
+  border: 2px dashed $color-border;
+  border-radius: $radius-md;
+  background: $color-bg;
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  min-height: 200px;
+}
+
+.dragging {
+  border-color: $color-primary;
+  background: $color-primary-light;
+}
+
+.uploading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.icon {
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.dragging .icon {
+  color: $color-text-main;
+}
+
+.hint {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+.chooseBtn {
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary;
+  color: $color-text-main;
+  border: none;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  font-size: 14px;
+  color: #dc2626;
+  margin: 0;
+  padding: $spacing-sm $spacing-md;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: $radius-sm;
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  pointer-events: none;
+}

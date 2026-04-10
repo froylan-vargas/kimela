@@ -1,0 +1,41 @@
+@use "../../../styles/variables" as *;
+
+.navbar {
+  background: $color-navbar-bg;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $color-border;
+  padding: $spacing-md 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: $z-navbar;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.navLink {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: $color-text-secondary;
+  text-decoration: none;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: $color-text-main;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &[aria-current="page"] {
+    color: $color-text-main;
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,33 @@
+@use "../../../../styles/variables" as *;
+
+.page {
+  padding: $spacing-lg 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: $spacing-lg;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: $spacing-sm;
+  color: $color-text-main;
+}
+
+.subtitle {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+}
+
+.controls {
+  margin-bottom: $spacing-lg;
+}
+
+.results {
+  margin-top: $spacing-md;
+}

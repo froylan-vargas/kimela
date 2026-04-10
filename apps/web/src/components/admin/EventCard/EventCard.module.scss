@@ -1,0 +1,86 @@
+@use "../../../styles/variables" as *;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: #cbcbd0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badgeMatchup {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badgeRace {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.league {
+  font-size: 13px;
+  color: $color-text-secondary;
+  font-weight: 500;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-text-main;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.dates {
+  font-size: 13px;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+.manageBtn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: auto;
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary;
+  color: $color-text-main;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  align-self: flex-start;
+
+  &:hover {
+    background: $color-primary-hover;
+  }
+}

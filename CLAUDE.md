@@ -24,6 +24,10 @@ system to create, manage and participate in sports pools
 - **Estilos**: SCSS + CSS Modules
 - **Testing**: Vitest + React Testing Library
 
+## Importat
+
+- All code should be en english, but web app (ui) should always be in spanish.
+
 ## Definitions
 
 - Qimela: A qimela is the representation of a single sport pool, a qimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.

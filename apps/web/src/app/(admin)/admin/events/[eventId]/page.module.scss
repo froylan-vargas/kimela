@@ -1,0 +1,244 @@
+@use "../../../../../styles/variables" as *;
+
+.page {
+  padding: $spacing-lg 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: $spacing-lg;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-text-secondary;
+  text-decoration: none;
+  margin-bottom: $spacing-sm;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $color-text-main;
+  }
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: $spacing-sm;
+  color: $color-text-main;
+}
+
+.subtitle {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+}
+
+// ── Two-column layout ──────────────────────────────────────────────────────────
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-lg;
+  align-items: start;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 2fr 3fr;
+  }
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  @media (min-width: 900px) {
+    position: sticky;
+    top: $spacing-lg;
+  }
+}
+
+.sidebarHeader {
+  padding: $spacing-md $spacing-md $spacing-sm;
+  border-bottom: 1px solid $color-border;
+}
+
+.sidebarTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: $color-text-main;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebarFooter {
+  padding: $spacing-sm $spacing-sm;
+  border-top: 1px solid $color-border;
+  margin-top: auto;
+}
+
+.newPhaseBtn {
+  display: block;
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  border: 1px dashed $color-border;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-secondary;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-text-main;
+    background: $color-primary-light;
+  }
+}
+
+.inlineForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+}
+
+.cancelFormBtn {
+  padding: $spacing-xs $spacing-sm;
+  background: transparent;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 13px;
+  color: $color-text-secondary;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  align-self: flex-start;
+
+  &:hover {
+    border-color: $color-text-secondary;
+    color: $color-text-main;
+  }
+}
+
+// ── Main panel ────────────────────────────────────────────────────────────────
+
+.panel {
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.emptyPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: $spacing-lg;
+}
+
+.emptyPanelText {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+  text-align: center;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-md 0;
+  border-bottom: 1px solid $color-border;
+  flex-wrap: wrap;
+}
+
+.panelTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-text-main;
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.tab {
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-text-secondary;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  margin-bottom: -1px;
+
+  &:hover {
+    color: $color-text-main;
+  }
+}
+
+.tabActive {
+  color: $color-text-main;
+  border-bottom-color: $color-primary;
+  font-weight: 600;
+}
+
+.panelBody {
+  padding: $spacing-md;
+}
+
+// ── Skeleton / loading states ─────────────────────────────────────────────────
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $spacing-sm;
+}
+
+.skeletonItem {
+  height: 44px;
+  background: $color-border;
+  border-radius: $radius-sm;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.error {
+  font-size: 14px;
+  color: #dc2626;
+  margin: 0;
+  padding: $spacing-sm $spacing-md;
+}

@@ -17,10 +17,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isLoading && !user) {
       router.replace("/login");
+    } else if (!isLoading && user?.role === "ADMIN") {
+      router.replace("/admin/events");
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || !user) {
+  if (isLoading || !user || user.role === "ADMIN") {
     return (
       <div
         style={{

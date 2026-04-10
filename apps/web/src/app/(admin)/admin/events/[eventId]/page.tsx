@@ -1,0 +1,234 @@
+"use client";
+
+import { use, useState, useTransition } from "react";
+import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
+import { usePhases } from "@/hooks/usePhases";
+import { useSessions } from "@/hooks/useSessions";
+import { adminApi } from "@/lib/apiClient";
+import PhaseList from "@/components/admin/PhaseList/PhaseList";
+import PhaseForm from "@/components/admin/PhaseForm/PhaseForm";
+import SessionList from "@/components/admin/SessionList/SessionList";
+import SessionUpload from "@/components/admin/SessionUpload/SessionUpload";
+import type { Phase } from "@/types/phase";
+import styles from "./page.module.scss";
+
+type Tab = "partidos" | "csv";
+
+interface EventManagementPageProps {
+  params: Promise<{ eventId: string }>;
+  searchParams: Promise<{ name?: string }>;
+}
+
+export default function EventManagementPage({
+  params,
+  searchParams,
+}: EventManagementPageProps) {
+  const { eventId } = use(params);
+  const { name: eventName } = use(searchParams);
+
+  const queryClient = useQueryClient();
+
+  const { data: phases, isLoading: phasesLoading, isError: phasesError } = usePhases(eventId);
+
+  const [selectedPhase, setSelectedPhase] = useState<Phase | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("partidos");
+  const [showPhaseForm, setShowPhaseForm] = useState(false);
+  const [localPhases, setLocalPhases] = useState<Phase[] | null>(null);
+  const [isUploading, startUploadTransition] = useTransition();
+
+  const {
+    data: sessions,
+    isLoading: sessionsLoading,
+    isError: sessionsError,
+  } = useSessions(eventId, selectedPhase?.id ?? null);
+
+  function handlePhaseCreated(phase: Phase) {
+    queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], (prev) => {
+      const list = prev ?? [];
+      return [...list, phase];
+    });
+    setLocalPhases(null);
+    setShowPhaseForm(false);
+    setSelectedPhase(phase);
+  }
+
+  function handlePhaseSelect(phase: Phase) {
+    setSelectedPhase(phase);
+    setActiveTab("partidos");
+  }
+
+  async function handleReorder(reordered: Phase[]) {
+    setLocalPhases(reordered);
+    try {
+      await adminApi.reorderPhases(
+        eventId,
+        reordered.map((p) => ({ id: p.id, order: p.order })),
+      );
+      queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], reordered);
+    } catch {
+      // rollback
+    } finally {
+      setLocalPhases(null);
+    }
+  }
+
+  async function handleDeletePhase(phaseId: string) {
+    const prev = queryClient.getQueryData<Phase[]>(["admin", "phases", eventId]) ?? [];
+    const updated = prev.filter((p) => p.id !== phaseId);
+    queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], updated);
+    setLocalPhases(null);
+    if (selectedPhase?.id === phaseId) setSelectedPhase(null);
+    try {
+      await adminApi.deletePhase(eventId, phaseId);
+    } catch {
+      queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], prev);
+    }
+  }
+
+  async function handleUpload(file: File) {
+    if (!selectedPhase) return;
+
+    await new Promise<void>((resolve, reject) => {
+      startUploadTransition(async () => {
+        try {
+          await adminApi.uploadSessions(eventId, selectedPhase.id, file);
+          await queryClient.invalidateQueries({
+            queryKey: ["admin", "sessions", eventId, selectedPhase.id],
+          });
+          setActiveTab("partidos");
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  const displayedPhases = localPhases ?? phases ?? [];
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.header}>
+        <Link href="/admin/events" className={styles.backLink}>
+          &larr; Volver a eventos
+        </Link>
+        <h1 className={styles.title}>
+          {eventName ? decodeURIComponent(eventName) : "Administrar evento"}
+        </h1>
+        <p className={styles.subtitle}>Gestiona las fases y partidos de este evento.</p>
+      </div>
+
+      <div className={styles.layout}>
+        {/* ── Sidebar ── */}
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarHeader}>
+            <h2 className={styles.sidebarTitle}>Fases</h2>
+          </div>
+
+          {phasesLoading && (
+            <div className={styles.skeletonList} aria-label="Cargando fases">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={styles.skeletonItem} />
+              ))}
+            </div>
+          )}
+
+          {phasesError && (
+            <p className={styles.error}>
+              Error al cargar las fases. Intenta de nuevo.
+            </p>
+          )}
+
+          {!phasesLoading && !phasesError && (
+            <PhaseList
+              phases={displayedPhases}
+              selectedPhaseId={selectedPhase?.id}
+              onSelect={handlePhaseSelect}
+              onReorder={handleReorder}
+              onDelete={handleDeletePhase}
+            />
+          )}
+
+          <div className={styles.sidebarFooter}>
+            {showPhaseForm ? (
+              <div className={styles.inlineForm}>
+                <PhaseForm eventId={eventId} onCreated={handlePhaseCreated} />
+                <button
+                  type="button"
+                  className={styles.cancelFormBtn}
+                  onClick={() => setShowPhaseForm(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={styles.newPhaseBtn}
+                onClick={() => setShowPhaseForm(true)}
+              >
+                + Nueva fase
+              </button>
+            )}
+          </div>
+        </aside>
+
+        {/* ── Main panel ── */}
+        <section className={styles.panel}>
+          {!selectedPhase ? (
+            <div className={styles.emptyPanel}>
+              <p className={styles.emptyPanelText}>
+                Selecciona una fase para ver sus partidos.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className={styles.panelHeader}>
+                <h2 className={styles.panelTitle}>{selectedPhase.name}</h2>
+
+                <div className={styles.tabs} role="tablist">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "partidos"}
+                    className={`${styles.tab} ${activeTab === "partidos" ? styles.tabActive : ""}`}
+                    onClick={() => setActiveTab("partidos")}
+                  >
+                    Partidos
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "csv"}
+                    className={`${styles.tab} ${activeTab === "csv" ? styles.tabActive : ""}`}
+                    onClick={() => setActiveTab("csv")}
+                  >
+                    Cargar CSV
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.panelBody}>
+                {activeTab === "partidos" && (
+                  <SessionList
+                    sessions={sessions ?? []}
+                    isLoading={sessionsLoading}
+                    isError={sessionsError}
+                  />
+                )}
+
+                {activeTab === "csv" && (
+                  <SessionUpload
+                    onUpload={handleUpload}
+                    isUploading={isUploading}
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

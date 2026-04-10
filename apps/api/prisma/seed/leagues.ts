@@ -1,9 +1,9 @@
 import { PrismaClient, League, Sport } from "@prisma/client";
 
-const LEAGUES: { name: string; sport: string }[] = [
+const LEAGUES: { slug: string; name: string; sport: string }[] = [
   // Fútbol
-  { name: "Liga MX", sport: "Fútbol soccer" },
-  { name: "Mundial", sport: "Fútbol soccer" },
+  { slug: "liga-mx", name: "Liga MX", sport: "futbol-soccer" },
+  { slug: "mundial", name: "Mundial", sport: "futbol-soccer" },
 ];
 
 export async function seedLeagues(
@@ -17,12 +17,12 @@ export async function seedLeagues(
     if (!sport) throw new Error(`Sport not found in seed: "${data.sport}"`);
 
     const league = await prisma.league.upsert({
-      where: { name_sportId: { name: data.name, sportId: sport.id } },
-      update: {},
-      create: { name: data.name, sportId: sport.id },
+      where: { slug_sportId: { slug: data.slug, sportId: sport.id } },
+      update: { name: data.name },
+      create: { slug: data.slug, name: data.name, sportId: sport.id },
     });
-    results[league.name] = league;
-    console.log(`  [league] ${league.name}`);
+    results[league.slug] = league;
+    console.log(`  [league] ${league.slug}`);
   }
 
   return results;

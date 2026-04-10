@@ -1,0 +1,149 @@
+@use "../../../styles/variables" as *;
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-left: 3px solid transparent;
+  border-radius: $radius-sm;
+  padding: 2px 4px 2px 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: $color-bg;
+    border-left-color: $color-border;
+
+    .deleteBtn {
+      opacity: 1;
+    }
+  }
+}
+
+.itemSelected {
+  background: $color-primary-light;
+  border-left-color: $color-primary;
+
+  &:hover {
+    background: $color-primary-light;
+    border-left-color: $color-primary;
+  }
+
+  .itemOrder {
+    background: $color-primary;
+    color: #fff;
+  }
+}
+
+.dragHandle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  cursor: grab;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  border-radius: $radius-sm;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    color: $color-text-main;
+  }
+}
+
+.itemBody {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 0;
+  padding: $spacing-sm 4px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.itemOrder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: $color-primary-light;
+  color: $color-text-main;
+  border-radius: $radius-pill;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.itemName {
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-text-main;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: $color-border;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.deleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: 18px;
+  line-height: 1;
+  color: $color-text-secondary;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: #dc2626;
+    background: #fee2e2;
+  }
+}
+
+.empty {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+  padding: $spacing-md 0;
+}

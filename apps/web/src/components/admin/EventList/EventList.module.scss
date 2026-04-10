@@ -1,0 +1,43 @@
+@use "../../../styles/variables" as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-md;
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-md;
+}
+
+.skeletonCard {
+  height: 160px;
+  border-radius: $radius-md;
+  background: linear-gradient(
+    90deg,
+    $color-border 25%,
+    rgba(228, 228, 231, 0.4) 50%,
+    $color-border 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.empty {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+  padding: $spacing-lg 0;
+}
+
+.error {
+  font-size: 14px;
+  color: #dc2626;
+  padding: $spacing-md 0;
+}

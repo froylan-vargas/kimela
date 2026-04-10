@@ -4,6 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { seedSports } from './sports'
 import { seedLeagues } from './leagues'
 import { seedContenders } from './contenders'
+import { seedPickCategories } from './pick-categories'
 
 config()
 
@@ -15,6 +16,7 @@ async function main() {
   const sports = await seedSports(prisma)
   const leagues = await seedLeagues(prisma, sports)
   await seedContenders(prisma, leagues)
+  await seedPickCategories(prisma, sports)
   console.log('Done.')
 }
 

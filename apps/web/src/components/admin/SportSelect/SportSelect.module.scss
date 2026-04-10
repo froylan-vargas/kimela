@@ -1,0 +1,49 @@
+@use "../../../styles/variables" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  max-width: 320px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-main;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 256 256'%3E%3Cpath fill='%2371717a' d='M213.66 101.66l-80 80a8 8 0 0 1-11.32 0l-80-80a8 8 0 0 1 11.32-11.32L128 164.69l74.34-74.35a8 8 0 0 1 11.32 11.32Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $spacing-sm center;
+  background-size: 16px;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: $spacing-sm $spacing-lg $spacing-sm $spacing-md;
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-text-main;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  font-size: 14px;
+  color: #dc2626;
+}

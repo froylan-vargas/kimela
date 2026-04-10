@@ -112,21 +112,30 @@ enum QimelaStatus {
   PAUSED
 }
 
+enum SessionFormat {
+  MATCHUP // A vs B (soccer, tennis, basketball, etc.)
+  RACE    // all contenders participate (F1, NASCAR, cycling, etc.)
+}
+
 model Sport {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  imgUrl    String?  @map("img_url")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String        @id @default(uuid())
+  slug          String        @unique
+  name          String        @unique
+  imgUrl        String?       @map("img_url")
+  sessionFormat SessionFormat @default(MATCHUP) @map("session_format")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
 
   leagues        League[]
   pickCategories PickCategory[]
+  sessions       Session[]
 
   @@map("sports")
 }
 
 model League {
   id        String   @id @default(uuid())
+  slug      String
   name      String
   imgUrl    String?  @map("img_url")
   createdAt DateTime @default(now()) @map("created_at")
@@ -137,6 +146,7 @@ model League {
   contenders ContenderLeague[]
   events     Event[]
 
+  @@unique([slug, sportId])
   @@unique([name, sportId])
   @@map("leagues")
 }
@@ -238,6 +248,9 @@ model Session {
   phaseId   String  @map("phase_id")
   phase     Phase   @relation(fields: [phaseId], references: [id], onDelete: Cascade)
 
+  sportId   String  @map("sport_id")
+  sport     Sport   @relation(fields: [sportId], references: [id])
+
   contenders         SessionContender[]
   results            SessionResult[]
   sessionCategories  SessionPickCategory[]
@@ -271,10 +284,11 @@ enum PickCategoryValueType {
 
 model PickCategory {
   id        String                @id @default(uuid())
-  name      String                // e.g. "winner", "fastest_lap", "score_home", "pole_position"
-  label     String                // human-readable: "Race Winner", "Fastest Lap"
+  name      String                // e.g. "fastest_lap", "score_home", "pole_position"
+  label     String                // human-readable: "Fastest Lap", "Goles local"
   valueType PickCategoryValueType @map("value_type")
   points    Int                   @default(1)
+  isDefault Boolean               @default(true) @map("is_default") // true = auto-assigned to all sessions of this sport
   createdAt DateTime              @default(now()) @map("created_at")
   updatedAt DateTime              @updatedAt @map("updated_at")
 

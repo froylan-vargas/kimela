@@ -1,4 +1,8 @@
 import type { AuthUser } from "@/types/auth";
+import type { Sport } from "@/types/sport";
+import type { SportEvent } from "@/types/event";
+import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
+import type { Session } from "@/types/session";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -145,5 +149,99 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ token, password }),
     });
+  },
+};
+
+export const sportsApi = {
+  list(): Promise<{ data: Sport[] }> {
+    return apiFetch<{ data: Sport[] }>("/admin/sports");
+  },
+};
+
+export const adminApi = {
+  listEvents(sportId: string): Promise<{ data: SportEvent[] }> {
+    return apiFetch<{ data: SportEvent[] }>(
+      `/admin/events?sportId=${encodeURIComponent(sportId)}`,
+    );
+  },
+
+  getPhases(eventId: string): Promise<{ data: Phase[] }> {
+    return apiFetch<{ data: Phase[] }>(`/admin/events/${encodeURIComponent(eventId)}/phases`);
+  },
+
+  createPhase(eventId: string, body: CreatePhaseBody): Promise<{ data: Phase }> {
+    return apiFetch<{ data: Phase }>(`/admin/events/${encodeURIComponent(eventId)}/phases`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+
+  reorderPhases(eventId: string, phases: ReorderPhaseEntry[]): Promise<void> {
+    return apiFetch<void>(`/admin/events/${encodeURIComponent(eventId)}/phases/reorder`, {
+      method: "PATCH",
+      body: JSON.stringify({ phases }),
+    });
+  },
+
+  deletePhase(eventId: string, phaseId: string): Promise<void> {
+    return apiFetch<void>(
+      `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}`,
+      { method: "DELETE" },
+    );
+  },
+
+  getSessions(eventId: string, phaseId: string): Promise<{ data: Session[] }> {
+    return apiFetch<{ data: Session[] }>(
+      `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/sessions`,
+    );
+  },
+
+  async uploadSessions(
+    eventId: string,
+    phaseId: string,
+    file: File,
+  ): Promise<{ data: Session[] }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const url = `${API_URL}/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/sessions/upload`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+      // Do NOT set Content-Type — browser sets it with boundary
+    });
+
+    if (res.ok) {
+      return res.json() as Promise<{ data: Session[] }>;
+    }
+
+    if (res.status === 401) {
+      try {
+        await authApi.refresh();
+      } catch {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new ApiError(401, "Session expired");
+      }
+
+      const retryRes = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (retryRes.ok) {
+        return retryRes.json() as Promise<{ data: Session[] }>;
+      }
+
+      const retryMsg = await parseErrorMessage(retryRes);
+      throw new ApiError(retryRes.status, retryMsg);
+    }
+
+    const message = await parseErrorMessage(res);
+    throw new ApiError(res.status, message);
   },
 };

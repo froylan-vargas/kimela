@@ -7,6 +7,7 @@ const makePhase = (overrides: Partial<ConstructorParameters<typeof PhaseEntity>[
     name: 'Group Stage',
     order: 1,
     type: 'REGULAR_SEASON',
+    status: 'UPCOMING',
     eventId: 'event-1',
     ...overrides,
   });
@@ -26,6 +27,7 @@ describe('PhaseMapper', () => {
         name: 'Group Stage',
         order: 1,
         type: 'REGULAR_SEASON',
+        status: 'UPCOMING',
         eventId: 'event-1',
       });
     });
@@ -68,9 +70,9 @@ describe('PhaseMapper', () => {
 
       // Assert
       expect(dtos).toHaveLength(3);
-      expect(dtos[0]).toEqual({ id: 'phase-1', name: 'Group Stage', order: 1, type: 'REGULAR_SEASON', eventId: 'event-1' });
-      expect(dtos[1]).toEqual({ id: 'phase-2', name: 'Quarter Finals', order: 2, type: 'PLAYOFFS', eventId: 'event-1' });
-      expect(dtos[2]).toEqual({ id: 'phase-3', name: 'Final', order: 3, type: 'PLAYOFFS', eventId: 'event-1' });
+      expect(dtos[0]).toEqual({ id: 'phase-1', name: 'Group Stage', order: 1, type: 'REGULAR_SEASON', status: 'UPCOMING', eventId: 'event-1' });
+      expect(dtos[1]).toEqual({ id: 'phase-2', name: 'Quarter Finals', order: 2, type: 'PLAYOFFS', status: 'UPCOMING', eventId: 'event-1' });
+      expect(dtos[2]).toEqual({ id: 'phase-3', name: 'Final', order: 3, type: 'PLAYOFFS', status: 'UPCOMING', eventId: 'event-1' });
     });
 
     it('returns empty array when given an empty array', () => {

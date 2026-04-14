@@ -31,6 +31,14 @@ import { CreatePhaseUseCase, CreatePhaseResponse } from '../application/use-case
 import { ReorderPhasesUseCase, ReorderPhasesResponse } from '../application/use-cases/reorder-phases.use-case';
 import { DeletePhaseUseCase } from '../application/use-cases/delete-phase.use-case';
 import {
+  ActivatePhaseUseCase,
+  ActivatePhaseResponse,
+} from '../application/use-cases/activate-phase.use-case';
+import {
+  CompletePhaseUseCase,
+  CompletePhaseResponse,
+} from '../application/use-cases/complete-phase.use-case';
+import {
   GetSessionsByPhaseUseCase,
   GetSessionsByPhaseResponse,
 } from '../application/use-cases/get-sessions-by-phase.use-case';
@@ -54,6 +62,8 @@ export class AdminController {
     private readonly createPhase: CreatePhaseUseCase,
     private readonly reorderPhases: ReorderPhasesUseCase,
     private readonly deletePhase: DeletePhaseUseCase,
+    private readonly activatePhaseUseCase: ActivatePhaseUseCase,
+    private readonly completePhaseUseCase: CompletePhaseUseCase,
     private readonly getSessionsByPhase: GetSessionsByPhaseUseCase,
     private readonly uploadSessions: UploadSessionsUseCase,
   ) {}
@@ -109,6 +119,28 @@ export class AdminController {
   ): Promise<void> {
     this.logger.log(`DELETE /admin/events/${eventId}/phases/${phaseId} requested`);
     await this.deletePhase.execute({ id: phaseId });
+  }
+
+  @Patch('events/:eventId/phases/:phaseId/activate')
+  @HttpCode(HttpStatus.OK)
+  async activatePhase(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('phaseId', ParseUUIDPipe) phaseId: string,
+  ): Promise<ActivatePhaseResponse> {
+    this.logger.log(`PATCH /admin/events/${eventId}/phases/${phaseId}/activate requested`);
+
+    return this.activatePhaseUseCase.execute({ phaseId });
+  }
+
+  @Patch('events/:eventId/phases/:phaseId/complete')
+  @HttpCode(HttpStatus.OK)
+  async completePhase(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('phaseId', ParseUUIDPipe) phaseId: string,
+  ): Promise<CompletePhaseResponse> {
+    this.logger.log(`PATCH /admin/events/${eventId}/phases/${phaseId}/complete requested`);
+
+    return this.completePhaseUseCase.execute({ phaseId });
   }
 
   @Get('events/:eventId/phases/:phaseId/sessions')

@@ -6,8 +6,7 @@ import type { Qimela } from "@/types/qimela";
 const sub1: Qimela = {
   id: "s1",
   name: "Liga MX",
-  description: "Fútbol mexicano",
-  sport: "football",
+  sportId: "sport-uuid-1",
   status: "ACTIVE",
   role: "SUBSCRIBER",
   creatorId: "u1",
@@ -16,8 +15,7 @@ const sub1: Qimela = {
 const sub2: Qimela = {
   id: "s2",
   name: "Premier League",
-  description: "English football",
-  sport: "football",
+  sportId: "sport-uuid-1",
   status: "ACTIVE",
   role: "SUBSCRIBER",
   creatorId: "u1",
@@ -26,8 +24,7 @@ const sub2: Qimela = {
 const cre1: Qimela = {
   id: "c1",
   name: "NBA Pool",
-  description: "Basketball",
-  sport: "basketball",
+  sportId: "sport-uuid-2",
   status: "ACTIVE",
   role: "CREATOR",
   creatorId: "u1",

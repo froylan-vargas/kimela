@@ -6,8 +6,7 @@ export class QimelaMapper {
     return {
       id: entity.id,
       name: entity.name,
-      description: entity.description,
-      sport: entity.sport,
+      sportId: entity.sportId,
       status: entity.status,
       role: entity.isCreatedBy(userId) ? 'CREATOR' : 'SUBSCRIBER',
       creatorId: entity.creatorId,

@@ -73,6 +73,36 @@ export default function EventManagementPage({
     }
   }
 
+  async function handleActivatePhase(phaseId: string) {
+    try {
+      const res = await adminApi.activatePhase(eventId, phaseId);
+      const updated = res.data;
+      queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], (prev) =>
+        (prev ?? []).map((p) => (p.id === phaseId ? { ...p, status: updated.status } : p)),
+      );
+    } catch {
+      // silent fail
+    }
+  }
+
+  async function handleCompletePhase(phaseId: string) {
+    try {
+      const res = await adminApi.completePhase(eventId, phaseId);
+      const updated = res.data;
+      queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], (prev) =>
+        (prev ?? []).map((p) => (p.id === phaseId ? { ...p, status: updated.status } : p)),
+      );
+    } catch {
+      // silent fail
+    }
+  }
+
+  function canCompletePhase(phase: Phase): boolean {
+    if (phase.id !== selectedPhase?.id) return true;
+    if (!sessions) return true;
+    return !sessions.some((s) => s.status === "SCHEDULED" || s.status === "LIVE");
+  }
+
   async function handleDeletePhase(phaseId: string) {
     const prev = queryClient.getQueryData<Phase[]>(["admin", "phases", eventId]) ?? [];
     const updated = prev.filter((p) => p.id !== phaseId);
@@ -147,6 +177,9 @@ export default function EventManagementPage({
               onSelect={handlePhaseSelect}
               onReorder={handleReorder}
               onDelete={handleDeletePhase}
+              onActivate={handleActivatePhase}
+              onComplete={handleCompletePhase}
+              canCompletePhase={canCompletePhase}
             />
           )}
 

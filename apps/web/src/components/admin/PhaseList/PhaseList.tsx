@@ -17,7 +17,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Phase, PhaseType } from "@/types/phase";
+import type { Phase, PhaseType, PhaseStatus } from "@/types/phase";
 import styles from "./PhaseList.module.scss";
 
 const PHASE_TYPE_LABELS: Record<PhaseType, string> = {
@@ -26,11 +26,20 @@ const PHASE_TYPE_LABELS: Record<PhaseType, string> = {
   OTHER: "Otro",
 };
 
+const PHASE_STATUS_LABELS: Record<PhaseStatus, string> = {
+  UPCOMING: "Próxima",
+  ACTIVE: "En curso",
+  COMPLETED: "Completada",
+};
+
 interface SortablePhaseItemProps {
   phase: Phase;
   isSelected: boolean;
   onSelect: (phase: Phase) => void;
   onDelete: (phaseId: string) => void;
+  onActivate: (phaseId: string) => void;
+  onComplete: (phaseId: string) => void;
+  canComplete: boolean;
 }
 
 function SortablePhaseItem({
@@ -38,6 +47,9 @@ function SortablePhaseItem({
   isSelected,
   onSelect,
   onDelete,
+  onActivate,
+  onComplete,
+  canComplete,
 }: SortablePhaseItemProps) {
   const {
     attributes,
@@ -81,7 +93,36 @@ function SortablePhaseItem({
         <span className={styles.itemTypeBadge}>
           {PHASE_TYPE_LABELS[phase.type]}
         </span>
+        <span
+          className={`${styles.statusBadge} ${styles[`statusBadge_${phase.status}`]}`}
+        >
+          {PHASE_STATUS_LABELS[phase.status]}
+        </span>
       </button>
+
+      {phase.status === "UPCOMING" && (
+        <button
+          type="button"
+          className={styles.activateBtn}
+          aria-label={`Iniciar fase ${phase.name}`}
+          onClick={() => onActivate(phase.id)}
+        >
+          Iniciar
+        </button>
+      )}
+
+      {phase.status === "ACTIVE" && (
+        <button
+          type="button"
+          className={styles.completeBtn}
+          aria-label={`Completar fase ${phase.name}`}
+          onClick={() => onComplete(phase.id)}
+          disabled={!canComplete}
+          title={!canComplete ? "Hay partidos pendientes" : undefined}
+        >
+          Completar
+        </button>
+      )}
 
       <button
         type="button"
@@ -114,6 +155,9 @@ interface PhaseListProps {
   onSelect: (phase: Phase) => void;
   onReorder: (reordered: Phase[]) => void;
   onDelete: (phaseId: string) => void;
+  onActivate: (phaseId: string) => void;
+  onComplete: (phaseId: string) => void;
+  canCompletePhase: (phase: Phase) => boolean;
 }
 
 export default function PhaseList({
@@ -122,6 +166,9 @@ export default function PhaseList({
   onSelect,
   onReorder,
   onDelete,
+  onActivate,
+  onComplete,
+  canCompletePhase,
 }: PhaseListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -170,6 +217,9 @@ export default function PhaseList({
               isSelected={phase.id === selectedPhaseId}
               onSelect={onSelect}
               onDelete={onDelete}
+              onActivate={onActivate}
+              onComplete={onComplete}
+              canComplete={canCompletePhase(phase)}
             />
           ))}
         </ul>

@@ -21,8 +21,8 @@ function createWrapper() {
 }
 
 const mockPhases: Phase[] = [
-  { id: "p1", name: "Jornada 1", order: 1, type: "REGULAR_SEASON", eventId: "e1" },
-  { id: "p2", name: "Playoffs", order: 2, type: "PLAYOFFS", eventId: "e1" },
+  { id: "p1", name: "Jornada 1", order: 1, type: "REGULAR_SEASON", status: "UPCOMING", eventId: "e1" },
+  { id: "p2", name: "Playoffs", order: 2, type: "PLAYOFFS", status: "UPCOMING", eventId: "e1" },
 ];
 
 describe("usePhases", () => {

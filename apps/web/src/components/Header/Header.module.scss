@@ -13,3 +13,25 @@
   top: 0;
   z-index: $z-navbar;
 }
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.createLink {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary;
+  color: $color-text-main;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: $color-primary-hover;
+  }
+}

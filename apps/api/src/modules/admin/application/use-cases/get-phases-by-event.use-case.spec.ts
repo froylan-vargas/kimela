@@ -8,6 +8,7 @@ const makePhase = (overrides: Partial<ConstructorParameters<typeof PhaseEntity>[
     name: 'Group Stage',
     order: 1,
     type: 'REGULAR_SEASON',
+    status: 'UPCOMING',
     eventId: 'event-1',
     ...overrides,
   });
@@ -23,6 +24,8 @@ describe('GetPhasesByEventUseCase', () => {
       create: jest.fn(),
       reorder: jest.fn(),
       delete: jest.fn(),
+      updateStatus: jest.fn(),
+      findById: jest.fn(),
     };
 
     useCase = new GetPhasesByEventUseCase(mockPhaseRepository);
@@ -49,6 +52,7 @@ describe('GetPhasesByEventUseCase', () => {
         name: 'Group Stage',
         order: 1,
         type: 'REGULAR_SEASON',
+        status: 'UPCOMING',
         eventId: 'event-1',
       });
       expect(result.data[2]).toEqual({
@@ -56,6 +60,7 @@ describe('GetPhasesByEventUseCase', () => {
         name: 'Final',
         order: 3,
         type: 'PLAYOFFS',
+        status: 'UPCOMING',
         eventId: 'event-1',
       });
     });

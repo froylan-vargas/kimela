@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "rules" ADD COLUMN     "max_points" INTEGER NOT NULL DEFAULT 5,
+ADD COLUMN     "min_points" INTEGER NOT NULL DEFAULT 0;

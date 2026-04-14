@@ -15,6 +15,7 @@ import { QimelaStatus } from '../../domain/qimela-status.enum';
 
 const TEST_USER_ID = 'e471c62d-6015-4ab9-b930-79db54ea75c0';
 const OTHER_USER_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+const TEST_SPORT_ID = 'bbbbbbbb-cccc-dddd-eeee-ffffffffffff';
 
 // Helper: wrap PrismaClient as PrismaService for testing
 function makePrismaService(client: PrismaClient): PrismaService {
@@ -41,18 +42,23 @@ describe('PrismaQimelaRepository (integration)', () => {
     await prisma.subscription.deleteMany();
     await prisma.qimela.deleteMany();
     await prisma.user.deleteMany();
+    await prisma.sport.deleteMany({ where: { id: TEST_SPORT_ID } });
+    await prisma.sport.create({
+      data: { id: TEST_SPORT_ID, name: 'Football', slug: 'football', sessionFormat: 'MATCHUP' },
+    });
   });
 
   const createUser = (id: string, email: string) =>
     prisma.user.create({ data: { id, email, name: 'Test User', passwordHash: 'hashed-password' } });
 
-  const createQimela = (creatorId: string, overrides: Partial<{ name: string; status: string }> = {}) =>
+  const createQimela = (creatorId: string, sportId: string, overrides: Partial<{ name: string; status: string }> = {}) =>
     prisma.qimela.create({
       data: {
         name: overrides.name ?? 'Test Qimela',
-        sport: 'football',
+        sportId,
         status: (overrides.status as never) ?? 'ACTIVE',
         creatorId,
+        coveredStages: 'REGULAR_SEASON',
       },
     });
 
@@ -60,7 +66,7 @@ describe('PrismaQimelaRepository (integration)', () => {
     it('returns qimelas where user is the creator', async () => {
       // Arrange
       await createUser(TEST_USER_ID, 'creator@test.com');
-      await createQimela(TEST_USER_ID, { name: 'My Qimela' });
+      await createQimela(TEST_USER_ID, TEST_SPORT_ID, { name: 'My Qimela' });
 
       // Act
       const result = await repository.findForUser({ userId: TEST_USER_ID });
@@ -75,7 +81,7 @@ describe('PrismaQimelaRepository (integration)', () => {
       // Arrange
       await createUser(TEST_USER_ID, 'subscriber@test.com');
       await createUser(OTHER_USER_ID, 'other@test.com');
-      const qimela = await createQimela(OTHER_USER_ID, { name: 'Subscribed Qimela' });
+      const qimela = await createQimela(OTHER_USER_ID, TEST_SPORT_ID, { name: 'Subscribed Qimela' });
       await prisma.subscription.create({
         data: { userId: TEST_USER_ID, qimelaId: qimela.id },
       });
@@ -92,8 +98,8 @@ describe('PrismaQimelaRepository (integration)', () => {
       // Arrange
       await createUser(TEST_USER_ID, 'user@test.com');
       await createUser(OTHER_USER_ID, 'other@test.com');
-      await createQimela(TEST_USER_ID, { name: 'Created Qimela' });
-      const subscribedQimela = await createQimela(OTHER_USER_ID, { name: 'Subscribed Qimela' });
+      await createQimela(TEST_USER_ID, TEST_SPORT_ID, { name: 'Created Qimela' });
+      const subscribedQimela = await createQimela(OTHER_USER_ID, TEST_SPORT_ID, { name: 'Subscribed Qimela' });
       await prisma.subscription.create({
         data: { userId: TEST_USER_ID, qimelaId: subscribedQimela.id },
       });
@@ -121,8 +127,8 @@ describe('PrismaQimelaRepository (integration)', () => {
     it('filters by status when provided', async () => {
       // Arrange
       await createUser(TEST_USER_ID, 'user@test.com');
-      await createQimela(TEST_USER_ID, { name: 'Active Qimela', status: 'ACTIVE' });
-      await createQimela(TEST_USER_ID, { name: 'Completed Qimela', status: 'COMPLETED' });
+      await createQimela(TEST_USER_ID, TEST_SPORT_ID, { name: 'Active Qimela', status: 'ACTIVE' });
+      await createQimela(TEST_USER_ID, TEST_SPORT_ID, { name: 'Completed Qimela', status: 'COMPLETED' });
 
       // Act
       const result = await repository.findForUser({
@@ -139,7 +145,7 @@ describe('PrismaQimelaRepository (integration)', () => {
       // Arrange
       await createUser(TEST_USER_ID, 'user@test.com');
       await createUser(OTHER_USER_ID, 'other@test.com');
-      await createQimela(OTHER_USER_ID, { name: 'Other User Qimela' });
+      await createQimela(OTHER_USER_ID, TEST_SPORT_ID, { name: 'Other User Qimela' });
 
       // Act
       const result = await repository.findForUser({ userId: TEST_USER_ID });
@@ -151,7 +157,7 @@ describe('PrismaQimelaRepository (integration)', () => {
     it('maps domain entity fields correctly', async () => {
       // Arrange
       await createUser(TEST_USER_ID, 'user@test.com');
-      await createQimela(TEST_USER_ID, { name: 'Mapped Qimela' });
+      await createQimela(TEST_USER_ID, TEST_SPORT_ID, { name: 'Mapped Qimela' });
 
       // Act
       const result = await repository.findForUser({ userId: TEST_USER_ID });
@@ -160,7 +166,7 @@ describe('PrismaQimelaRepository (integration)', () => {
       const entity = result[0];
       expect(entity.id).toBeDefined();
       expect(entity.name).toBe('Mapped Qimela');
-      expect(entity.sport).toBe('football');
+      expect(entity.sportId).toBe(TEST_SPORT_ID);
       expect(entity.status).toBe(QimelaStatus.ACTIVE);
       expect(entity.creatorId).toBe(TEST_USER_ID);
       expect(entity.createdAt).toBeInstanceOf(Date);

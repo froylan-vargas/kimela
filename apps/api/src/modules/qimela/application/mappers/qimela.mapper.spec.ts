@@ -1,15 +1,21 @@
 import { QimelaMapper } from './qimela.mapper';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { CoveredStages } from '../../domain/covered-stages.enum';
 
 const makeEntity = (overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {}): QimelaEntity => {
   return new QimelaEntity({
     id: 'qimela-1',
     name: 'Liga Domingo',
-    description: 'Quiniela dominical',
-    sport: 'football',
+    sportId: 'sport-uuid',
     status: QimelaStatus.ACTIVE,
     creatorId: 'creator-uuid',
+    eventId: null,
+    leagueId: null,
+    rules: [],
+    coveredStages: CoveredStages.REGULAR_SEASON,
+    startPhaseId: null,
+    endPhaseId: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-02T00:00:00Z'),
     ...overrides,
@@ -53,24 +59,11 @@ describe('QimelaMapper', () => {
       // Assert
       expect(dto.id).toBe(entity.id);
       expect(dto.name).toBe(entity.name);
-      expect(dto.description).toBe(entity.description);
-      expect(dto.sport).toBe(entity.sport);
+      expect(dto.sportId).toBe(entity.sportId);
       expect(dto.status).toBe(entity.status);
       expect(dto.creatorId).toBe(entity.creatorId);
       expect(dto.createdAt).toBe(entity.createdAt);
       expect(dto.updatedAt).toBe(entity.updatedAt);
-    });
-
-    it('maps null description correctly', () => {
-      // Arrange
-      const entity = makeEntity({ description: null });
-      const userId = 'any-user';
-
-      // Act
-      const dto = QimelaMapper.toDto(entity, userId);
-
-      // Assert
-      expect(dto.description).toBeNull();
     });
   });
 

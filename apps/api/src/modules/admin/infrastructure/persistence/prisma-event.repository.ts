@@ -17,7 +17,9 @@ export class PrismaEventRepository implements EventRepository {
 
     const records = await this.prisma.event.findMany({
       where: {
-        status: 'ACTIVE',
+        status: {
+          in: ['UPCOMING', 'ACTIVE'],
+        },
         league: { sportId },
       },
       include: {

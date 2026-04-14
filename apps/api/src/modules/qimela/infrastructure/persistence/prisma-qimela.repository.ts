@@ -1,7 +1,8 @@
+import { randomUUID } from 'crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QimelaEntity } from '../../domain/qimela.entity';
-import { FindForUserOptions, QimelaRepository } from '../../domain/qimela.repository';
+import { FindForUserOptions, QimelaPatch, QimelaRepository } from '../../domain/qimela.repository';
 import { QimelaPersistenceMapper } from './qimela-persistence.mapper';
 
 @Injectable()
@@ -9,6 +10,12 @@ export class PrismaQimelaRepository implements QimelaRepository {
   private readonly logger = new Logger(PrismaQimelaRepository.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  async findById(id: string): Promise<QimelaEntity | null> {
+    this.logger.debug(`Finding qimela by id ${id}`);
+    const record = await this.prisma.qimela.findUnique({ where: { id } });
+    return record ? QimelaPersistenceMapper.toDomain(record) : null;
+  }
 
   async findForUser(options: FindForUserOptions): Promise<QimelaEntity[]> {
     const { userId, status } = options;
@@ -38,5 +45,50 @@ export class PrismaQimelaRepository implements QimelaRepository {
     });
 
     return records.map((record) => QimelaPersistenceMapper.toDomain(record));
+  }
+
+  async save(entity: QimelaEntity): Promise<QimelaEntity> {
+    this.logger.debug(`Saving qimela ${entity.id}`);
+
+    const record = await this.prisma.$transaction(async (tx) => {
+      return tx.qimela.create({
+        data: {
+          id: entity.id,
+          name: entity.name,
+          status: QimelaPersistenceMapper.toPrismaStatus(entity.status),
+          sportId: entity.sportId,
+          creatorId: entity.creatorId,
+          eventId: entity.eventId,
+          leagueId: entity.leagueId,
+          coveredStages: QimelaPersistenceMapper.toPrismaCoveredStages(entity.coveredStages),
+          startPhaseId: entity.startPhaseId,
+          endPhaseId: entity.endPhaseId,
+          rules: {
+            create: entity.rules.map((r) => ({
+              id: randomUUID(),
+              ruleId: r.ruleId,
+              points: r.points,
+            })),
+          },
+        },
+      });
+    });
+
+    return QimelaPersistenceMapper.toDomain(record);
+  }
+
+  async update(id: string, patch: QimelaPatch): Promise<QimelaEntity> {
+    this.logger.debug(`Updating qimela ${id}`);
+
+    const data: Record<string, unknown> = {};
+    if (patch.name !== undefined) data.name = patch.name;
+    if (patch.coveredStages !== undefined) {
+      data.coveredStages = QimelaPersistenceMapper.toPrismaCoveredStages(patch.coveredStages);
+    }
+    if (patch.startPhaseId !== undefined) data.startPhaseId = patch.startPhaseId;
+    if (patch.endPhaseId !== undefined) data.endPhaseId = patch.endPhaseId;
+
+    const record = await this.prisma.qimela.update({ where: { id }, data });
+    return QimelaPersistenceMapper.toDomain(record);
   }
 }

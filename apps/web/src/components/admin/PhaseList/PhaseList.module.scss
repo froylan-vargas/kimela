@@ -147,3 +147,94 @@
   margin: 0;
   padding: $spacing-md 0;
 }
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-pill;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.statusBadge_UPCOMING {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.statusBadge_ACTIVE {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusBadge_COMPLETED {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+// ── Phase action buttons ──────────────────────────────────────────────────────
+
+.activateBtn,
+.completeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  opacity: 0;
+}
+
+.item:hover {
+  .activateBtn,
+  .completeBtn {
+    opacity: 1;
+  }
+}
+
+.activateBtn {
+  background: transparent;
+  border: 1px solid #0ea5e9;
+  color: #0369a1;
+
+  &:hover {
+    background: #e0f2fe;
+    border-color: #0369a1;
+  }
+}
+
+.completeBtn {
+  background: transparent;
+  border: 1px solid #10b981;
+  color: #065f46;
+
+  &:hover {
+    background: #d1fae5;
+    border-color: #065f46;
+  }
+
+  &:disabled {
+    border-color: $color-border;
+    color: $color-text-secondary;
+    cursor: not-allowed;
+    background: transparent;
+
+    &:hover {
+      background: transparent;
+      border-color: $color-border;
+      color: $color-text-secondary;
+    }
+  }
+}

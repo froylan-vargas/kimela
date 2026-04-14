@@ -8,6 +8,7 @@ const makePhase = (overrides: Partial<ConstructorParameters<typeof PhaseEntity>[
     name: 'Group Stage',
     order: 1,
     type: 'REGULAR_SEASON',
+    status: 'UPCOMING',
     eventId: 'event-1',
     ...overrides,
   });
@@ -23,6 +24,8 @@ describe('ReorderPhasesUseCase', () => {
       create: jest.fn(),
       reorder: jest.fn(),
       delete: jest.fn(),
+      updateStatus: jest.fn(),
+      findById: jest.fn(),
     };
 
     useCase = new ReorderPhasesUseCase(mockPhaseRepository);
@@ -67,9 +70,9 @@ describe('ReorderPhasesUseCase', () => {
       const result = await useCase.execute({ phases: items });
 
       // Assert
-      expect(result.data[0]).toEqual({ id: 'phase-a', name: 'Phase A', order: 1, type: 'REGULAR_SEASON', eventId: 'event-1' });
-      expect(result.data[1]).toEqual({ id: 'phase-b', name: 'Phase B', order: 2, type: 'REGULAR_SEASON', eventId: 'event-1' });
-      expect(result.data[2]).toEqual({ id: 'phase-c', name: 'Phase C', order: 3, type: 'PLAYOFFS', eventId: 'event-1' });
+      expect(result.data[0]).toEqual({ id: 'phase-a', name: 'Phase A', order: 1, type: 'REGULAR_SEASON', status: 'UPCOMING', eventId: 'event-1' });
+      expect(result.data[1]).toEqual({ id: 'phase-b', name: 'Phase B', order: 2, type: 'REGULAR_SEASON', status: 'UPCOMING', eventId: 'event-1' });
+      expect(result.data[2]).toEqual({ id: 'phase-c', name: 'Phase C', order: 3, type: 'PLAYOFFS', status: 'UPCOMING', eventId: 'event-1' });
     });
   });
 });

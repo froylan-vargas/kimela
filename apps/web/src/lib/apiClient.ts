@@ -1,6 +1,7 @@
 import type { AuthUser } from "@/types/auth";
 import type { Sport } from "@/types/sport";
 import type { SportEvent } from "@/types/event";
+import type { QimelaEvent, Rule, CreateQimelaBody, UpdateQimelaBody, CoveredStages } from "@/types/qimela";
 import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
 import type { Session } from "@/types/session";
 
@@ -158,6 +159,40 @@ export const sportsApi = {
   },
 };
 
+export const qimelasApi = {
+  getSports(): Promise<{ data: Sport[] }> {
+    return apiFetch<{ data: Sport[] }>("/qimelas/sports");
+  },
+
+  getEvents(sportId: string): Promise<{ data: QimelaEvent[] }> {
+    return apiFetch<{ data: QimelaEvent[] }>(
+      `/qimelas/sports/${encodeURIComponent(sportId)}/events`,
+    );
+  },
+
+  getRules(): Promise<{ data: Rule[] }> {
+    return apiFetch<{ data: Rule[] }>("/qimelas/rules");
+  },
+
+  create(body: CreateQimelaBody): Promise<{ data: { id: string; name: string } }> {
+    return apiFetch<{ data: { id: string; name: string } }>("/qimelas", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+
+  getById(id: string): Promise<{ data: { id: string; name: string; sportId: string; status: string; coveredStages: CoveredStages; startPhaseId: string | null; endPhaseId: string | null; creatorId: string } }> {
+    return apiFetch(`/qimelas/${encodeURIComponent(id)}`);
+  },
+
+  update(id: string, body: UpdateQimelaBody): Promise<{ data: { id: string; name: string; status: string; coveredStages: CoveredStages; startPhaseId: string | null; endPhaseId: string | null } }> {
+    return apiFetch(`/qimelas/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  },
+};
+
 export const adminApi = {
   listEvents(sportId: string): Promise<{ data: SportEvent[] }> {
     return apiFetch<{ data: SportEvent[] }>(
@@ -193,6 +228,20 @@ export const adminApi = {
   getSessions(eventId: string, phaseId: string): Promise<{ data: Session[] }> {
     return apiFetch<{ data: Session[] }>(
       `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/sessions`,
+    );
+  },
+
+  activatePhase(eventId: string, phaseId: string): Promise<{ data: Phase }> {
+    return apiFetch<{ data: Phase }>(
+      `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/activate`,
+      { method: "PATCH", body: JSON.stringify({}) },
+    );
+  },
+
+  completePhase(eventId: string, phaseId: string): Promise<{ data: Phase }> {
+    return apiFetch<{ data: Phase }>(
+      `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/complete`,
+      { method: "PATCH", body: JSON.stringify({}) },
     );
   },
 

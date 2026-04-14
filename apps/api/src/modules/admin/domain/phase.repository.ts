@@ -1,4 +1,4 @@
-import { PhaseEntity, PhaseType } from './phase.entity';
+import { PhaseEntity, PhaseStatus, PhaseType } from './phase.entity';
 
 export const PHASE_REPOSITORY = Symbol('PHASE_REPOSITORY');
 
@@ -23,4 +23,6 @@ export interface PhaseRepository {
   create(options: CreatePhaseOptions): Promise<PhaseEntity>;
   reorder(items: ReorderPhaseItem[]): Promise<PhaseEntity[]>;
   delete(id: string): Promise<void>;
+  updateStatus(id: string, status: PhaseStatus): Promise<PhaseEntity>;
+  findById(id: string): Promise<PhaseEntity | null>;
 }

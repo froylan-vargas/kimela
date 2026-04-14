@@ -1,5 +1,5 @@
 import { Phase as PrismaPhase } from '@prisma/client';
-import { PhaseEntity, PhaseType } from '../../domain/phase.entity';
+import { PhaseEntity, PhaseStatus, PhaseType } from '../../domain/phase.entity';
 
 export class PhasePersistenceMapper {
   static toDomain(raw: PrismaPhase): PhaseEntity {
@@ -8,6 +8,7 @@ export class PhasePersistenceMapper {
       name: raw.name,
       order: raw.order,
       type: raw.type as PhaseType,
+      status: raw.status as PhaseStatus,
       eventId: raw.eventId,
     });
   }

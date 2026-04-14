@@ -28,7 +28,8 @@
       "Bash(npx --prefix /Users/fvg/Source/qimela/apps/web next build /Users/fvg/Source/qimela/apps/web)",
       "Bash(node_modules/.bin/next build:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" node_modules/.bin/next build:*)",
-      "Bash(ls /Users/fvg/Source/qimela/apps/api/src/modules/admin/application/use-cases/*.spec.ts)"
+      "Bash(ls /Users/fvg/Source/qimela/apps/api/src/modules/admin/application/use-cases/*.spec.ts)",
+      "Bash(npx prisma:*)"
     ]
   }
 }

@@ -5,8 +5,7 @@ export type QimelaRole = 'CREATOR' | 'SUBSCRIBER';
 export interface QimelaDto {
   id: string;
   name: string;
-  description: string | null;
-  sport: string;
+  sportId: string;
   status: QimelaStatus;
   role: QimelaRole;
   creatorId: string;

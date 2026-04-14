@@ -36,6 +36,7 @@ const makePhase = (overrides: Partial<Phase> = {}): Phase => ({
   name: "Jornada 1",
   order: 1,
   type: "REGULAR_SEASON",
+  status: "UPCOMING",
   eventId: "event-1",
   ...overrides,
 });
@@ -46,6 +47,9 @@ const defaultProps = {
   onSelect: vi.fn(),
   onReorder: vi.fn(),
   onDelete: vi.fn(),
+  onActivate: vi.fn(),
+  onComplete: vi.fn(),
+  canCompletePhase: () => true,
 };
 
 describe("PhaseList", () => {

@@ -12,6 +12,8 @@ describe('DeletePhaseUseCase', () => {
       create: jest.fn(),
       reorder: jest.fn(),
       delete: jest.fn(),
+      updateStatus: jest.fn(),
+      findById: jest.fn(),
     };
 
     useCase = new DeletePhaseUseCase(mockPhaseRepository);

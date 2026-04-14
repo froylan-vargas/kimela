@@ -13,11 +13,14 @@ export default function QimelaSelector() {
   const { data, isLoading, isError } = useQimelas();
   const { selectedQimela, viewAs, selectQimela } = useQimelaContext();
 
-  const participatingQimelas = data?.data ?? [];
-  const creatorQimelas = data?.data.filter((k) => k.role === "CREATOR") ?? [];
+  const activeQimelas = data?.data.filter(
+    (q) => q.status === "UPCOMING" || q.status === "ACTIVE",
+  ) ?? [];
+  const participatingQimelas = activeQimelas;
+  const creatorQimelas = activeQimelas.filter((k) => k.role === "CREATOR");
 
   // Default: last qimela with SUBSCRIBER role — never a creator-only qimela
-  const defaultQimela = data?.data.findLast((k) => k.role === "SUBSCRIBER") ?? null;
+  const defaultQimela = activeQimelas.findLast((k) => k.role === "SUBSCRIBER") ?? null;
 
   useEffect(() => {
     if (!selectedQimela && defaultQimela) {

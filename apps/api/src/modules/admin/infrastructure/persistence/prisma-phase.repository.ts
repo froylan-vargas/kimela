@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { PhaseEntity } from '../../domain/phase.entity';
+import { PhaseEntity, PhaseStatus } from '../../domain/phase.entity';
 import {
   PhaseRepository,
   FindPhasesByEventOptions,
@@ -26,6 +26,14 @@ export class PrismaPhaseRepository implements PhaseRepository {
     });
 
     return records.map((record) => PhasePersistenceMapper.toDomain(record));
+  }
+
+  async findById(id: string): Promise<PhaseEntity | null> {
+    this.logger.debug(`Finding phase by id ${id}`);
+
+    const record = await this.prisma.phase.findUnique({ where: { id } });
+
+    return record ? PhasePersistenceMapper.toDomain(record) : null;
   }
 
   async getMaxOrderForEvent(eventId: string): Promise<number> {
@@ -94,5 +102,16 @@ export class PrismaPhaseRepository implements PhaseRepository {
   async delete(id: string): Promise<void> {
     this.logger.debug(`Deleting phase ${id}`);
     await this.prisma.phase.delete({ where: { id } });
+  }
+
+  async updateStatus(id: string, status: PhaseStatus): Promise<PhaseEntity> {
+    this.logger.debug(`Updating phase ${id} status to ${status}`);
+
+    const record = await this.prisma.phase.update({
+      where: { id },
+      data: { status },
+    });
+
+    return PhasePersistenceMapper.toDomain(record);
   }
 }

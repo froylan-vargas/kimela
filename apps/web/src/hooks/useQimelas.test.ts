@@ -11,8 +11,7 @@ const mockResponse: QimelasResponse = {
     {
       id: "1",
       name: "Liga MX",
-      description: "Fútbol mexicano",
-      sport: "football",
+      sportId: "sport-uuid-1",
       status: "ACTIVE",
       role: "SUBSCRIBER",
       creatorId: "u1",

@@ -8,6 +8,7 @@ export class PhaseMapper {
       name: entity.name,
       order: entity.order,
       type: entity.type,
+      status: entity.status,
       eventId: entity.eventId,
     };
   }

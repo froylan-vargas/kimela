@@ -47,20 +47,34 @@ model RefreshToken {
 }
 
 model Qimela {
-  id          String        @id @default(uuid())
-  name        String
-  description String?
-  sport       String
-  status      QimelaStatus  @default(ACTIVE)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id        String        @id @default(uuid())
+  name      String
+  status    QimelaStatus  @default(ACTIVE)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
 
   creatorId     String         @map("creator_id")
   creator       User           @relation("QimelaCreator", fields: [creatorId], references: [id])
   subscriptions Subscription[]
 
+  sportId       String         @map("sport_id")
+  sport         Sport          @relation(fields: [sportId], references: [id])
+
   eventId       String?        @map("event_id")
   event         Event?         @relation(fields: [eventId], references: [id])
+
+  leagueId      String?        @map("league_id")
+  league        League?        @relation(fields: [leagueId], references: [id])
+
+  coveredStages CoveredStages  @map("covered_stages")
+
+  startPhaseId  String?        @map("start_phase_id")
+  startPhase    Phase?         @relation("QimelaStartPhase", fields: [startPhaseId], references: [id])
+
+  endPhaseId    String?        @map("end_phase_id")
+  endPhase      Phase?         @relation("QimelaEndPhase", fields: [endPhaseId], references: [id])
+
+  rules         QimelaRule[]
 
   @@map("qimelas")
 }
@@ -112,6 +126,12 @@ enum QimelaStatus {
   PAUSED
 }
 
+enum CoveredStages {
+  REGULAR_SEASON
+  PLAYOFFS
+  FULL
+}
+
 enum SessionFormat {
   MATCHUP // A vs B (soccer, tennis, basketball, etc.)
   RACE    // all contenders participate (F1, NASCAR, cycling, etc.)
@@ -129,6 +149,7 @@ model Sport {
   leagues        League[]
   pickCategories PickCategory[]
   sessions       Session[]
+  qimelas        Qimela[]
 
   @@map("sports")
 }
@@ -145,6 +166,7 @@ model League {
   sport      Sport              @relation(fields: [sportId], references: [id])
   contenders ContenderLeague[]
   events     Event[]
+  qimelas    Qimela[]
 
   @@unique([slug, sportId])
   @@unique([name, sportId])
@@ -194,6 +216,12 @@ enum PhaseType {
   OTHER
 }
 
+enum PhaseStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
 enum SessionStatus {
   SCHEDULED
   LIVE
@@ -221,17 +249,21 @@ model Event {
 }
 
 model Phase {
-  id        String    @id @default(uuid())
+  id        String      @id @default(uuid())
   name      String
   order     Int
-  type      PhaseType @default(OTHER)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  type      PhaseType   @default(OTHER)
+  status    PhaseStatus @default(UPCOMING)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
   eventId   String  @map("event_id")
   event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   sessions  Session[]
+
+  qimelaStarts  Qimela[]  @relation("QimelaStartPhase")
+  qimelaEnds    Qimela[]  @relation("QimelaEndPhase")
 
   @@unique([eventId, order])
   @@map("phases")
@@ -362,4 +394,35 @@ model UserPick {
 
   @@unique([userId, sessionId, pickCategoryId])
   @@map("user_picks")
+}
+
+// ─── Rules ────────────────────────────────────────────────────────────────────
+
+model Rule {
+  id            String        @id @default(uuid())
+  slug          String        @unique
+  question      String
+  sessionFormat SessionFormat @map("session_format")
+  minPoints     Int           @default(0) @map("min_points")
+  maxPoints     Int           @default(5) @map("max_points")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  qimelaRules   QimelaRule[]
+
+  @@map("rules")
+}
+
+model QimelaRule {
+  id       String  @id @default(uuid())
+  points   Int
+
+  ruleId   String  @map("rule_id")
+  rule     Rule    @relation(fields: [ruleId], references: [id])
+
+  qimelaId String  @map("qimela_id")
+  qimela   Qimela  @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+
+  @@unique([qimelaId, ruleId])
+  @@map("qimela_rules")
 }

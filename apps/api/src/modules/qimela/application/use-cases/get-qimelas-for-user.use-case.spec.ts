@@ -2,16 +2,22 @@ import { GetQimelasForUserUseCase } from './get-qimelas-for-user.use-case';
 import { QimelaRepository } from '../../domain/qimela.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { CoveredStages } from '../../domain/covered-stages.enum';
 import { GetQimelasQuery } from '../dtos/get-qimelas.query';
 
 const makeEntity = (overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {}): QimelaEntity => {
   return new QimelaEntity({
     id: 'qimela-1',
     name: 'Liga Domingo',
-    description: null,
-    sport: 'football',
+    sportId: 'sport-uuid',
     status: QimelaStatus.ACTIVE,
     creatorId: 'user-uuid',
+    eventId: null,
+    leagueId: null,
+    rules: [],
+    coveredStages: CoveredStages.REGULAR_SEASON,
+    startPhaseId: null,
+    endPhaseId: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-02T00:00:00Z'),
     ...overrides,
@@ -24,7 +30,10 @@ describe('GetQimelasForUserUseCase', () => {
 
   beforeEach(() => {
     mockRepository = {
+      findById: jest.fn(),
       findForUser: jest.fn(),
+      save: jest.fn(),
+      update: jest.fn(),
     };
 
     useCase = new GetQimelasForUserUseCase(mockRepository);

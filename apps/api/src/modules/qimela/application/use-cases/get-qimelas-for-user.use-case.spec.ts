@@ -2,7 +2,6 @@ import { GetQimelasForUserUseCase } from './get-qimelas-for-user.use-case';
 import { QimelaRepository } from '../../domain/qimela.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 import { GetQimelasQuery } from '../dtos/get-qimelas.query';
 
 const makeEntity = (overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {}): QimelaEntity => {
@@ -15,7 +14,6 @@ const makeEntity = (overrides: Partial<ConstructorParameters<typeof QimelaEntity
     eventId: null,
     leagueId: null,
     rules: [],
-    coveredStages: CoveredStages.REGULAR_SEASON,
     startPhaseId: null,
     endPhaseId: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),

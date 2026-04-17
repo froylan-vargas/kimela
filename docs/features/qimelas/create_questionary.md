@@ -2,7 +2,7 @@
 
 ## Inputs
 
-- Nombre de la quimela (open text - required > 8 chars menor a 40 chars)
+- Nombre de la qimela (open text - required > 8 chars menor a 40 chars)
 - Deporte (sport dropdown - required)
 - Liga (league dropdown - required) (puedes decidir si guardarla o no en la tabla de qimela para evitar traversing, tu decides)
 - Evento (event dropdown - required)

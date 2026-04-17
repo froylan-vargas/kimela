@@ -1,7 +1,7 @@
 ---
 name: "frontend"
 description: "frontend developer Next.js, typescript, css, accessibility"
-model: sonnet
+model: haiku
 color: purple
 memory: project
 ---

@@ -3,7 +3,6 @@ import { GetQimelaByIdUseCase } from './get-qimela-by-id.use-case';
 import { QimelaRepository } from '../../domain/qimela.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 
 const QIMELA_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const CREATOR_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
@@ -21,7 +20,6 @@ const makeQimela = (overrides: Partial<ConstructorParameters<typeof QimelaEntity
     leagueId: LEAGUE_ID,
     creatorId: CREATOR_ID,
     rules: [],
-    coveredStages: CoveredStages.REGULAR_SEASON,
     startPhaseId: 'phase-1',
     endPhaseId: 'phase-2',
     createdAt: new Date(),
@@ -32,6 +30,10 @@ const makeQimela = (overrides: Partial<ConstructorParameters<typeof QimelaEntity
 describe('GetQimelaByIdUseCase', () => {
   let useCase: GetQimelaByIdUseCase;
   let mockQimelaRepository: jest.Mocked<QimelaRepository>;
+  let mockPrisma: {
+    phase: { findMany: jest.Mock };
+    qimelaRule: { findMany: jest.Mock };
+  };
 
   beforeEach(() => {
     mockQimelaRepository = {
@@ -41,7 +43,12 @@ describe('GetQimelaByIdUseCase', () => {
       update: jest.fn(),
     };
 
-    useCase = new GetQimelaByIdUseCase(mockQimelaRepository);
+    mockPrisma = {
+      phase: { findMany: jest.fn().mockResolvedValue([]) },
+      qimelaRule: { findMany: jest.fn().mockResolvedValue([]) },
+    };
+
+    useCase = new GetQimelaByIdUseCase(mockQimelaRepository, mockPrisma as any);
   });
 
   describe('execute', () => {
@@ -80,9 +87,10 @@ describe('GetQimelaByIdUseCase', () => {
         creatorId: CREATOR_ID,
         eventId: EVENT_ID,
         leagueId: LEAGUE_ID,
-        coveredStages: CoveredStages.REGULAR_SEASON,
         startPhaseId: 'phase-1',
         endPhaseId: 'phase-2',
+        phases: [],
+        rules: [],
       });
     });
 

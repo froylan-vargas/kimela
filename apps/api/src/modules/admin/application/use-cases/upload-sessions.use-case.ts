@@ -1,7 +1,8 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { SESSION_REPOSITORY, SessionRepository, SessionRow } from '../../domain/session.repository';
 import { SessionDto } from '../dtos/session.dto';
 import { SessionMapper } from '../mappers/session.mapper';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const REQUIRED_HEADERS = ['equipo_local', 'equipo_visitante', 'fecha', 'hora'] as const;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -31,10 +32,27 @@ export class UploadSessionsUseCase {
   constructor(
     @Inject(SESSION_REPOSITORY)
     private readonly sessionRepository: SessionRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: UploadSessionsCommand): Promise<UploadSessionsResponse> {
     this.logger.log(`Uploading sessions for phase ${command.phaseId} of event ${command.eventId}`);
+
+    const phase = await this.prisma.phase.findUnique({
+      where: { id: command.phaseId },
+      select: { status: true },
+    });
+
+    if (!phase) {
+      throw new NotFoundException(`Phase ${command.phaseId} not found`);
+    }
+
+    if (phase.status !== 'UPCOMING') {
+      throw new UnprocessableEntityException({
+        code: 'PHASE_MUST_BE_UPCOMING_FOR_UPLOAD',
+        message: 'Sessions can only be uploaded to an upcoming phase.',
+      });
+    }
 
     const csvRows = this.parseCsv(command.fileBuffer);
 

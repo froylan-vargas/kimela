@@ -29,7 +29,17 @@
       "Bash(node_modules/.bin/next build:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" node_modules/.bin/next build:*)",
       "Bash(ls /Users/fvg/Source/qimela/apps/api/src/modules/admin/application/use-cases/*.spec.ts)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(npm run *)",
+      "Bash(DATABASE_URL=\"postgresql://placeholder/placeholder\" npx prisma migrate dev --name remove_covered_stages --create-only)",
+      "Bash(cp /Users/fvg/Source/qimela/.env .env)",
+      "Bash(rm -f .env)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" npx prisma migrate dev --name remove_covered_stages --create-only)",
+      "Bash(mkdir *)",
+      "Bash(rm *)",
+      "Bash(npx vitest *)",
+      "Bash(git stash *)"
     ]
   }
 }

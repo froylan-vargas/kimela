@@ -1,6 +1,5 @@
 import { QimelaEntity } from './qimela.entity';
 import { QimelaStatus } from './qimela-status.enum';
-import { CoveredStages } from './covered-stages.enum';
 
 export const QIMELA_REPOSITORY = Symbol('QIMELA_REPOSITORY');
 
@@ -11,7 +10,6 @@ export interface FindForUserOptions {
 
 export interface QimelaPatch {
   name?: string;
-  coveredStages?: CoveredStages;
   startPhaseId?: string | null;
   endPhaseId?: string | null;
 }

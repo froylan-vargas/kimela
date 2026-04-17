@@ -10,7 +10,6 @@ import { UpdateQimelaUseCase } from '../application/use-cases/update-qimela.use-
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
-import { CoveredStages } from '../domain/covered-stages.enum';
 import { PaginatedQimelaResponse } from '../application/dtos/qimela.dto';
 import { CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { UserRole } from '../../users/domain/user-role.enum';
@@ -150,9 +149,10 @@ describe('QimelaController', () => {
           creatorId: MOCK_USER_ID,
           eventId: null,
           leagueId: null,
-          coveredStages: CoveredStages.REGULAR_SEASON,
           startPhaseId: null,
           endPhaseId: null,
+          phases: [],
+          rules: [],
         },
       };
       getQimelaById.execute.mockResolvedValue(mockResponse);
@@ -175,9 +175,10 @@ describe('QimelaController', () => {
           creatorId: MOCK_USER_ID,
           eventId: null,
           leagueId: null,
-          coveredStages: CoveredStages.REGULAR_SEASON,
           startPhaseId: null,
           endPhaseId: null,
+          phases: [],
+          rules: [],
         },
       };
       getQimelaById.execute.mockResolvedValue(mockResponse);
@@ -266,7 +267,6 @@ describe('QimelaController', () => {
           id: QIMELA_ID,
           name: 'Updated Name',
           status: QimelaStatus.UPCOMING,
-          coveredStages: CoveredStages.REGULAR_SEASON,
           startPhaseId: null,
           endPhaseId: null,
         },
@@ -281,7 +281,9 @@ describe('QimelaController', () => {
         id: QIMELA_ID,
         requesterId: MOCK_USER_ID,
         name: 'Updated Name',
-        coveredStages: undefined,
+        initialPhaseId: undefined,
+        finalPhaseId: undefined,
+        rules: undefined,
       });
     });
 
@@ -292,7 +294,6 @@ describe('QimelaController', () => {
           id: QIMELA_ID,
           name: 'Updated Name',
           status: QimelaStatus.UPCOMING,
-          coveredStages: CoveredStages.REGULAR_SEASON,
           startPhaseId: null,
           endPhaseId: null,
         },
@@ -313,6 +314,8 @@ describe('QimelaController', () => {
     const EVENT_ID = 'e1234567-0000-0000-0000-000000000000';
     const LEAGUE_ID = 'b1234567-0000-0000-0000-000000000000';
     const RULE_ID = 'c1234567-0000-0000-0000-000000000000';
+    const INITIAL_PHASE_ID = 'd1234567-0000-0000-0000-000000000000';
+    const FINAL_PHASE_ID = 'e2234567-0000-0000-0000-000000000000';
 
     it('calls use case with creatorId from current user and all body fields', async () => {
       // Arrange
@@ -325,9 +328,8 @@ describe('QimelaController', () => {
           creatorId: MOCK_USER_ID,
           eventId: EVENT_ID,
           leagueId: LEAGUE_ID,
-          coveredStages: CoveredStages.REGULAR_SEASON,
-          startPhaseId: null,
-          endPhaseId: null,
+          startPhaseId: INITIAL_PHASE_ID,
+          endPhaseId: FINAL_PHASE_ID,
         },
       };
       createQimela.execute.mockResolvedValue(mockResponse);
@@ -337,7 +339,8 @@ describe('QimelaController', () => {
         sportId: SPORT_ID,
         eventId: EVENT_ID,
         leagueId: LEAGUE_ID,
-        coveredStages: CoveredStages.REGULAR_SEASON,
+        initialPhaseId: INITIAL_PHASE_ID,
+        finalPhaseId: FINAL_PHASE_ID,
         rules: [{ ruleId: RULE_ID, points: 3 }],
       };
 
@@ -351,7 +354,8 @@ describe('QimelaController', () => {
         sportId: SPORT_ID,
         eventId: EVENT_ID,
         leagueId: LEAGUE_ID,
-        coveredStages: CoveredStages.REGULAR_SEASON,
+        initialPhaseId: INITIAL_PHASE_ID,
+        finalPhaseId: FINAL_PHASE_ID,
         rules: [{ ruleId: RULE_ID, points: 3 }],
       });
     });
@@ -367,9 +371,8 @@ describe('QimelaController', () => {
           creatorId: MOCK_USER_ID,
           eventId: EVENT_ID,
           leagueId: LEAGUE_ID,
-          coveredStages: CoveredStages.REGULAR_SEASON,
-          startPhaseId: null,
-          endPhaseId: null,
+          startPhaseId: INITIAL_PHASE_ID,
+          endPhaseId: FINAL_PHASE_ID,
         },
       };
       createQimela.execute.mockResolvedValue(mockResponse);
@@ -379,7 +382,8 @@ describe('QimelaController', () => {
         sportId: SPORT_ID,
         eventId: EVENT_ID,
         leagueId: LEAGUE_ID,
-        coveredStages: CoveredStages.REGULAR_SEASON,
+        initialPhaseId: INITIAL_PHASE_ID,
+        finalPhaseId: FINAL_PHASE_ID,
         rules: [{ ruleId: RULE_ID, points: 3 }],
       };
 

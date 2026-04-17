@@ -2,16 +2,11 @@
 
 import { useEffect, useReducer, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Sport } from "@/types/sport";
-import type { QimelaEvent, Rule, CreateQimelaBody, CoveredStages } from "@/types/qimela";
+import type { QimelaEvent, Rule, CreateQimelaBody, QimelaEventPhase } from "@/types/qimela";
 import { qimelasApi } from "@/lib/apiClient";
 import styles from "./CreateQimelaForm.module.scss";
-
-const COVERED_STAGES_LABELS: Record<CoveredStages, string> = {
-  REGULAR_SEASON: "Temporada regular",
-  PLAYOFFS: "Playoffs",
-  FULL: "Temporada completa (regular + playoffs)",
-};
 
 const EVENT_STATUS_LABELS: Record<string, string> = {
   UPCOMING: "(Próximo)",
@@ -22,7 +17,8 @@ interface FormState {
   name: string;
   sport: Sport | null;
   event: QimelaEvent | null;
-  coveredStages: CoveredStages | null;
+  initialPhaseId: string | null;
+  finalPhaseId: string | null;
   ruleValues: Record<string, number | "">;
 }
 
@@ -30,7 +26,8 @@ type FormAction =
   | { type: "SET_NAME"; value: string }
   | { type: "SET_SPORT"; sport: Sport | null }
   | { type: "SET_EVENT"; event: QimelaEvent | null }
-  | { type: "SET_COVERED_STAGES"; coveredStages: CoveredStages | null }
+  | { type: "SET_INITIAL_PHASE"; phaseId: string | null }
+  | { type: "SET_FINAL_PHASE"; phaseId: string | null }
   | { type: "SET_RULE"; ruleId: string; value: number | "" }
   | { type: "INIT_RULES"; rules: Rule[] };
 
@@ -39,11 +36,22 @@ function reducer(state: FormState, action: FormAction): FormState {
     case "SET_NAME":
       return { ...state, name: action.value };
     case "SET_SPORT":
-      return { ...state, sport: action.sport, event: null, coveredStages: null, ruleValues: {} };
+      return { ...state, sport: action.sport, event: null, initialPhaseId: null, finalPhaseId: null, ruleValues: {} };
     case "SET_EVENT":
-      return { ...state, event: action.event, coveredStages: null };
-    case "SET_COVERED_STAGES":
-      return { ...state, coveredStages: action.coveredStages };
+      return { ...state, event: action.event, initialPhaseId: null, finalPhaseId: null };
+    case "SET_INITIAL_PHASE": {
+      let newFinalPhaseId = state.finalPhaseId;
+      if (action.phaseId && state.finalPhaseId) {
+        const initialPhase = state.event?.phases.find((p) => p.id === action.phaseId);
+        const finalPhase = state.event?.phases.find((p) => p.id === state.finalPhaseId);
+        if (initialPhase && finalPhase && finalPhase.order < initialPhase.order) {
+          newFinalPhaseId = null;
+        }
+      }
+      return { ...state, initialPhaseId: action.phaseId, finalPhaseId: newFinalPhaseId };
+    }
+    case "SET_FINAL_PHASE":
+      return { ...state, finalPhaseId: action.phaseId };
     case "SET_RULE":
       return {
         ...state,
@@ -65,12 +73,14 @@ const initialState: FormState = {
   name: "",
   sport: null,
   event: null,
-  coveredStages: null,
+  initialPhaseId: null,
+  finalPhaseId: null,
   ruleValues: {},
 };
 
 export default function CreateQimelaForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const [sports, setSports] = useState<Sport[]>([]);
@@ -123,7 +133,8 @@ export default function CreateQimelaForm() {
     if (trimmedName.length > 40) return "El nombre no puede superar los 40 caracteres.";
     if (!state.sport) return "Selecciona un deporte.";
     if (!state.event) return "Selecciona un evento.";
-    if (!state.coveredStages) return "Selecciona las etapas a cubrir.";
+    if (!state.initialPhaseId) return "Selecciona la fase inicial.";
+    if (!state.finalPhaseId) return "Selecciona la fase final.";
     for (const rule of filteredRules) {
       const val = state.ruleValues[rule.id];
       if (val === "" || val === undefined) return "Ingresa un valor para cada regla.";
@@ -151,13 +162,15 @@ export default function CreateQimelaForm() {
           sportId: state.sport!.id,
           eventId: state.event!.id,
           leagueId: state.event!.leagueId,
-          coveredStages: state.coveredStages!,
+          initialPhaseId: state.initialPhaseId!,
+          finalPhaseId: state.finalPhaseId!,
           rules: filteredRules.map((r) => ({
             ruleId: r.id,
             points: state.ruleValues[r.id] as number,
           })),
         };
         const res = await qimelasApi.create(body);
+        await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
         router.push(`/qimela/${res.data.id}`);
       } catch {
         setSubmitError("Error al crear la qimela. Intenta de nuevo.");
@@ -232,31 +245,60 @@ export default function CreateQimelaForm() {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="qimela-covered-stages" className={styles.label}>
-            Etapas a cubrir
+          <label htmlFor="qimela-initial-phase" className={styles.label}>
+            Fase inicial
           </label>
           <select
-            id="qimela-covered-stages"
+            id="qimela-initial-phase"
             className={styles.select}
-            value={state.coveredStages ?? ""}
+            value={state.initialPhaseId ?? ""}
             onChange={(e) => {
-              const val = e.target.value as CoveredStages | "";
-              dispatch({ type: "SET_COVERED_STAGES", coveredStages: val === "" ? null : val });
+              const val = e.target.value;
+              dispatch({ type: "SET_INITIAL_PHASE", phaseId: val === "" ? null : val });
             }}
             disabled={isPending || !state.event}
+            aria-required="true"
           >
-            <option value="">Selecciona las etapas a cubrir</option>
-            {state.event && state.event.availableCoveredStages.length === 0 ? (
-              <option value="" disabled>
-                No hay etapas disponibles
-              </option>
-            ) : (
-              (state.event?.availableCoveredStages ?? []).map((stage) => (
-                <option key={stage} value={stage}>
-                  {COVERED_STAGES_LABELS[stage]}
+            <option value="">Selecciona la fase inicial</option>
+            {(state.event?.phases ?? [])
+              .sort((a, b) => a.order - b.order)
+              .map((phase) => (
+                <option key={phase.id} value={phase.id}>
+                  {phase.name}
                 </option>
-              ))
-            )}
+              ))}
+          </select>
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="qimela-final-phase" className={styles.label}>
+            Fase final
+          </label>
+          <select
+            id="qimela-final-phase"
+            className={styles.select}
+            value={state.finalPhaseId ?? ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              dispatch({ type: "SET_FINAL_PHASE", phaseId: val === "" ? null : val });
+            }}
+            disabled={isPending || !state.initialPhaseId}
+            aria-required="true"
+          >
+            <option value="">Selecciona la fase final</option>
+            {state.initialPhaseId
+              ? (state.event?.phases ?? [])
+                  .filter((phase) => {
+                    const initialPhase = state.event?.phases.find((p) => p.id === state.initialPhaseId);
+                    return !initialPhase || phase.order >= initialPhase.order;
+                  })
+                  .sort((a, b) => a.order - b.order)
+                  .map((phase) => (
+                    <option key={phase.id} value={phase.id}>
+                      {phase.name}
+                    </option>
+                  ))
+              : null}
           </select>
         </div>
       </div>

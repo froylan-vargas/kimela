@@ -1,7 +1,7 @@
 import type { AuthUser } from "@/types/auth";
 import type { Sport } from "@/types/sport";
 import type { SportEvent } from "@/types/event";
-import type { QimelaEvent, Rule, CreateQimelaBody, UpdateQimelaBody, CoveredStages } from "@/types/qimela";
+import type { QimelaEvent, QimelaDetail, Rule, CreateQimelaBody, UpdateQimelaBody } from "@/types/qimela";
 import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
 import type { Session } from "@/types/session";
 
@@ -26,15 +26,15 @@ export class ApiError extends Error {
   }
 }
 
-async function parseErrorMessage(res: Response): Promise<string> {
+async function parseError(res: Response): Promise<{ message: string; code?: string }> {
   try {
     const body = await res.json();
-    if (Array.isArray(body.message)) {
-      return body.message.join(", ");
-    }
-    return body.message ?? res.statusText;
+    const message = Array.isArray(body.message)
+      ? body.message.join(", ")
+      : (body.message ?? res.statusText);
+    return { message, code: typeof body.code === "string" ? body.code : undefined };
   } catch {
-    return res.statusText;
+    return { message: res.statusText };
   }
 }
 
@@ -88,12 +88,12 @@ export async function apiFetch<T>(
       return retryRes.json() as Promise<T>;
     }
 
-    const retryMsg = await parseErrorMessage(retryRes);
-    throw new ApiError(retryRes.status, retryMsg);
+    const retryErr = await parseError(retryRes);
+    throw new ApiError(retryRes.status, retryErr.message, retryErr.code);
   }
 
-  const message = await parseErrorMessage(res);
-  throw new ApiError(res.status, message);
+  const err = await parseError(res);
+  throw new ApiError(res.status, err.message, err.code);
 }
 
 export const authApi = {
@@ -181,15 +181,42 @@ export const qimelasApi = {
     });
   },
 
-  getById(id: string): Promise<{ data: { id: string; name: string; sportId: string; status: string; coveredStages: CoveredStages; startPhaseId: string | null; endPhaseId: string | null; creatorId: string } }> {
+  getById(id: string): Promise<{ data: QimelaDetail }> {
     return apiFetch(`/qimelas/${encodeURIComponent(id)}`);
   },
 
-  update(id: string, body: UpdateQimelaBody): Promise<{ data: { id: string; name: string; status: string; coveredStages: CoveredStages; startPhaseId: string | null; endPhaseId: string | null } }> {
+  update(id: string, body: UpdateQimelaBody): Promise<{ data: { id: string; name: string; status: string; startPhaseId: string | null; endPhaseId: string | null; rules?: { id: string; ruleId: string; points: number }[] } }> {
     return apiFetch(`/qimelas/${encodeURIComponent(id)}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     });
+  },
+};
+
+export const inviteApi = {
+  getByToken(token: string): Promise<{ data: { qimelaId: string; name: string; status: string; sport: { id: string; name: string }; creator: { name: string } } }> {
+    return apiFetch(`/invite/${encodeURIComponent(token)}`);
+  },
+
+  subscribe(token: string): Promise<void> {
+    return apiFetch<void>(`/invite/${encodeURIComponent(token)}/subscribe`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
+  },
+
+  generate(qimelaId: string): Promise<{ data: { token: string } }> {
+    return apiFetch<{ data: { token: string } }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/invite`,
+      { method: "POST", body: JSON.stringify({}) },
+    );
+  },
+
+  revoke(qimelaId: string): Promise<void> {
+    return apiFetch<void>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/invite`,
+      { method: "DELETE" },
+    );
   },
 };
 
@@ -286,11 +313,11 @@ export const adminApi = {
         return retryRes.json() as Promise<{ data: Session[] }>;
       }
 
-      const retryMsg = await parseErrorMessage(retryRes);
-      throw new ApiError(retryRes.status, retryMsg);
+      const retryErr = await parseError(retryRes);
+      throw new ApiError(retryRes.status, retryErr.message, retryErr.code);
     }
 
-    const message = await parseErrorMessage(res);
-    throw new ApiError(res.status, message);
+    const err = await parseError(res);
+    throw new ApiError(res.status, err.message, err.code);
   },
 };

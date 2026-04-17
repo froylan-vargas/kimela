@@ -1,6 +1,5 @@
-import { IsString, IsUUID, IsArray, IsInt, Min, Max, ValidateNested, ArrayNotEmpty, MinLength, MaxLength, IsEnum } from 'class-validator';
+import { IsString, IsUUID, IsArray, IsInt, Min, Max, ValidateNested, ArrayNotEmpty, MinLength, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 
 export class QimelaRuleInputDto {
   @IsUUID()
@@ -27,8 +26,11 @@ export class CreateQimelaRequestDto {
   @IsUUID()
   leagueId!: string;
 
-  @IsEnum(CoveredStages)
-  coveredStages!: CoveredStages;
+  @IsUUID()
+  initialPhaseId!: string;
+
+  @IsUUID()
+  finalPhaseId!: string;
 
   @IsArray()
   @ArrayNotEmpty()

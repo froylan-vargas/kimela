@@ -2,7 +2,13 @@ import type { SessionFormat } from "./sport";
 
 export type QimelaRole = "CREATOR" | "SUBSCRIBER";
 export type QimelaStatus = "ACTIVE" | "INACTIVE" | string;
-export type CoveredStages = "REGULAR_SEASON" | "PLAYOFFS" | "FULL";
+
+export interface QimelaEventPhase {
+  id: string;
+  name: string;
+  order: number;
+  status: string;
+}
 
 export interface Qimela {
   id: string;
@@ -32,7 +38,7 @@ export interface QimelaEvent {
   status: string;
   startsAt: string;
   endsAt: string | null;
-  availableCoveredStages: CoveredStages[];
+  phases: QimelaEventPhase[];
 }
 
 export interface Rule {
@@ -44,15 +50,34 @@ export interface Rule {
   maxPoints: number;
 }
 
+export interface QimelaDetailPhase {
+  id: string;
+  name: string;
+  order: number;
+  status: string;
+}
+
+export interface QimelaDetailRule {
+  id: string;
+  ruleId: string;
+  slug: string;
+  question: string;
+  points: number;
+  minPoints: number;
+  maxPoints: number;
+}
+
 export interface QimelaDetail {
   id: string;
   name: string;
   sportId: string;
   status: string;
-  coveredStages: CoveredStages;
   startPhaseId: string | null;
   endPhaseId: string | null;
   creatorId: string;
+  eventId: string | null;
+  phases: QimelaDetailPhase[];
+  rules: QimelaDetailRule[];
 }
 
 export interface CreateQimelaBody {
@@ -60,11 +85,14 @@ export interface CreateQimelaBody {
   sportId: string;
   eventId: string;
   leagueId: string;
-  coveredStages: CoveredStages;
+  initialPhaseId: string;
+  finalPhaseId: string;
   rules: { ruleId: string; points: number }[];
 }
 
 export interface UpdateQimelaBody {
   name?: string;
-  coveredStages?: CoveredStages;
+  initialPhaseId?: string;
+  finalPhaseId?: string;
+  rules?: { ruleId: string; points: number }[];
 }

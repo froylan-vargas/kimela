@@ -1,6 +1,23 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { CoveredStages } from '../../domain/covered-stages.enum';
+
+export interface GetQimelaByIdPhase {
+  id: string;
+  name: string;
+  order: number;
+  status: string;
+}
+
+export interface GetQimelaByIdRule {
+  id: string;
+  ruleId: string;
+  slug: string;
+  question: string;
+  points: number;
+  minPoints: number;
+  maxPoints: number;
+}
 
 export interface GetQimelaByIdResponse {
   data: {
@@ -11,9 +28,10 @@ export interface GetQimelaByIdResponse {
     creatorId: string;
     eventId: string | null;
     leagueId: string | null;
-    coveredStages: CoveredStages;
     startPhaseId: string | null;
     endPhaseId: string | null;
+    phases: GetQimelaByIdPhase[];
+    rules: GetQimelaByIdRule[];
   };
 }
 
@@ -24,6 +42,7 @@ export class GetQimelaByIdUseCase {
   constructor(
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
   async execute(id: string): Promise<GetQimelaByIdResponse> {
@@ -34,6 +53,21 @@ export class GetQimelaByIdUseCase {
       throw new NotFoundException(`Qimela ${id} not found`);
     }
 
+    // Fetch event phases and qimela rules in parallel
+    const [phases, qimelaRules] = await Promise.all([
+      qimela.eventId
+        ? this.prisma.phase.findMany({
+            where: { eventId: qimela.eventId },
+            select: { id: true, name: true, order: true, status: true },
+            orderBy: { order: 'asc' },
+          })
+        : Promise.resolve([]),
+      this.prisma.qimelaRule.findMany({
+        where: { qimelaId: id },
+        include: { rule: true },
+      }),
+    ]);
+
     return {
       data: {
         id: qimela.id,
@@ -43,9 +77,23 @@ export class GetQimelaByIdUseCase {
         creatorId: qimela.creatorId,
         eventId: qimela.eventId,
         leagueId: qimela.leagueId,
-        coveredStages: qimela.coveredStages,
         startPhaseId: qimela.startPhaseId,
         endPhaseId: qimela.endPhaseId,
+        phases: phases.map((p) => ({
+          id: p.id,
+          name: p.name,
+          order: p.order,
+          status: p.status,
+        })),
+        rules: qimelaRules.map((qr) => ({
+          id: qr.id,
+          ruleId: qr.rule.id,
+          slug: qr.rule.slug,
+          question: qr.rule.question,
+          points: qr.points,
+          minPoints: qr.rule.minPoints,
+          maxPoints: qr.rule.maxPoints,
+        })),
       },
     };
   }

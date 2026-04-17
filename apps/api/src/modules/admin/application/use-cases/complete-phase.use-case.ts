@@ -35,7 +35,7 @@ export class CompletePhaseUseCase {
 
     if (phase.status !== 'ACTIVE') {
       throw new UnprocessableEntityException(
-        `Phase ${phaseId} cannot be completed: current status is "${phase.status}"`,
+        `La fase ${phaseId} no puede completarse: el estado actual es "${phase.status}"`,
       );
     }
 
@@ -44,7 +44,7 @@ export class CompletePhaseUseCase {
     });
 
     if (blockingSessionCount > 0) {
-      throw new UnprocessableEntityException('Phase has sessions that are still active');
+      throw new UnprocessableEntityException('La fase tiene sesiones que aún están activas');
     }
 
     const updated = await this.phaseRepository.updateStatus(phaseId, 'COMPLETED');

@@ -1,5 +1,6 @@
-import { IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { CoveredStages } from '../../domain/covered-stages.enum';
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength, IsArray, ValidateNested, ArrayNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import { QimelaRuleInputDto } from './create-qimela-request.dto';
 
 export class UpdateQimelaRequestDto {
   @IsOptional()
@@ -9,6 +10,17 @@ export class UpdateQimelaRequestDto {
   name?: string;
 
   @IsOptional()
-  @IsEnum(CoveredStages)
-  coveredStages?: CoveredStages;
+  @IsUUID()
+  initialPhaseId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  finalPhaseId?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => QimelaRuleInputDto)
+  rules?: QimelaRuleInputDto[];
 }

@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { UploadSessionsUseCase } from './upload-sessions.use-case';
 import { SessionRepository } from '../../domain/session.repository';
 import { SessionEntity } from '../../domain/session.entity';
@@ -26,17 +26,51 @@ const makeSession = (overrides: Partial<ConstructorParameters<typeof SessionEnti
 describe('UploadSessionsUseCase', () => {
   let useCase: UploadSessionsUseCase;
   let mockSessionRepository: jest.Mocked<SessionRepository>;
+  let mockPrisma: { phase: { findUnique: jest.Mock } };
 
   beforeEach(() => {
     mockSessionRepository = {
       findByPhase: jest.fn(),
       replaceForPhase: jest.fn(),
     };
+    mockPrisma = { phase: { findUnique: jest.fn().mockResolvedValue({ status: 'UPCOMING' }) } };
 
-    useCase = new UploadSessionsUseCase(mockSessionRepository);
+    useCase = new UploadSessionsUseCase(mockSessionRepository, mockPrisma as any);
   });
 
   describe('execute', () => {
+    describe('phase status validation', () => {
+      it('throws NotFoundException when the phase does not exist', async () => {
+        // Arrange
+        mockPrisma.phase.findUnique.mockResolvedValue(null);
+
+        // Act & Assert
+        await expect(
+          useCase.execute({ eventId: 'event-1', phaseId: 'phase-1', fileBuffer: makeValidCsv() }),
+        ).rejects.toThrow(NotFoundException);
+      });
+
+      it('throws UnprocessableEntityException when the phase is ACTIVE', async () => {
+        // Arrange
+        mockPrisma.phase.findUnique.mockResolvedValue({ status: 'ACTIVE' });
+
+        // Act & Assert
+        await expect(
+          useCase.execute({ eventId: 'event-1', phaseId: 'phase-1', fileBuffer: makeValidCsv() }),
+        ).rejects.toThrow(UnprocessableEntityException);
+      });
+
+      it('throws UnprocessableEntityException when the phase is COMPLETED', async () => {
+        // Arrange
+        mockPrisma.phase.findUnique.mockResolvedValue({ status: 'COMPLETED' });
+
+        // Act & Assert
+        await expect(
+          useCase.execute({ eventId: 'event-1', phaseId: 'phase-1', fileBuffer: makeValidCsv() }),
+        ).rejects.toThrow(UnprocessableEntityException);
+      });
+    });
+
     describe('valid CSV', () => {
       it('calls replaceForPhase with correctly parsed SessionRows for a single row', async () => {
         // Arrange

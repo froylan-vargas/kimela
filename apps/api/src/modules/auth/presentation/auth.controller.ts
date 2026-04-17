@@ -82,7 +82,7 @@ export class AuthController {
       user = await this.registerUserUseCase.execute(dto);
     } catch (error) {
       if (error instanceof EmailAlreadyExistsError) {
-        throw new ConflictException('Email already exists');
+        throw new ConflictException('El correo electrónico ya está registrado');
       }
       throw error;
     }

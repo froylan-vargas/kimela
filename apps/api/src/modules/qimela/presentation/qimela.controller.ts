@@ -75,7 +75,9 @@ export class QimelaController {
       id,
       requesterId: user.id,
       name: body.name,
-      coveredStages: body.coveredStages,
+      initialPhaseId: body.initialPhaseId,
+      finalPhaseId: body.finalPhaseId,
+      rules: body.rules,
     });
   }
 
@@ -92,7 +94,8 @@ export class QimelaController {
       sportId: body.sportId,
       eventId: body.eventId,
       leagueId: body.leagueId,
-      coveredStages: body.coveredStages,
+      initialPhaseId: body.initialPhaseId,
+      finalPhaseId: body.finalPhaseId,
       rules: body.rules,
     });
   }

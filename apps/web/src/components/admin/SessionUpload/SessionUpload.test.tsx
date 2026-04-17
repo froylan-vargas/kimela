@@ -51,7 +51,7 @@ describe("SessionUpload", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("displays error message when onUpload rejects", async () => {
+  it("does not render a local error message when onUpload rejects (parent surfaces via toast)", async () => {
     const onUpload = vi.fn().mockRejectedValue(new Error("Bad format"));
     render(<SessionUpload onUpload={onUpload} isUploading={false} />);
 
@@ -61,9 +61,8 @@ describe("SessionUpload", () => {
     fireEvent.change(input, { target: { files: [file] } });
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("alert"),
-      ).toHaveTextContent("El archivo no tiene el formato correcto.");
+      expect(onUpload).toHaveBeenCalledOnce();
     });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

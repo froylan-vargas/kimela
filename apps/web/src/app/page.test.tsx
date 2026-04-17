@@ -30,6 +30,7 @@ describe("Home page", () => {
       selectedQimela: subscriberQimela,
       viewAs: "SUBSCRIBER",
       selectQimela: vi.fn(),
+      clearQimela: vi.fn(),
     });
 
     render(<Home />);
@@ -42,6 +43,7 @@ describe("Home page", () => {
       selectedQimela: creatorQimela,
       viewAs: "CREATOR",
       selectQimela: vi.fn(),
+      clearQimela: vi.fn(),
     });
 
     render(<Home />);
@@ -54,6 +56,7 @@ describe("Home page", () => {
       selectedQimela: null,
       viewAs: null,
       selectQimela: vi.fn(),
+      clearQimela: vi.fn(),
     });
 
     render(<Home />);
@@ -68,6 +71,7 @@ describe("Home page", () => {
       selectedQimela: null,
       viewAs: null,
       selectQimela: vi.fn(),
+      clearQimela: vi.fn(),
     });
 
     render(<Home />);

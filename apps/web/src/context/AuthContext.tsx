@@ -5,9 +5,11 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { AuthUser } from "@/types/auth";
 import { authApi, ApiError } from "@/lib/apiClient";
 
@@ -24,6 +26,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const previousUserIdRef = useRef<string | null>(null);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     authApi
@@ -38,6 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    const nextId = user?.id ?? null;
+    if (hasInitializedRef.current && previousUserIdRef.current !== nextId) {
+      queryClient.clear();
+    }
+    previousUserIdRef.current = nextId;
+    hasInitializedRef.current = true;
+  }, [user?.id, queryClient]);
 
   const login = useCallback(async (email: string, password: string) => {
     const authUser = await authApi.login({ email, password });

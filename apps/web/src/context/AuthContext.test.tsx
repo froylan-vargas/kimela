@@ -1,6 +1,7 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuthContext } from "./AuthContext";
 import type { AuthUser } from "@/types/auth";
 
@@ -32,7 +33,12 @@ const mockUser: AuthUser = {
 };
 
 function renderWithAuth(ui: ReactNode) {
-  return render(<AuthProvider>{ui}</AuthProvider>);
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>{ui}</AuthProvider>
+    </QueryClientProvider>,
+  );
 }
 
 function TestConsumer() {

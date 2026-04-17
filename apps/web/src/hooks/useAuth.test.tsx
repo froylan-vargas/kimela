@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/context/AuthContext";
 import type { AuthUser } from "@/types/auth";
 import { useAuth, useRequireAuth, useRequireRole } from "./useAuth";
@@ -50,7 +51,12 @@ const adminUser: AuthUser = {
 
 function makeWrapper(user: AuthUser | null = null) {
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <AuthProvider>{children}</AuthProvider>;
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return (
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>{children}</AuthProvider>
+      </QueryClientProvider>
+    );
   };
 }
 

@@ -9,6 +9,8 @@ RUN pnpm install
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app .
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN pnpm --filter @qimela/types build
 RUN pnpm --filter @qimela/web build
 

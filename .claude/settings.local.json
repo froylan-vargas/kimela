@@ -39,7 +39,12 @@
       "Bash(mkdir *)",
       "Bash(rm *)",
       "Bash(npx vitest *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Read(//Users/fvg/.config/gcloud/**)",
+      "Bash(gcloud --version)",
+      "Bash(lsof -iTCP:5433 -sTCP:LISTEN)",
+      "Bash(nc -zv 127.0.0.1 5433)",
+      "Bash(lsof *)"
     ]
   }
 }

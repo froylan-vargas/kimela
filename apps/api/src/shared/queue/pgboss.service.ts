@@ -7,8 +7,10 @@ export class PgBossService implements OnModuleInit, OnModuleDestroy {
   readonly boss: PgBoss;
 
   constructor() {
+    const isProduction = process.env.NODE_ENV === 'production';
     this.boss = new PgBoss({
       connectionString: process.env.DATABASE_URL,
+      ...(isProduction && { ssl: { rejectUnauthorized: false } }),
       monitorIntervalSeconds: 30,
     });
   }

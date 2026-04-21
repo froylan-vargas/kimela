@@ -1,19 +1,32 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import QimelaSelector from "./QimelaSelector";
 import { QimelaProvider } from "@/context/QimelaContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { useQimelas } from "@/hooks/useQimelas";
 import type { Qimela, QimelasResponse } from "@/types/qimela";
 import type { UseQueryResult } from "@tanstack/react-query";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock("@/hooks/useQimelas");
+vi.mock("@/lib/apiClient", () => ({
+  authApi: { me: vi.fn().mockRejectedValue(new Error("no user")), login: vi.fn(), logout: vi.fn() },
+  ApiError: class ApiError extends Error {
+    constructor(public status: number, message: string) {
+      super(message);
+    }
+  },
+}));
 
 const sub1: Qimela = {
   id: "s1",
   name: "Liga MX",
-  description: "Fútbol mexicano",
-  sport: "football",
+  sportId: "sport-uuid-1",
   status: "ACTIVE",
   role: "SUBSCRIBER",
   creatorId: "u1",
@@ -22,8 +35,7 @@ const sub1: Qimela = {
 const sub2: Qimela = {
   id: "s2",
   name: "Premier League",
-  description: "English football",
-  sport: "football",
+  sportId: "sport-uuid-1",
   status: "ACTIVE",
   role: "SUBSCRIBER",
   creatorId: "u1",
@@ -32,8 +44,7 @@ const sub2: Qimela = {
 const cre1: Qimela = {
   id: "c1",
   name: "NBA Pool",
-  description: "Basketball",
-  sport: "basketball",
+  sportId: "sport-uuid-2",
   status: "ACTIVE",
   role: "CREATOR",
   creatorId: "u1",
@@ -59,7 +70,14 @@ function mockUseQimelas(
 }
 
 function wrapper({ children }: { children: ReactNode }) {
-  return <QimelaProvider>{children}</QimelaProvider>;
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <QimelaProvider>{children}</QimelaProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
 }
 
 describe("QimelaSelector", () => {
@@ -86,14 +104,9 @@ describe("QimelaSelector", () => {
   });
 
   it("shows 'Select a qimela' when data loaded but nothing selected", () => {
-    vi.mocked(useQimelas).mockReturnValue({
+    mockUseQimelas({
       data: { data: [], meta: { total: 0, page: 1, limit: 10 } },
-      isLoading: false,
-      isError: false,
-      isPending: false,
-      isSuccess: true,
-      error: null,
-    } as UseQueryResult<QimelasResponse, Error>);
+    });
 
     render(<QimelaSelector />, { wrapper });
     expect(screen.getByText("Select a qimela")).toBeInTheDocument();

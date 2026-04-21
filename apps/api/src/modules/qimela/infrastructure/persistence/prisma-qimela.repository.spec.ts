@@ -58,7 +58,6 @@ describe('PrismaQimelaRepository (integration)', () => {
         sportId,
         status: (overrides.status as never) ?? 'ACTIVE',
         creatorId,
-        coveredStages: 'REGULAR_SEASON',
       },
     });
 

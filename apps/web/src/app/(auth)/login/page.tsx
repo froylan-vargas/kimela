@@ -30,6 +30,7 @@ function LoginForm() {
       if (err instanceof ApiError && err.status === 401) {
         setError("Correo o contraseña incorrectos");
       } else {
+        console.error('[LoginPage] Unexpected login error', err);
         setError("Algo salió mal, intenta de nuevo");
       }
     } finally {

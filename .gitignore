@@ -11,6 +11,7 @@ out/
 .env
 apps/api/.env
 apps/web/.env
+docs/
 
 # Logs
 *.log

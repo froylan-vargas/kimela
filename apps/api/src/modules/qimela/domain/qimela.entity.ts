@@ -1,6 +1,5 @@
 import { randomUUID } from 'crypto';
 import { QimelaStatus } from './qimela-status.enum';
-import { CoveredStages } from './covered-stages.enum';
 
 export interface QimelaRuleProps {
   ruleId: string;
@@ -16,7 +15,6 @@ export interface QimelaProps {
   leagueId: string | null;
   creatorId: string;
   rules: QimelaRuleProps[];
-  coveredStages: CoveredStages;
   startPhaseId: string | null;
   endPhaseId: string | null;
   createdAt: Date;
@@ -30,7 +28,6 @@ export interface CreateQimelaProps {
   leagueId: string;
   creatorId: string;
   rules: QimelaRuleProps[];
-  coveredStages: CoveredStages;
   startPhaseId: string | null;
   endPhaseId: string | null;
   status?: QimelaStatus;
@@ -45,7 +42,6 @@ export class QimelaEntity {
   readonly leagueId: string | null;
   readonly creatorId: string;
   readonly rules: QimelaRuleProps[];
-  readonly coveredStages: CoveredStages;
   readonly startPhaseId: string | null;
   readonly endPhaseId: string | null;
   readonly createdAt: Date;
@@ -60,7 +56,6 @@ export class QimelaEntity {
     this.leagueId = props.leagueId;
     this.creatorId = props.creatorId;
     this.rules = props.rules;
-    this.coveredStages = props.coveredStages;
     this.startPhaseId = props.startPhaseId;
     this.endPhaseId = props.endPhaseId;
     this.createdAt = props.createdAt;
@@ -77,7 +72,6 @@ export class QimelaEntity {
       leagueId: props.leagueId,
       creatorId: props.creatorId,
       rules: props.rules,
-      coveredStages: props.coveredStages,
       startPhaseId: props.startPhaseId,
       endPhaseId: props.endPhaseId,
       createdAt: new Date(),

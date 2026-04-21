@@ -6,17 +6,19 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { PhaseType, SessionStatus, EventStatus } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QimelaPatch, QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { RULE_REPOSITORY, RuleRepository } from '../../domain/rule.repository';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 
 export interface UpdateQimelaCommand {
   id: string;
   requesterId: string;
   name?: string;
-  coveredStages?: CoveredStages;
+  initialPhaseId?: string;
+  finalPhaseId?: string;
+  rules?: { ruleId: string; points: number }[];
 }
 
 export interface UpdateQimelaResponse {
@@ -24,19 +26,11 @@ export interface UpdateQimelaResponse {
     id: string;
     name: string;
     status: string;
-    coveredStages: CoveredStages;
     startPhaseId: string | null;
     endPhaseId: string | null;
+    rules?: { id: string; ruleId: string; points: number }[];
   };
 }
-
-type PhaseWithSessions = {
-  id: string;
-  name: string;
-  order: number;
-  type: PhaseType;
-  sessions: { status: SessionStatus }[];
-};
 
 @Injectable()
 export class UpdateQimelaUseCase {
@@ -45,6 +39,8 @@ export class UpdateQimelaUseCase {
   constructor(
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
+    @Inject(RULE_REPOSITORY)
+    private readonly ruleRepository: RuleRepository,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -61,7 +57,24 @@ export class UpdateQimelaUseCase {
     }
 
     if (qimela.status === QimelaStatus.COMPLETED) {
-      throw new UnprocessableEntityException('Cannot edit a completed qimela');
+      throw new UnprocessableEntityException({
+        code: 'QIMELA_COMPLETED_UNEDITABLE',
+        message: 'Cannot edit a completed qimela',
+      });
+    }
+
+    // Block name and rules changes for ACTIVE qimelas
+    if (qimela.status === QimelaStatus.ACTIVE) {
+      if (command.name !== undefined) {
+        throw new UnprocessableEntityException(
+          'No se puede cambiar el nombre de una qimela activa.',
+        );
+      }
+      if (command.rules !== undefined) {
+        throw new UnprocessableEntityException(
+          'No se pueden cambiar las reglas de una qimela activa.',
+        );
+      }
     }
 
     const patch: QimelaPatch = {};
@@ -70,177 +83,142 @@ export class UpdateQimelaUseCase {
       patch.name = command.name;
     }
 
-    if (command.coveredStages !== undefined && command.coveredStages !== qimela.coveredStages) {
-      if (qimela.status === QimelaStatus.UPCOMING) {
-        const { startPhaseId, endPhaseId } = await this.resolvePhases(
-          qimela.eventId!,
-          command.coveredStages,
+    const hasInitialPhase = command.initialPhaseId !== undefined;
+    const hasFinalPhase = command.finalPhaseId !== undefined;
+
+    if (hasInitialPhase || hasFinalPhase) {
+      if (qimela.status === QimelaStatus.ACTIVE && hasInitialPhase) {
+        throw new UnprocessableEntityException(
+          'No se puede cambiar la fase inicial de una qimela activa.',
         );
-        patch.coveredStages = command.coveredStages;
-        patch.startPhaseId = startPhaseId;
-        patch.endPhaseId = endPhaseId;
-      } else if (qimela.status === QimelaStatus.ACTIVE) {
-        const isRegularSeasonToFull =
-          qimela.coveredStages === CoveredStages.REGULAR_SEASON &&
-          command.coveredStages === CoveredStages.FULL;
+      }
 
-        if (!isRegularSeasonToFull) {
-          throw new UnprocessableEntityException(
-            'Only REGULAR_SEASON to FULL is allowed while qimela is active',
-          );
-        }
+      const eventId = qimela.eventId!;
 
-        const lastPlayoffPhase = await this.prisma.phase.findFirst({
-          where: { eventId: qimela.eventId!, type: PhaseType.PLAYOFFS },
-          orderBy: { order: 'desc' },
+      const newInitialPhaseId = command.initialPhaseId ?? qimela.startPhaseId!;
+      const newFinalPhaseId = command.finalPhaseId ?? qimela.endPhaseId!;
+
+      const [newInitialPhase, newFinalPhase] = await Promise.all([
+        this.prisma.phase.findUnique({
+          where: { id: newInitialPhaseId },
+          select: { id: true, eventId: true, order: true },
+        }),
+        this.prisma.phase.findUnique({
+          where: { id: newFinalPhaseId },
+          select: { id: true, eventId: true, order: true },
+        }),
+      ]);
+
+      if (!newInitialPhase || newInitialPhase.eventId !== eventId) {
+        throw new UnprocessableEntityException(
+          'La fase inicial no pertenece al evento de esta qimela.',
+        );
+      }
+
+      if (!newFinalPhase || newFinalPhase.eventId !== eventId) {
+        throw new UnprocessableEntityException(
+          'La fase final no pertenece al evento de esta qimela.',
+        );
+      }
+
+      if (newInitialPhase.order > newFinalPhase.order) {
+        throw new UnprocessableEntityException(
+          'La fase inicial debe tener un orden menor o igual a la fase final.',
+        );
+      }
+
+      if (qimela.status === QimelaStatus.ACTIVE && hasFinalPhase) {
+        const currentEndPhase = await this.prisma.phase.findUnique({
+          where: { id: qimela.endPhaseId! },
+          select: { order: true },
         });
 
-        if (!lastPlayoffPhase) {
-          throw new UnprocessableEntityException('No playoff phases found for this event');
+        if (currentEndPhase && newFinalPhase.order < currentEndPhase.order) {
+          throw new UnprocessableEntityException(
+            'Solo se puede extender la fase final en una qimela activa.',
+          );
         }
+      }
 
-        patch.coveredStages = command.coveredStages;
-        patch.endPhaseId = lastPlayoffPhase.id;
+      if (hasInitialPhase) {
+        patch.startPhaseId = command.initialPhaseId;
+      }
+      if (hasFinalPhase) {
+        patch.endPhaseId = command.finalPhaseId;
       }
     }
 
-    if (Object.keys(patch).length === 0) {
+    // Validate and apply rule updates
+    let updatedRules: { id: string; ruleId: string; points: number }[] | undefined;
+
+    if (command.rules !== undefined) {
+      const submittedRuleIds = command.rules.map((r) => r.ruleId);
+      const foundRules = await this.ruleRepository.findByIds(submittedRuleIds);
+
+      const missingId = submittedRuleIds.find((id) => !foundRules.some((r) => r.id === id));
+      if (missingId) {
+        throw new NotFoundException(`Rule ${missingId} not found`);
+      }
+
+      for (const submitted of command.rules) {
+        const rule = foundRules.find((r) => r.id === submitted.ruleId)!;
+        if (submitted.points < rule.minPoints) {
+          throw new UnprocessableEntityException({
+            code: 'RULE_BELOW_MIN_POINTS',
+            message: `Rule "${rule.slug}" requires at least ${rule.minPoints} point(s).`,
+          });
+        }
+        if (submitted.points > rule.maxPoints) {
+          throw new UnprocessableEntityException({
+            code: 'RULE_ABOVE_MAX_POINTS',
+            message: `Rule "${rule.slug}" allows at most ${rule.maxPoints} point(s).`,
+          });
+        }
+      }
+
+      // Replace all rules in a transaction
+      const newRules = command.rules.map((r) => ({
+        id: randomUUID(),
+        ruleId: r.ruleId,
+        points: r.points,
+        qimelaId: command.id,
+      }));
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.qimelaRule.deleteMany({ where: { qimelaId: command.id } });
+        await tx.qimelaRule.createMany({ data: newRules });
+      });
+
+      updatedRules = newRules.map((r) => ({ id: r.id, ruleId: r.ruleId, points: r.points }));
+    }
+
+    const hasPatch = Object.keys(patch).length > 0;
+
+    if (!hasPatch && !updatedRules) {
       return {
         data: {
           id: qimela.id,
           name: qimela.name,
           status: qimela.status,
-          coveredStages: qimela.coveredStages,
           startPhaseId: qimela.startPhaseId,
           endPhaseId: qimela.endPhaseId,
         },
       };
     }
 
-    const updated = await this.qimelaRepository.update(command.id, patch);
+    const updated = hasPatch
+      ? await this.qimelaRepository.update(command.id, patch)
+      : qimela;
 
     return {
       data: {
         id: updated.id,
         name: updated.name,
         status: updated.status,
-        coveredStages: updated.coveredStages,
         startPhaseId: updated.startPhaseId,
         endPhaseId: updated.endPhaseId,
+        ...(updatedRules ? { rules: updatedRules } : {}),
       },
     };
-  }
-
-  private async resolvePhases(
-    eventId: string,
-    coveredStages: CoveredStages,
-  ): Promise<{ startPhaseId: string | null; endPhaseId: string | null }> {
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        phases: {
-          orderBy: { order: 'asc' },
-          include: {
-            sessions: { select: { status: true, scheduledAt: true } },
-          },
-        },
-      },
-    });
-
-    if (!event) {
-      throw new NotFoundException(`Event ${eventId} not found`);
-    }
-
-    const coveredPhaseTypes = this.getCoveredPhaseTypes(coveredStages);
-
-    const eligiblePhases = (event.phases as PhaseWithSessions[]).filter((p) =>
-      coveredPhaseTypes.includes(p.type),
-    );
-
-    if (eligiblePhases.length === 0) {
-      throw new UnprocessableEntityException(
-        `No phases of type "${coveredStages}" exist for this event.`,
-      );
-    }
-
-    const eventStatus = event.status as EventStatus;
-
-    if (eventStatus === EventStatus.UPCOMING) {
-      return {
-        startPhaseId: eligiblePhases[0].id,
-        endPhaseId: eligiblePhases[eligiblePhases.length - 1].id,
-      };
-    }
-
-    const currentPhase = this.findCurrentPhase(event.phases as PhaseWithSessions[]);
-
-    return this.resolveActivePhaseBounds(coveredStages, eligiblePhases, currentPhase);
-  }
-
-  private findCurrentPhase(phases: PhaseWithSessions[]): PhaseWithSessions | null {
-    return (
-      phases.find((p) => p.sessions.some((s) => s.status === SessionStatus.SCHEDULED)) ?? null
-    );
-  }
-
-  private getCoveredPhaseTypes(coveredStages: CoveredStages): PhaseType[] {
-    switch (coveredStages) {
-      case CoveredStages.REGULAR_SEASON:
-        return [PhaseType.REGULAR_SEASON];
-      case CoveredStages.PLAYOFFS:
-        return [PhaseType.PLAYOFFS];
-      case CoveredStages.FULL:
-        return [PhaseType.REGULAR_SEASON, PhaseType.PLAYOFFS];
-    }
-  }
-
-  private resolveActivePhaseBounds(
-    coveredStages: CoveredStages,
-    eligiblePhases: PhaseWithSessions[],
-    currentPhase: PhaseWithSessions | null,
-  ): { startPhaseId: string; endPhaseId: string } {
-    const endPhase = eligiblePhases[eligiblePhases.length - 1];
-
-    if (!currentPhase) {
-      throw new UnprocessableEntityException(
-        `Cannot update qimela for "${coveredStages}": no future sessions available in this event.`,
-      );
-    }
-
-    if (coveredStages === CoveredStages.REGULAR_SEASON) {
-      const startPhase = eligiblePhases.find((p) => p.order > currentPhase.order);
-      if (!startPhase) {
-        throw new UnprocessableEntityException(
-          'Cannot update qimela for REGULAR_SEASON: the regular season is already over.',
-        );
-      }
-      return { startPhaseId: startPhase.id, endPhaseId: endPhase.id };
-    }
-
-    if (coveredStages === CoveredStages.PLAYOFFS) {
-      const startPhase = eligiblePhases.find((p) => {
-        if (p.order > currentPhase.order) return true;
-        if (p.order === currentPhase.order) return true;
-        const allDone = p.sessions.every(
-          (s) => s.status === SessionStatus.COMPLETED || s.status === SessionStatus.CANCELLED,
-        );
-        return !allDone;
-      });
-      if (!startPhase) {
-        throw new UnprocessableEntityException(
-          'Cannot update qimela for PLAYOFFS: all playoff phases are already completed.',
-        );
-      }
-      return { startPhaseId: startPhase.id, endPhaseId: endPhase.id };
-    }
-
-    // FULL
-    const startPhase = eligiblePhases.find((p) => p.order > currentPhase.order);
-    if (!startPhase) {
-      throw new UnprocessableEntityException(
-        'Cannot update qimela for FULL: no covered phases remain after the current phase.',
-      );
-    }
-    return { startPhaseId: startPhase.id, endPhaseId: endPhase.id };
   }
 }

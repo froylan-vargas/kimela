@@ -35,7 +35,7 @@ export class ActivatePhaseUseCase {
 
     if (phase.status !== 'UPCOMING') {
       throw new UnprocessableEntityException(
-        `Phase ${phaseId} cannot be activated: current status is "${phase.status}"`,
+        `La fase ${phaseId} no puede activarse: el estado actual es "${phase.status}"`,
       );
     }
 

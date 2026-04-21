@@ -1,12 +1,18 @@
 import { GetEventsForQimelaUseCase } from './get-events-for-qimela.use-case';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 
 const SPORT_ID = 'sport-uuid';
+
+const makePhase = (id: string, name: string, order: number, status: string = 'UPCOMING') => ({
+  id,
+  name,
+  order,
+  status,
+});
 
 const makeEvent = (
   id: string,
   status: 'UPCOMING' | 'ACTIVE',
-  phases: { type: string; sessions: { status: string }[] }[],
+  phases: ReturnType<typeof makePhase>[],
 ) => ({
   id,
   name: `Event ${id}`,
@@ -46,6 +52,25 @@ describe('GetEventsForQimelaUseCase', () => {
       );
     });
 
+    it('excludes ACTIVE phases from the query', async () => {
+      // Arrange
+      mockPrisma.event.findMany.mockResolvedValue([]);
+
+      // Act
+      await useCase.execute(SPORT_ID);
+
+      // Assert
+      expect(mockPrisma.event.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({
+            phases: expect.objectContaining({
+              where: { status: { not: 'ACTIVE' } },
+            }),
+          }),
+        }),
+      );
+    });
+
     it('returns empty data array when no events found', async () => {
       // Arrange
       mockPrisma.event.findMany.mockResolvedValue([]);
@@ -57,9 +82,13 @@ describe('GetEventsForQimelaUseCase', () => {
       expect(result.data).toEqual([]);
     });
 
-    it('maps event fields to QimelaEventDto', async () => {
+    it('maps event fields to QimelaEventDto including phases', async () => {
       // Arrange
-      const event = makeEvent('e-1', 'UPCOMING', []);
+      const phases = [
+        makePhase('phase-1', 'Fase 1', 1, 'UPCOMING'),
+        makePhase('phase-2', 'Fase 2', 2, 'COMPLETED'),
+      ];
+      const event = makeEvent('e-1', 'UPCOMING', phases);
       mockPrisma.event.findMany.mockResolvedValue([event]);
 
       // Act
@@ -70,96 +99,54 @@ describe('GetEventsForQimelaUseCase', () => {
       expect(dto.id).toBe('e-1');
       expect(dto.status).toBe('UPCOMING');
       expect(dto.leagueName).toBe('Liga Test');
+      expect(dto.phases).toHaveLength(2);
     });
-  });
 
-  describe('availableCoveredStages computation', () => {
-    it('includes REGULAR_SEASON when event has a non-completed RS phase', async () => {
+    it('maps phase fields correctly in the response', async () => {
       // Arrange
-      const event = makeEvent('e-1', 'UPCOMING', [
-        { type: 'REGULAR_SEASON', sessions: [{ status: 'SCHEDULED' }] },
-      ]);
+      const phases = [makePhase('phase-1', 'Grupo A', 1, 'UPCOMING')];
+      const event = makeEvent('e-1', 'ACTIVE', phases);
       mockPrisma.event.findMany.mockResolvedValue([event]);
 
       // Act
       const result = await useCase.execute(SPORT_ID);
 
       // Assert
-      expect(result.data[0].availableCoveredStages).toContain(CoveredStages.REGULAR_SEASON);
+      const phase = result.data[0].phases[0];
+      expect(phase.id).toBe('phase-1');
+      expect(phase.name).toBe('Grupo A');
+      expect(phase.order).toBe(1);
+      expect(phase.status).toBe('UPCOMING');
     });
 
-    it('includes PLAYOFFS when event has a non-completed PLAYOFFS phase', async () => {
+    it('returns empty phases array when event has no phases', async () => {
       // Arrange
-      const event = makeEvent('e-1', 'ACTIVE', [
-        { type: 'PLAYOFFS', sessions: [{ status: 'SCHEDULED' }] },
-      ]);
+      const event = makeEvent('e-1', 'UPCOMING', []);
       mockPrisma.event.findMany.mockResolvedValue([event]);
 
       // Act
       const result = await useCase.execute(SPORT_ID);
 
       // Assert
-      expect(result.data[0].availableCoveredStages).toContain(CoveredStages.PLAYOFFS);
+      expect(result.data[0].phases).toEqual([]);
     });
 
-    it('includes FULL when both RS and PLAYOFFS are available', async () => {
+    it('returns all phases for the event ordered by order', async () => {
       // Arrange
-      const event = makeEvent('e-1', 'UPCOMING', [
-        { type: 'REGULAR_SEASON', sessions: [{ status: 'SCHEDULED' }] },
-        { type: 'PLAYOFFS', sessions: [{ status: 'SCHEDULED' }] },
-      ]);
+      const phases = [
+        makePhase('phase-1', 'Fase 1', 1),
+        makePhase('phase-2', 'Fase 2', 2),
+        makePhase('phase-3', 'Fase 3', 3),
+      ];
+      const event = makeEvent('e-1', 'UPCOMING', phases);
       mockPrisma.event.findMany.mockResolvedValue([event]);
 
       // Act
       const result = await useCase.execute(SPORT_ID);
 
       // Assert
-      expect(result.data[0].availableCoveredStages).toContain(CoveredStages.FULL);
-    });
-
-    it('does not include REGULAR_SEASON when all RS phases are completed', async () => {
-      // Arrange
-      const event = makeEvent('e-1', 'ACTIVE', [
-        { type: 'REGULAR_SEASON', sessions: [{ status: 'COMPLETED' }] },
-        { type: 'PLAYOFFS', sessions: [{ status: 'SCHEDULED' }] },
-      ]);
-      mockPrisma.event.findMany.mockResolvedValue([event]);
-
-      // Act
-      const result = await useCase.execute(SPORT_ID);
-
-      // Assert
-      expect(result.data[0].availableCoveredStages).not.toContain(CoveredStages.REGULAR_SEASON);
-      expect(result.data[0].availableCoveredStages).not.toContain(CoveredStages.FULL);
-      expect(result.data[0].availableCoveredStages).toContain(CoveredStages.PLAYOFFS);
-    });
-
-    it('includes REGULAR_SEASON when RS phase has no sessions yet (future phase)', async () => {
-      // Arrange
-      const event = makeEvent('e-1', 'UPCOMING', [
-        { type: 'REGULAR_SEASON', sessions: [] },
-      ]);
-      mockPrisma.event.findMany.mockResolvedValue([event]);
-
-      // Act
-      const result = await useCase.execute(SPORT_ID);
-
-      // Assert
-      expect(result.data[0].availableCoveredStages).toContain(CoveredStages.REGULAR_SEASON);
-    });
-
-    it('excludes OTHER phase types from all covered stage computations', async () => {
-      // Arrange: only OTHER phases exist
-      const event = makeEvent('e-1', 'UPCOMING', [
-        { type: 'OTHER', sessions: [{ status: 'SCHEDULED' }] },
-      ]);
-      mockPrisma.event.findMany.mockResolvedValue([event]);
-
-      // Act
-      const result = await useCase.execute(SPORT_ID);
-
-      // Assert
-      expect(result.data[0].availableCoveredStages).toEqual([]);
+      expect(result.data[0].phases).toHaveLength(3);
+      expect(result.data[0].phases.map((p) => p.order)).toEqual([1, 2, 3]);
     });
   });
 });

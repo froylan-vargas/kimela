@@ -4,6 +4,8 @@ services:
       dockerfile: apps/api/Dockerfile.dev
     ports:
       - "9229:9229"
+    environment:
+      DATABASE_URL: "postgresql://qimela:qimela_secret@postgres:5432/qimela_db?schema=public"
     volumes:
       - ./apps/api/src:/app/apps/api/src
       - ./apps/api/dist:/app/apps/api/dist

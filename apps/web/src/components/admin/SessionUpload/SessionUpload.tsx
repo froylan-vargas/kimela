@@ -15,15 +15,13 @@ interface SessionUploadProps {
 export default function SessionUpload({ onUpload, isUploading }: SessionUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleFile = useCallback(
     async (file: File) => {
-      setError(null);
       try {
         await onUpload(file);
       } catch {
-        setError("El archivo no tiene el formato correcto.");
+        // Parent surfaces the error via toast.
       }
     },
     [onUpload],
@@ -108,12 +106,6 @@ export default function SessionUpload({ onUpload, isUploading }: SessionUploadPr
           </>
         )}
       </div>
-
-      {error && (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      )}
 
       <input
         ref={inputRef}

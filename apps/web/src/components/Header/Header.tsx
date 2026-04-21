@@ -12,7 +12,7 @@ export default function Header() {
 
   return (
     <header className={styles.navbar}>
-      <Logo />
+      <Logo href="/dashboard" />
       <QimelaSelector />
       <nav className={styles.nav}>
         <Link href="/qimela/create" className={styles.createLink}>

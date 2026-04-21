@@ -1,6 +1,7 @@
 substitutions:
   _REGION: us-central1
   _REPO: us-central1-docker.pkg.dev/${PROJECT_ID}/qimela
+  _NEXT_PUBLIC_API_URL: https://qimela-api-dab5pbfutq-uc.a.run.app
 
 options:
   logging: CLOUD_LOGGING_ONLY
@@ -43,6 +44,8 @@ steps:
       - build
       - -f
       - apps/web/Dockerfile
+      - --build-arg
+      - NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}
       - -t
       - ${_REPO}/web:${SHORT_SHA}
       - -t

@@ -1,7 +1,6 @@
 import { QimelaMapper } from './qimela.mapper';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 
 const makeEntity = (overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {}): QimelaEntity => {
   return new QimelaEntity({
@@ -13,7 +12,6 @@ const makeEntity = (overrides: Partial<ConstructorParameters<typeof QimelaEntity
     eventId: null,
     leagueId: null,
     rules: [],
-    coveredStages: CoveredStages.REGULAR_SEASON,
     startPhaseId: null,
     endPhaseId: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),

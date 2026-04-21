@@ -59,6 +59,56 @@
   }
 }
 
+// ─── Share section ────────────────────────────────────────────────────────────
+
+.shareSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  width: 100%;
+  max-width: 480px;
+}
+
+.shareDescription {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+.shareActions {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.revokeBtn {
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #fef2f2;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // ─── Edit section ─────────────────────────────────────────────────────────────
 
 .editSection {
@@ -189,3 +239,35 @@
     cursor: not-allowed;
   }
 }
+
+// ─── Rules section ────────────────────────────────────────────────────────────
+
+.rulesSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1px solid $color-border;
+  margin-top: $spacing-md;
+}
+
+.rulesHeading {
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-main;
+  margin: 0;
+}
+
+.rulesGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.ruleRange {
+  font-size: 12px;
+  font-weight: 400;
+  color: $color-text-secondary;
+  margin-top: -$spacing-xs;
+}
+

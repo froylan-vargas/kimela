@@ -60,7 +60,6 @@ export class PrismaQimelaRepository implements QimelaRepository {
           creatorId: entity.creatorId,
           eventId: entity.eventId,
           leagueId: entity.leagueId,
-          coveredStages: QimelaPersistenceMapper.toPrismaCoveredStages(entity.coveredStages),
           startPhaseId: entity.startPhaseId,
           endPhaseId: entity.endPhaseId,
           rules: {
@@ -82,9 +81,6 @@ export class PrismaQimelaRepository implements QimelaRepository {
 
     const data: Record<string, unknown> = {};
     if (patch.name !== undefined) data.name = patch.name;
-    if (patch.coveredStages !== undefined) {
-      data.coveredStages = QimelaPersistenceMapper.toPrismaCoveredStages(patch.coveredStages);
-    }
     if (patch.startPhaseId !== undefined) data.startPhaseId = patch.startPhaseId;
     if (patch.endPhaseId !== undefined) data.endPhaseId = patch.endPhaseId;
 

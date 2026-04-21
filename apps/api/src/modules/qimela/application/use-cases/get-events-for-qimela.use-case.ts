@@ -1,7 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EventStatus, PhaseType, SessionStatus } from '@prisma/client';
+import { EventStatus } from '@prisma/client';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { CoveredStages } from '../../domain/covered-stages.enum';
+
+export interface PhaseDto {
+  id: string;
+  name: string;
+  order: number;
+  status: string;
+}
 
 export interface QimelaEventDto {
   id: string;
@@ -11,17 +17,12 @@ export interface QimelaEventDto {
   status: string;
   leagueId: string;
   leagueName: string;
-  availableCoveredStages: CoveredStages[];
+  phases: PhaseDto[];
 }
 
 export interface GetEventsForQimelaResponse {
   data: QimelaEventDto[];
 }
-
-type PhaseWithSessions = {
-  type: PhaseType;
-  sessions: { status: SessionStatus }[];
-};
 
 @Injectable()
 export class GetEventsForQimelaUseCase {
@@ -40,10 +41,14 @@ export class GetEventsForQimelaUseCase {
       include: {
         league: { select: { name: true } },
         phases: {
+          where: { status: { not: 'ACTIVE' } },
           select: {
-            type: true,
-            sessions: { select: { status: true } },
+            id: true,
+            name: true,
+            order: true,
+            status: true,
           },
+          orderBy: { order: 'asc' },
         },
       },
     });
@@ -56,46 +61,14 @@ export class GetEventsForQimelaUseCase {
       status: record.status,
       leagueId: record.leagueId,
       leagueName: record.league.name,
-      availableCoveredStages: this.computeAvailableCoveredStages(
-        record.phases as PhaseWithSessions[],
-      ),
+      phases: record.phases.map((phase) => ({
+        id: phase.id,
+        name: phase.name,
+        order: phase.order,
+        status: phase.status,
+      })),
     }));
 
     return { data };
-  }
-
-  /**
-   * Determines which CoveredStages options are still available for an event.
-   *
-   * - REGULAR_SEASON: event has at least one REGULAR_SEASON phase that is not fully completed.
-   * - PLAYOFFS: event has at least one PLAYOFFS phase that is not fully completed.
-   * - FULL: both REGULAR_SEASON and PLAYOFFS are available.
-   *
-   * "Not fully completed" means the phase has no sessions OR at least one session
-   * with a status other than COMPLETED / CANCELLED.
-   */
-  private computeAvailableCoveredStages(phases: PhaseWithSessions[]): CoveredStages[] {
-    const isPhaseAvailable = (phase: PhaseWithSessions): boolean => {
-      if (phase.sessions.length === 0) return true;
-      return phase.sessions.some(
-        (s) => s.status !== SessionStatus.COMPLETED && s.status !== SessionStatus.CANCELLED,
-      );
-    };
-
-    const hasAvailableRegularSeason = phases
-      .filter((p) => p.type === PhaseType.REGULAR_SEASON)
-      .some(isPhaseAvailable);
-
-    const hasAvailablePlayoffs = phases
-      .filter((p) => p.type === PhaseType.PLAYOFFS)
-      .some(isPhaseAvailable);
-
-    const available: CoveredStages[] = [];
-
-    if (hasAvailableRegularSeason) available.push(CoveredStages.REGULAR_SEASON);
-    if (hasAvailablePlayoffs) available.push(CoveredStages.PLAYOFFS);
-    if (hasAvailableRegularSeason && hasAvailablePlayoffs) available.push(CoveredStages.FULL);
-
-    return available;
   }
 }

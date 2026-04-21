@@ -1,0 +1,135 @@
+@use "../../../../styles/variables" as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-bg;
+  padding: $spacing-lg;
+}
+
+.loading {
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+}
+
+.errorCard {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.errorText {
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+}
+
+// ─── Invite card ──────────────────────────────────────────────────────────────
+
+.card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.sport {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: $color-text-main;
+  margin: 0;
+}
+
+.creator {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+
+  strong {
+    color: $color-text-main;
+    font-weight: 600;
+  }
+}
+
+.description {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-pill;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+
+  &--upcoming {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &--active {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &--completed {
+    background: #f4f4f5;
+    color: $color-text-secondary;
+  }
+}
+
+// ─── Subscribe button ─────────────────────────────────────────────────────────
+
+.subscribeBtn {
+  width: 100%;
+  padding: 12px;
+  background: $color-primary;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: $font-family-base;
+  color: $color-text-main;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: $spacing-xs;
+
+  &:hover {
+    background: $color-primary-hover;
+  }
+}

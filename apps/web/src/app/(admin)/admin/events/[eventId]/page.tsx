@@ -6,6 +6,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePhases } from "@/hooks/usePhases";
 import { useSessions } from "@/hooks/useSessions";
 import { adminApi } from "@/lib/apiClient";
+import { useToast } from "@/context/ToastContext";
+import { toUserMessage } from "@/lib/errors";
 import PhaseList from "@/components/admin/PhaseList/PhaseList";
 import PhaseForm from "@/components/admin/PhaseForm/PhaseForm";
 import SessionList from "@/components/admin/SessionList/SessionList";
@@ -28,6 +30,7 @@ export default function EventManagementPage({
   const { name: eventName } = use(searchParams);
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: phases, isLoading: phasesLoading, isError: phasesError } = usePhases(eventId);
 
@@ -66,7 +69,8 @@ export default function EventManagementPage({
         reordered.map((p) => ({ id: p.id, order: p.order })),
       );
       queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], reordered);
-    } catch {
+    } catch (err) {
+      console.error('[EventManagementPage] Failed to reorder phases', err);
       // rollback
     } finally {
       setLocalPhases(null);
@@ -80,8 +84,9 @@ export default function EventManagementPage({
       queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], (prev) =>
         (prev ?? []).map((p) => (p.id === phaseId ? { ...p, status: updated.status } : p)),
       );
-    } catch {
-      // silent fail
+      toast("Fase actualizada correctamente.", "success");
+    } catch (err) {
+      toast(toUserMessage(err), "error");
     }
   }
 
@@ -92,8 +97,9 @@ export default function EventManagementPage({
       queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], (prev) =>
         (prev ?? []).map((p) => (p.id === phaseId ? { ...p, status: updated.status } : p)),
       );
-    } catch {
-      // silent fail
+      toast("Fase actualizada correctamente.", "success");
+    } catch (err) {
+      toast(toUserMessage(err), "error");
     }
   }
 
@@ -111,7 +117,8 @@ export default function EventManagementPage({
     if (selectedPhase?.id === phaseId) setSelectedPhase(null);
     try {
       await adminApi.deletePhase(eventId, phaseId);
-    } catch {
+    } catch (err) {
+      console.error('[EventManagementPage] Failed to delete phase', err);
       queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], prev);
     }
   }
@@ -122,13 +129,15 @@ export default function EventManagementPage({
     await new Promise<void>((resolve, reject) => {
       startUploadTransition(async () => {
         try {
-          await adminApi.uploadSessions(eventId, selectedPhase.id, file);
+          const res = await adminApi.uploadSessions(eventId, selectedPhase.id, file);
           await queryClient.invalidateQueries({
             queryKey: ["admin", "sessions", eventId, selectedPhase.id],
           });
           setActiveTab("partidos");
+          toast(`${res.data.length} sesiones cargadas correctamente.`, "success");
           resolve();
         } catch (err) {
+          toast(toUserMessage(err), "error");
           reject(err);
         }
       });

@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { UpdateQimelaUseCase, UpdateQimelaCommand } from './update-qimela.use-case';
 import { QimelaRepository } from '../../domain/qimela.repository';
+import { RuleRepository } from '../../domain/rule.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { CoveredStages } from '../../domain/covered-stages.enum';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -17,6 +17,10 @@ const OTHER_USER_ID = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 const SPORT_ID = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 const EVENT_ID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
 const LEAGUE_ID = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+const PHASE_START_ID = 'phase-start-id';
+const PHASE_END_ID = 'phase-end-id';
+const NEW_INITIAL_PHASE_ID = 'new-initial-phase-id';
+const NEW_FINAL_PHASE_ID = 'new-final-phase-id';
 
 const makeQimela = (
   overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {},
@@ -30,25 +34,18 @@ const makeQimela = (
     leagueId: LEAGUE_ID,
     creatorId: CREATOR_ID,
     rules: [],
-    coveredStages: CoveredStages.REGULAR_SEASON,
-    startPhaseId: 'phase-rs-1',
-    endPhaseId: 'phase-rs-2',
+    startPhaseId: PHASE_START_ID,
+    endPhaseId: PHASE_END_ID,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
   });
 
-const makePhase = (
-  id: string,
-  order: number,
-  type: 'REGULAR_SEASON' | 'PLAYOFFS',
-  sessions: { status: string }[] = [],
-) => ({ id, order, type, sessions });
-
-const makeEvent = (
-  status: 'UPCOMING' | 'ACTIVE',
-  phases: ReturnType<typeof makePhase>[],
-) => ({ id: EVENT_ID, status, phases });
+const makePhase = (id: string, order: number, eventId: string = EVENT_ID) => ({
+  id,
+  order,
+  eventId,
+});
 
 const baseCommand: UpdateQimelaCommand = {
   id: QIMELA_ID,
@@ -60,9 +57,11 @@ const baseCommand: UpdateQimelaCommand = {
 describe('UpdateQimelaUseCase', () => {
   let useCase: UpdateQimelaUseCase;
   let mockQimelaRepository: jest.Mocked<QimelaRepository>;
+  let mockRuleRepository: jest.Mocked<RuleRepository>;
   let mockPrisma: {
-    event: { findUnique: jest.Mock };
-    phase: { findFirst: jest.Mock };
+    phase: { findUnique: jest.Mock };
+    qimelaRule: { deleteMany: jest.Mock; createMany: jest.Mock };
+    $transaction: jest.Mock;
   };
 
   beforeEach(() => {
@@ -73,12 +72,18 @@ describe('UpdateQimelaUseCase', () => {
       update: jest.fn(),
     };
 
-    mockPrisma = {
-      event: { findUnique: jest.fn() },
-      phase: { findFirst: jest.fn() },
+    mockRuleRepository = {
+      findAll: jest.fn(),
+      findByIds: jest.fn(),
     };
 
-    useCase = new UpdateQimelaUseCase(mockQimelaRepository, mockPrisma as any);
+    mockPrisma = {
+      phase: { findUnique: jest.fn() },
+      qimelaRule: { deleteMany: jest.fn(), createMany: jest.fn() },
+      $transaction: jest.fn((fn: any) => fn(mockPrisma)),
+    };
+
+    useCase = new UpdateQimelaUseCase(mockQimelaRepository, mockRuleRepository, mockPrisma as any);
   });
 
   // ─── Authorization & basic guards ─────────────────────────────────────────
@@ -128,23 +133,6 @@ describe('UpdateQimelaUseCase', () => {
       expect(result.data.id).toBe(QIMELA_ID);
       expect(result.data.name).toBe('Original Name');
     });
-
-    it('returns current qimela data when coveredStages is the same as existing', async () => {
-      // Arrange
-      mockQimelaRepository.findById.mockResolvedValue(
-        makeQimela({ coveredStages: CoveredStages.REGULAR_SEASON }),
-      );
-
-      // Act
-      const result = await useCase.execute({
-        ...baseCommand,
-        coveredStages: CoveredStages.REGULAR_SEASON,
-      });
-
-      // Assert
-      expect(mockQimelaRepository.update).not.toHaveBeenCalled();
-      expect(result.data.coveredStages).toBe(CoveredStages.REGULAR_SEASON);
-    });
   });
 
   // ─── Name update ──────────────────────────────────────────────────────────
@@ -168,127 +156,112 @@ describe('UpdateQimelaUseCase', () => {
     });
   });
 
-  // ─── coveredStages change — UPCOMING qimela ───────────────────────────────
+  // ─── Phase change — UPCOMING qimela ───────────────────────────────────────
 
-  describe('coveredStages change on UPCOMING qimela', () => {
+  describe('phase change on UPCOMING qimela', () => {
     beforeEach(() => {
       mockQimelaRepository.findById.mockResolvedValue(
-        makeQimela({ status: QimelaStatus.UPCOMING, coveredStages: CoveredStages.REGULAR_SEASON }),
+        makeQimela({ status: QimelaStatus.UPCOMING }),
       );
     });
 
-    it('resolves phases from the event and updates coveredStages', async () => {
+    it('updates both initialPhaseId and finalPhaseId when both provided', async () => {
       // Arrange
-      const phases = [
-        makePhase('rs-1', 1, 'REGULAR_SEASON'),
-        makePhase('po-1', 2, 'PLAYOFFS'),
-      ];
-      mockPrisma.event.findUnique.mockResolvedValue(makeEvent('UPCOMING', phases));
+      mockPrisma.phase.findUnique
+        .mockResolvedValueOnce(makePhase(NEW_INITIAL_PHASE_ID, 1))
+        .mockResolvedValueOnce(makePhase(NEW_FINAL_PHASE_ID, 3));
       mockQimelaRepository.update.mockResolvedValue(
-        makeQimela({
-          coveredStages: CoveredStages.FULL,
-          startPhaseId: 'rs-1',
-          endPhaseId: 'po-1',
-        }),
+        makeQimela({ startPhaseId: NEW_INITIAL_PHASE_ID, endPhaseId: NEW_FINAL_PHASE_ID }),
       );
 
       // Act
-      await useCase.execute({ ...baseCommand, coveredStages: CoveredStages.FULL });
+      await useCase.execute({
+        ...baseCommand,
+        initialPhaseId: NEW_INITIAL_PHASE_ID,
+        finalPhaseId: NEW_FINAL_PHASE_ID,
+      });
 
       // Assert
       expect(mockQimelaRepository.update).toHaveBeenCalledWith(
         QIMELA_ID,
         expect.objectContaining({
-          coveredStages: CoveredStages.FULL,
-          startPhaseId: 'rs-1',
-          endPhaseId: 'po-1',
+          startPhaseId: NEW_INITIAL_PHASE_ID,
+          endPhaseId: NEW_FINAL_PHASE_ID,
         }),
       );
     });
 
-    it('throws NotFoundException when event does not exist during phase resolution', async () => {
+    it('throws UnprocessableEntityException when initialPhase does not belong to event', async () => {
       // Arrange
-      mockPrisma.event.findUnique.mockResolvedValue(null);
+      mockPrisma.phase.findUnique
+        .mockResolvedValueOnce(makePhase(NEW_INITIAL_PHASE_ID, 1, 'other-event'))
+        .mockResolvedValueOnce(makePhase(NEW_FINAL_PHASE_ID, 3));
 
       // Act + Assert
       await expect(
-        useCase.execute({ ...baseCommand, coveredStages: CoveredStages.PLAYOFFS }),
-      ).rejects.toThrow(NotFoundException);
+        useCase.execute({ ...baseCommand, initialPhaseId: NEW_INITIAL_PHASE_ID, finalPhaseId: NEW_FINAL_PHASE_ID }),
+      ).rejects.toThrow(UnprocessableEntityException);
     });
 
-    it('throws UnprocessableEntityException when no phases of the requested type exist', async () => {
+    it('throws UnprocessableEntityException when initialPhase order > finalPhase order', async () => {
       // Arrange
-      const phases = [makePhase('rs-1', 1, 'REGULAR_SEASON')];
-      mockPrisma.event.findUnique.mockResolvedValue(makeEvent('UPCOMING', phases));
+      mockPrisma.phase.findUnique
+        .mockResolvedValueOnce(makePhase(NEW_INITIAL_PHASE_ID, 5))
+        .mockResolvedValueOnce(makePhase(NEW_FINAL_PHASE_ID, 2));
 
       // Act + Assert
       await expect(
-        useCase.execute({ ...baseCommand, coveredStages: CoveredStages.PLAYOFFS }),
+        useCase.execute({ ...baseCommand, initialPhaseId: NEW_INITIAL_PHASE_ID, finalPhaseId: NEW_FINAL_PHASE_ID }),
       ).rejects.toThrow(UnprocessableEntityException);
     });
   });
 
-  // ─── coveredStages change — ACTIVE qimela ─────────────────────────────────
+  // ─── Phase change — ACTIVE qimela ─────────────────────────────────────────
 
-  describe('coveredStages change on ACTIVE qimela', () => {
-    it('allows upgrading from REGULAR_SEASON to FULL and sets endPhaseId to last playoff phase', async () => {
-      // Arrange
+  describe('phase change on ACTIVE qimela', () => {
+    beforeEach(() => {
       mockQimelaRepository.findById.mockResolvedValue(
-        makeQimela({ status: QimelaStatus.ACTIVE, coveredStages: CoveredStages.REGULAR_SEASON }),
+        makeQimela({ status: QimelaStatus.ACTIVE, startPhaseId: PHASE_START_ID, endPhaseId: PHASE_END_ID }),
       );
-      const lastPlayoffPhase = { id: 'po-final', type: 'PLAYOFFS', order: 5 };
-      mockPrisma.phase.findFirst.mockResolvedValue(lastPlayoffPhase);
+    });
+
+    it('throws UnprocessableEntityException when trying to change initialPhaseId on ACTIVE qimela', async () => {
+      // Act + Assert
+      await expect(
+        useCase.execute({ ...baseCommand, initialPhaseId: NEW_INITIAL_PHASE_ID }),
+      ).rejects.toThrow(UnprocessableEntityException);
+    });
+
+    it('allows extending finalPhaseId to a later phase on ACTIVE qimela', async () => {
+      // Arrange: current endPhase has order 3, new finalPhase has order 5
+      mockPrisma.phase.findUnique
+        .mockResolvedValueOnce(makePhase(PHASE_START_ID, 1)) // current startPhase used for validation
+        .mockResolvedValueOnce(makePhase(NEW_FINAL_PHASE_ID, 5)) // new finalPhase
+        .mockResolvedValueOnce(makePhase(PHASE_END_ID, 3)); // current endPhase order check
       mockQimelaRepository.update.mockResolvedValue(
-        makeQimela({ coveredStages: CoveredStages.FULL, endPhaseId: 'po-final' }),
+        makeQimela({ startPhaseId: PHASE_START_ID, endPhaseId: NEW_FINAL_PHASE_ID }),
       );
 
       // Act
-      await useCase.execute({ ...baseCommand, coveredStages: CoveredStages.FULL });
+      await useCase.execute({ ...baseCommand, finalPhaseId: NEW_FINAL_PHASE_ID });
 
       // Assert
       expect(mockQimelaRepository.update).toHaveBeenCalledWith(
         QIMELA_ID,
-        expect.objectContaining({
-          coveredStages: CoveredStages.FULL,
-          endPhaseId: 'po-final',
-        }),
+        expect.objectContaining({ endPhaseId: NEW_FINAL_PHASE_ID }),
       );
     });
 
-    it('throws UnprocessableEntityException when no playoff phases exist for REGULAR_SEASON to FULL upgrade', async () => {
-      // Arrange
-      mockQimelaRepository.findById.mockResolvedValue(
-        makeQimela({ status: QimelaStatus.ACTIVE, coveredStages: CoveredStages.REGULAR_SEASON }),
-      );
-      mockPrisma.phase.findFirst.mockResolvedValue(null);
+    it('throws UnprocessableEntityException when trying to shorten finalPhaseId on ACTIVE qimela', async () => {
+      // Arrange: current endPhase has order 5, new finalPhase has order 2
+      mockPrisma.phase.findUnique
+        .mockResolvedValueOnce(makePhase(PHASE_START_ID, 1))
+        .mockResolvedValueOnce(makePhase(NEW_FINAL_PHASE_ID, 2)) // order < current end
+        .mockResolvedValueOnce(makePhase(PHASE_END_ID, 5)); // current end order
 
       // Act + Assert
       await expect(
-        useCase.execute({ ...baseCommand, coveredStages: CoveredStages.FULL }),
-      ).rejects.toThrow(UnprocessableEntityException);
-    });
-
-    it('throws UnprocessableEntityException for non REGULAR_SEASON to FULL upgrade on ACTIVE qimela', async () => {
-      // Arrange
-      mockQimelaRepository.findById.mockResolvedValue(
-        makeQimela({ status: QimelaStatus.ACTIVE, coveredStages: CoveredStages.PLAYOFFS }),
-      );
-
-      // Act + Assert
-      await expect(
-        useCase.execute({ ...baseCommand, coveredStages: CoveredStages.FULL }),
-      ).rejects.toThrow(UnprocessableEntityException);
-    });
-
-    it('throws UnprocessableEntityException when trying to change from FULL on an ACTIVE qimela', async () => {
-      // Arrange
-      mockQimelaRepository.findById.mockResolvedValue(
-        makeQimela({ status: QimelaStatus.ACTIVE, coveredStages: CoveredStages.FULL }),
-      );
-
-      // Act + Assert
-      await expect(
-        useCase.execute({ ...baseCommand, coveredStages: CoveredStages.REGULAR_SEASON }),
+        useCase.execute({ ...baseCommand, finalPhaseId: NEW_FINAL_PHASE_ID }),
       ).rejects.toThrow(UnprocessableEntityException);
     });
   });

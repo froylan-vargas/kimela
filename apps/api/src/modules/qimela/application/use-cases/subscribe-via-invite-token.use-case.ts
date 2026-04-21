@@ -1,0 +1,94 @@
+import {
+  ConflictException,
+  ForbiddenException,
+  GoneException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  INVITE_TOKEN_REPOSITORY,
+  InviteTokenRepository,
+} from "../../domain/invite-token.repository";
+import {
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import { QimelaStatus } from "../../domain/qimela-status.enum";
+
+export interface SubscribeViaInviteTokenCommand {
+  token: string;
+  userId: string;
+}
+
+export interface SubscribeViaInviteTokenResponse {
+  data: {
+    subscriptionId: string;
+  };
+}
+
+@Injectable()
+export class SubscribeViaInviteTokenUseCase {
+  private readonly logger = new Logger(SubscribeViaInviteTokenUseCase.name);
+
+  constructor(
+    @Inject(INVITE_TOKEN_REPOSITORY)
+    private readonly inviteTokenRepository: InviteTokenRepository,
+    @Inject(QIMELA_REPOSITORY)
+    private readonly qimelaRepository: QimelaRepository,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async execute(
+    command: SubscribeViaInviteTokenCommand,
+  ): Promise<SubscribeViaInviteTokenResponse> {
+    this.logger.log(`Subscribing user ${command.userId} via invite token`);
+
+    const inviteToken = await this.inviteTokenRepository.findByToken(
+      command.token,
+    );
+    if (!inviteToken) {
+      throw new NotFoundException("Invite link not found");
+    }
+
+    if (!inviteToken.isActive()) {
+      throw new GoneException("Este enlace de invitación ha sido revocado");
+    }
+
+    const qimela = await this.qimelaRepository.findById(inviteToken.qimelaId);
+    if (!qimela) {
+      throw new NotFoundException("Qimela not found");
+    }
+
+    if (qimela.status !== QimelaStatus.UPCOMING) {
+      throw new UnprocessableEntityException(
+        "Las suscripciones para esta qimela están cerradas",
+      );
+    }
+
+    if (qimela.creatorId === command.userId) {
+      throw new ForbiddenException(
+        "El creador no puede suscribirse a su propia qimela",
+      );
+    }
+
+    try {
+      const subscription = await this.prisma.subscription.create({
+        data: {
+          userId: command.userId,
+          qimelaId: qimela.id,
+        },
+      });
+
+      return { data: { subscriptionId: subscription.id } };
+    } catch (error) {
+      if ((error as { code?: string })?.code === "P2002") {
+        throw new ConflictException("Ya estás suscrito a esta qimela");
+      }
+      throw error;
+    }
+  }
+}

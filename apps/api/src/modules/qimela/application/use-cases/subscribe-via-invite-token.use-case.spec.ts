@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  ForbiddenException,
   GoneException,
   NotFoundException,
   UnprocessableEntityException,
@@ -123,15 +122,20 @@ describe('SubscribeViaInviteTokenUseCase', () => {
       ).rejects.toThrow(UnprocessableEntityException);
     });
 
-    it('throws ForbiddenException when userId equals creatorId', async () => {
-      // Arrange
+    it('allows the creator to subscribe to their own qimela', async () => {
       mockInviteTokenRepo.findByToken.mockResolvedValue(makeInviteToken());
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
+      mockPrisma.subscription.create.mockResolvedValue({ id: SUBSCRIPTION_ID });
 
-      // Act + Assert
-      await expect(
-        useCase.execute({ token: VALID_TOKEN, userId: CREATOR_ID }),
-      ).rejects.toThrow(ForbiddenException);
+      const result = await useCase.execute({
+        token: VALID_TOKEN,
+        userId: CREATOR_ID,
+      });
+
+      expect(mockPrisma.subscription.create).toHaveBeenCalledWith({
+        data: { userId: CREATOR_ID, qimelaId: QIMELA_ID },
+      });
+      expect(result).toEqual({ data: { subscriptionId: SUBSCRIPTION_ID } });
     });
 
     it('throws ConflictException when Prisma throws a P2002 unique constraint error', async () => {

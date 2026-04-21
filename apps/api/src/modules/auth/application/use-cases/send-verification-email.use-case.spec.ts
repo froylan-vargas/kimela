@@ -1,10 +1,7 @@
 import * as crypto from 'crypto';
 import { SendVerificationEmailUseCase } from './send-verification-email.use-case';
-import {
-  EMAIL_VERIFICATION_TOKEN_REPOSITORY,
-  EmailVerificationTokenRepository,
-} from '../../domain/email-verification-token.repository';
-import { EMAIL_SERVICE, EmailService } from '../services/email.service';
+import { EmailVerificationTokenRepository } from '../../domain/email-verification-token.repository';
+import { EmailService } from '../services/email.service';
 import { UserEntity } from '../../../users/domain/user.entity';
 import { UserRole } from '../../../users/domain/user-role.enum';
 

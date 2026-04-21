@@ -49,7 +49,7 @@ const adminUser: AuthUser = {
   emailVerifiedAt: "2026-01-01T00:00:00.000Z",
 };
 
-function makeWrapper(user: AuthUser | null = null) {
+function makeWrapper(_user: AuthUser | null = null) {
   return function Wrapper({ children }: { children: ReactNode }) {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     return (

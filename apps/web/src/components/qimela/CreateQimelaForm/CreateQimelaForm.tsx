@@ -4,7 +4,7 @@ import { useEffect, useReducer, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Sport } from "@/types/sport";
-import type { QimelaEvent, Rule, CreateQimelaBody, QimelaEventPhase } from "@/types/qimela";
+import type { QimelaEvent, Rule, CreateQimelaBody } from "@/types/qimela";
 import { qimelasApi } from "@/lib/apiClient";
 import styles from "./CreateQimelaForm.module.scss";
 

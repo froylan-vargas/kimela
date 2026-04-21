@@ -148,8 +148,7 @@ describe('AuthController', () => {
 
       // Assert
       const cookieCalls = (res.cookie as jest.Mock).mock.calls.map((c: unknown[]) => c[0]);
-      expect(cookieCalls).toContain('access_token');
-      expect(cookieCalls).toContain('refresh_token');
+      expect(cookieCalls).toEqual([]);
     });
   });
 
@@ -312,18 +311,40 @@ describe('AuthController', () => {
   // ─── POST /auth/resend-verification ────────────────────────────────────────
 
   describe('POST /auth/resend-verification', () => {
-    it('calls sendVerificationEmailUseCase.execute and returns success message', async () => {
-      // Arrange
+    it('calls sendVerificationEmailUseCase.execute and returns a neutral success message for unverified users', async () => {
       const user = makeUser();
-      mockUserRepository.findById.mockResolvedValue(user);
+      mockUserRepository.findByEmail.mockResolvedValue(user);
       mockSendVerificationEmailUseCase.execute.mockResolvedValue(undefined);
 
-      // Act
-      const result = await controller.resendVerification(MOCK_USER_PAYLOAD);
+      const result = await controller.resendVerification({ email: user.email });
 
-      // Assert
       expect(mockSendVerificationEmailUseCase.execute).toHaveBeenCalledWith(user);
-      expect(result).toEqual({ message: 'Verification email sent' });
+      expect(result).toEqual({
+        message: 'Si existe una cuenta pendiente de verificación para ese correo, te enviaremos un mensaje.',
+      });
+    });
+
+    it('does not send email for verified users and still returns a neutral response', async () => {
+      const user = makeUser({ emailVerifiedAt: new Date('2026-01-02T00:00:00Z') });
+      mockUserRepository.findByEmail.mockResolvedValue(user);
+
+      const result = await controller.resendVerification({ email: user.email });
+
+      expect(mockSendVerificationEmailUseCase.execute).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        message: 'Si existe una cuenta pendiente de verificación para ese correo, te enviaremos un mensaje.',
+      });
+    });
+
+    it('does not reveal whether the email exists', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+
+      const result = await controller.resendVerification({ email: 'missing@example.com' });
+
+      expect(mockSendVerificationEmailUseCase.execute).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        message: 'Si existe una cuenta pendiente de verificación para ese correo, te enviaremos un mensaje.',
+      });
     });
   });
 

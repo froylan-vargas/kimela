@@ -108,6 +108,56 @@
   }
 }
 
+.verificationBox {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $radius-sm;
+  background: #fff8e6;
+  border: 1px solid #f1d17a;
+}
+
+.verificationText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b540f;
+}
+
+.secondaryButton {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #d9b550;
+  border-radius: $radius-sm;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: $font-family-base;
+  color: #5f490c;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(217, 181, 80, 0.12);
+    border-color: #c9a33d;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.verificationHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6b5e40;
+}
+
 .forgotLink {
   display: block;
   text-align: center;

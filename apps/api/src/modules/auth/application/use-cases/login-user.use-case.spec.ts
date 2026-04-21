@@ -3,6 +3,7 @@ import { LoginUserUseCase } from './login-user.use-case';
 import { UserRepository } from '../../../users/domain/user.repository';
 import { UserEntity } from '../../../users/domain/user.entity';
 import { UserRole } from '../../../users/domain/user-role.enum';
+import { EmailNotVerifiedError } from '../../domain/errors/email-not-verified.error';
 import { InvalidCredentialsError } from '../../domain/errors/invalid-credentials.error';
 
 const VALID_PASSWORD = 'Password1!';
@@ -39,7 +40,7 @@ describe('LoginUserUseCase', () => {
   describe('execute', () => {
     it('returns user when credentials are valid', async () => {
       // Arrange
-      const user = makeUser();
+      const user = makeUser({ emailVerifiedAt: new Date('2026-01-02T00:00:00Z') });
       mockUserRepository.findByEmail.mockResolvedValue(user);
 
       // Act
@@ -67,6 +68,15 @@ describe('LoginUserUseCase', () => {
       // Act & Assert
       await expect(useCase.execute(user.email, 'WrongPassword1!')).rejects.toThrow(
         InvalidCredentialsError,
+      );
+    });
+
+    it('throws EmailNotVerifiedError when credentials are valid but email is not verified', async () => {
+      const user = makeUser({ emailVerifiedAt: null });
+      mockUserRepository.findByEmail.mockResolvedValue(user);
+
+      await expect(useCase.execute(user.email, VALID_PASSWORD)).rejects.toThrow(
+        EmailNotVerifiedError,
       );
     });
 

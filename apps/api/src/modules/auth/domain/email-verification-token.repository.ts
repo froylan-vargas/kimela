@@ -31,6 +31,7 @@ export class EmailVerificationTokenEntity {
 
 export interface EmailVerificationTokenRepository {
   findByHash(tokenHash: string): Promise<EmailVerificationTokenEntity | null>;
+  findLatestByUserId(userId: string): Promise<EmailVerificationTokenEntity | null>;
   create(token: EmailVerificationTokenEntity): Promise<void>;
   markUsed(id: string): Promise<void>;
   deleteByUserId(userId: string): Promise<void>;

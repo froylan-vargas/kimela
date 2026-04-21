@@ -6,6 +6,34 @@ import { useRouter } from "next/navigation";
 import { authApi, ApiError } from "@/lib/apiClient";
 import styles from "./page.module.scss";
 
+const PASSWORD_REQUIREMENTS = [
+  {
+    id: "length",
+    label: "Al menos 8 caracteres",
+    isMet: (password: string) => password.length >= 8,
+  },
+  {
+    id: "uppercase",
+    label: "Al menos una mayúscula",
+    isMet: (password: string) => /[A-Z]/.test(password),
+  },
+  {
+    id: "lowercase",
+    label: "Al menos una minúscula",
+    isMet: (password: string) => /[a-z]/.test(password),
+  },
+  {
+    id: "number",
+    label: "Al menos un número",
+    isMet: (password: string) => /\d/.test(password),
+  },
+  {
+    id: "special",
+    label: "Al menos un carácter especial",
+    isMet: (password: string) => /[\W_]/.test(password),
+  },
+] as const;
+
 function validateName(name: string): string | null {
   if (name.length < 4) return "El nombre debe tener al menos 4 caracteres";
   if (name.length > 20) return "El nombre no puede tener más de 20 caracteres";
@@ -43,6 +71,9 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const unmetPasswordRequirements = PASSWORD_REQUIREMENTS.filter(
+    (requirement) => !requirement.isMet(password)
+  );
 
   function handleNameChange(value: string) {
     // Strip spaces to enforce single word
@@ -80,7 +111,7 @@ export default function RegisterPage() {
 
     try {
       await authApi.register({ name, email, password });
-      router.push("/login");
+      router.push(`/register/success?email=${encodeURIComponent(email)}`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setError("Ya existe una cuenta con este correo");
@@ -106,7 +137,20 @@ export default function RegisterPage() {
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.field}>
-            <label htmlFor="name">Nombre para jugar </label>
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@ejemplo.com"
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="name">Nombre con el que te verán los demás</label>
             <input
               id="name"
               type="text"
@@ -121,20 +165,14 @@ export default function RegisterPage() {
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="email">Correo electrónico</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@ejemplo.com"
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div className={styles.field}>
             <label htmlFor="password">Contraseña </label>
+            <ul className={styles.hints} aria-live="polite">
+              {unmetPasswordRequirements.map((requirement) => (
+                <li key={requirement.id} className={styles.hint}>
+                  {requirement.label}
+                </li>
+              ))}
+            </ul>
             <input
               id="password"
               type="password"

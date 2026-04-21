@@ -31,6 +31,25 @@ export class PrismaEmailVerificationTokenRepository
     });
   }
 
+  async findLatestByUserId(userId: string): Promise<EmailVerificationTokenEntity | null> {
+    this.logger.debug(`Finding latest email verification token for user: ${userId}`);
+    const record = await this.prisma.emailVerificationToken.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!record) return null;
+
+    return new EmailVerificationTokenEntity({
+      id: record.id,
+      tokenHash: record.tokenHash,
+      userId: record.userId,
+      expiresAt: record.expiresAt,
+      usedAt: record.usedAt,
+      createdAt: record.createdAt,
+    });
+  }
+
   async create(token: EmailVerificationTokenEntity): Promise<void> {
     this.logger.debug(`Creating email verification token for user: ${token.userId}`);
     await this.prisma.emailVerificationToken.create({

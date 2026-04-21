@@ -76,9 +76,18 @@
 }
 
 .hint {
+  margin: 0;
   font-weight: 400;
   font-size: 12px;
   color: $color-text-secondary;
+}
+
+.hints {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .error {

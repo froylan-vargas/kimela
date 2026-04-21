@@ -29,10 +29,22 @@ export class ApiError extends Error {
 async function parseError(res: Response): Promise<{ message: string; code?: string }> {
   try {
     const body = await res.json();
-    const message = Array.isArray(body.message)
-      ? body.message.join(", ")
-      : (body.message ?? res.statusText);
-    return { message, code: typeof body.code === "string" ? body.code : undefined };
+    const nestedMessage =
+      body && typeof body.message === "object" && body.message !== null
+        ? body.message
+        : null;
+
+    const messageSource = nestedMessage?.message ?? body.message;
+    const message = Array.isArray(messageSource)
+      ? messageSource.join(", ")
+      : (typeof messageSource === "string" ? messageSource : res.statusText);
+
+    const code =
+      typeof body.code === "string"
+        ? body.code
+        : (typeof nestedMessage?.code === "string" ? nestedMessage.code : undefined);
+
+    return { message, code };
   } catch {
     return { message: res.statusText };
   }
@@ -134,8 +146,11 @@ export const authApi = {
     });
   },
 
-  resendVerification(): Promise<void> {
-    return apiFetch<void>("/auth/resend-verification", { method: "POST" });
+  resendVerification(email: string): Promise<void> {
+    return apiFetch<void>("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
   },
 
   forgotPassword(email: string): Promise<void> {

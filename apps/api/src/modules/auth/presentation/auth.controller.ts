@@ -28,6 +28,7 @@ import { RegisterDto } from '../application/dtos/register.dto';
 import { ConfirmEmailDto } from '../application/dtos/confirm-email.dto';
 import { ForgotPasswordDto } from '../application/dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../application/dtos/reset-password.dto';
+import { ResendVerificationDto } from '../application/dtos/resend-verification.dto';
 import { AuthUserDto } from '../application/dtos/auth-response.dto';
 import {
   REFRESH_TOKEN_REPOSITORY,
@@ -86,8 +87,6 @@ export class AuthController {
       }
       throw error;
     }
-
-    await this.setAuthCookies(res, user);
 
     const body: AuthUserDto = {
       id: user.id,
@@ -204,19 +203,23 @@ export class AuthController {
     return { message: 'Email confirmed successfully' };
   }
 
+  @Public()
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async resendVerification(
-    @CurrentUser() payload: CurrentUserPayload,
+    @Body() dto: ResendVerificationDto,
   ): Promise<{ message: string }> {
-    this.logger.log(`POST /auth/resend-verification - user: ${payload.id}`);
-    const user = await this.userRepository.findById(payload.id);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+    this.logger.log(`POST /auth/resend-verification - email: ${dto.email}`);
+    const user = await this.userRepository.findByEmail(dto.email);
+
+    if (user && !user.emailVerifiedAt) {
+      await this.sendVerificationEmailUseCase.execute(user);
     }
-    await this.sendVerificationEmailUseCase.execute(user);
-    return { message: 'Verification email sent' };
+
+    return {
+      message: 'Si existe una cuenta pendiente de verificación para ese correo, te enviaremos un mensaje.',
+    };
   }
 
   @Public()

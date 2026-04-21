@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  ForbiddenException,
   GoneException,
   Inject,
   Injectable,
@@ -66,12 +65,6 @@ export class SubscribeViaInviteTokenUseCase {
     if (qimela.status !== QimelaStatus.UPCOMING) {
       throw new UnprocessableEntityException(
         "Las suscripciones para esta qimela están cerradas",
-      );
-    }
-
-    if (qimela.creatorId === command.userId) {
-      throw new ForbiddenException(
-        "El creador no puede suscribirse a su propia qimela",
       );
     }
 

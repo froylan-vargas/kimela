@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import LoginPage from "./page";
-import { ApiError } from "@/lib/apiClient";
+import { ApiError, authApi } from "@/lib/apiClient";
 
 const mockPush = vi.fn();
 const mockGetSearchParam = vi.fn().mockReturnValue(null);
@@ -14,6 +14,20 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/hooks/useAuth", () => ({
   useAuth: vi.fn().mockReturnValue({ login: vi.fn() }),
 }));
+
+vi.mock("@/lib/apiClient", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/apiClient")>(
+    "@/lib/apiClient"
+  );
+
+  return {
+    ...actual,
+    authApi: {
+      ...actual.authApi,
+      resendVerification: vi.fn(),
+    },
+  };
+});
 
 vi.mock("next/link", () => ({
   default: ({
@@ -129,6 +143,85 @@ describe("LoginPage", () => {
 
     expect(
       await screen.findByText("Correo o contraseña incorrectos"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows verification guidance and resend button when login fails because email is not verified", async () => {
+    const mockLogin = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError(401, "Email not verified", "EMAIL_NOT_VERIFIED")
+      );
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: mockLogin,
+      logout: vi.fn(),
+    });
+
+    render(<LoginPage />);
+
+    await act(async () => {
+      fireEvent.change(await screen.findByLabelText(/correo electrónico/i), {
+        target: { value: "pending@example.com" },
+      });
+      fireEvent.change(await screen.findByLabelText(/contraseña/i), {
+        target: { value: "password123" },
+      });
+      fireEvent.click(
+        await screen.findByRole("button", { name: /iniciar sesión/i })
+      );
+    });
+
+    expect(
+      await screen.findByText(/tu correo todavía no ha sido verificado/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /reenviar correo de verificación/i })
+    ).toBeInTheDocument();
+  });
+
+  it("resends verification email from login when account is pending verification", async () => {
+    const mockLogin = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError(401, "Email not verified", "EMAIL_NOT_VERIFIED")
+      );
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: mockLogin,
+      logout: vi.fn(),
+    });
+    vi.mocked(authApi.resendVerification).mockResolvedValue(undefined);
+
+    render(<LoginPage />);
+
+    await act(async () => {
+      fireEvent.change(await screen.findByLabelText(/correo electrónico/i), {
+        target: { value: "pending@example.com" },
+      });
+      fireEvent.change(await screen.findByLabelText(/contraseña/i), {
+        target: { value: "password123" },
+      });
+      fireEvent.click(
+        await screen.findByRole("button", { name: /iniciar sesión/i })
+      );
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /reenviar correo de verificación/i })
+      );
+    });
+
+    expect(authApi.resendVerification).toHaveBeenCalledWith(
+      "pending@example.com"
+    );
+    expect(
+      await screen.findByText(/si tu cuenta sigue pendiente de verificación/i)
     ).toBeInTheDocument();
   });
 

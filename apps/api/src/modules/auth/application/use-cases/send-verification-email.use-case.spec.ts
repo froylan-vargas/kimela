@@ -1,6 +1,9 @@
 import * as crypto from 'crypto';
 import { SendVerificationEmailUseCase } from './send-verification-email.use-case';
-import { EmailVerificationTokenRepository } from '../../domain/email-verification-token.repository';
+import {
+  EmailVerificationTokenEntity,
+  EmailVerificationTokenRepository,
+} from '../../domain/email-verification-token.repository';
 import { EmailService } from '../services/email.service';
 import { UserEntity } from '../../../users/domain/user.entity';
 import { UserRole } from '../../../users/domain/user-role.enum';
@@ -26,6 +29,7 @@ describe('SendVerificationEmailUseCase', () => {
   beforeEach(() => {
     mockTokenRepo = {
       findByHash: jest.fn(),
+      findLatestByUserId: jest.fn(),
       create: jest.fn(),
       markUsed: jest.fn(),
       deleteByUserId: jest.fn(),
@@ -43,6 +47,7 @@ describe('SendVerificationEmailUseCase', () => {
     it('deletes existing tokens for the user before creating a new one', async () => {
       // Arrange
       const user = makeUser();
+      mockTokenRepo.findLatestByUserId.mockResolvedValue(null);
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
       mockEmailService.sendVerificationEmail.mockResolvedValue(undefined);
@@ -61,6 +66,7 @@ describe('SendVerificationEmailUseCase', () => {
       // Arrange
       const user = makeUser();
       const beforeCall = Date.now();
+      mockTokenRepo.findLatestByUserId.mockResolvedValue(null);
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
       mockEmailService.sendVerificationEmail.mockResolvedValue(undefined);
@@ -82,6 +88,7 @@ describe('SendVerificationEmailUseCase', () => {
     it('stores a SHA-256 hash, not the raw token', async () => {
       // Arrange
       const user = makeUser();
+      mockTokenRepo.findLatestByUserId.mockResolvedValue(null);
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
 
@@ -109,6 +116,7 @@ describe('SendVerificationEmailUseCase', () => {
     it('calls emailService.sendVerificationEmail with correct email and name', async () => {
       // Arrange
       const user = makeUser({ email: 'user@qimela.com', name: 'QimelaUser' });
+      mockTokenRepo.findLatestByUserId.mockResolvedValue(null);
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
       mockEmailService.sendVerificationEmail.mockResolvedValue(undefined);
@@ -127,6 +135,7 @@ describe('SendVerificationEmailUseCase', () => {
     it('the confirmUrl passed to emailService contains /confirm-email?token=', async () => {
       // Arrange
       const user = makeUser();
+      mockTokenRepo.findLatestByUserId.mockResolvedValue(null);
       mockTokenRepo.deleteByUserId.mockResolvedValue(undefined);
       mockTokenRepo.create.mockResolvedValue(undefined);
       mockEmailService.sendVerificationEmail.mockResolvedValue(undefined);
@@ -137,6 +146,26 @@ describe('SendVerificationEmailUseCase', () => {
       // Assert
       const confirmUrl: string = mockEmailService.sendVerificationEmail.mock.calls[0][2];
       expect(confirmUrl).toContain('/confirm-email?token=');
+    });
+
+    it('skips sending a new email while resend cooldown is active', async () => {
+      const user = makeUser();
+      mockTokenRepo.findLatestByUserId.mockResolvedValue(
+        new EmailVerificationTokenEntity({
+          id: 'token-1',
+          tokenHash: 'hash',
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 60_000),
+          usedAt: null,
+          createdAt: new Date(Date.now() - 30_000),
+        }),
+      );
+
+      await useCase.execute(user);
+
+      expect(mockTokenRepo.deleteByUserId).not.toHaveBeenCalled();
+      expect(mockTokenRepo.create).not.toHaveBeenCalled();
+      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
   });
 });

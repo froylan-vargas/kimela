@@ -4,7 +4,7 @@ import { Suspense, type FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/lib/apiClient";
+import { authApi, ApiError } from "@/lib/apiClient";
 import styles from "./page.module.scss";
 
 function LoginForm() {
@@ -15,11 +15,16 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setNeedsVerification(false);
+    setResendMessage(null);
     setIsSubmitting(true);
 
     try {
@@ -27,7 +32,16 @@ function LoginForm() {
       const redirect = searchParams.get("redirect") ?? "/dashboard";
       router.push(redirect);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
+      if (
+        err instanceof ApiError &&
+        err.status === 401 &&
+        err.code === "EMAIL_NOT_VERIFIED"
+      ) {
+        setNeedsVerification(true);
+        setError(
+          "Tu correo todavía no ha sido verificado. Revisa tu bandeja de entrada o vuelve a solicitar el mensaje de confirmación."
+        );
+      } else if (err instanceof ApiError && err.status === 401) {
         setError("Correo o contraseña incorrectos");
       } else {
         console.error('[LoginPage] Unexpected login error', err);
@@ -35,6 +49,27 @@ function LoginForm() {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!email) {
+      setResendMessage("Escribe tu correo para reenviar la verificación.");
+      return;
+    }
+
+    setIsResending(true);
+    setResendMessage(null);
+
+    try {
+      await authApi.resendVerification(email);
+      setResendMessage(
+        "Si tu cuenta sigue pendiente de verificación, te enviamos un nuevo correo. Revisa también spam o correo no deseado."
+      );
+    } catch {
+      setResendMessage("No se pudo procesar la solicitud. Inténtalo de nuevo.");
+    } finally {
+      setIsResending(false);
     }
   }
 
@@ -76,6 +111,25 @@ function LoginForm() {
       >
         {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
       </button>
+
+      {needsVerification && (
+        <div className={styles.verificationBox}>
+          <p className={styles.verificationText}>
+            Necesitas confirmar tu correo antes de entrar.
+          </p>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={handleResend}
+            disabled={isResending}
+          >
+            {isResending ? "Enviando..." : "Reenviar correo de verificación"}
+          </button>
+          {resendMessage && (
+            <p className={styles.verificationHint}>{resendMessage}</p>
+          )}
+        </div>
+      )}
 
       <Link href="/forgot-password" className={styles.forgotLink}>
         ¿Olvidaste tu contraseña?

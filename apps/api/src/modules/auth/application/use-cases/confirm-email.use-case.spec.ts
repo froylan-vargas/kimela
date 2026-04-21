@@ -28,6 +28,7 @@ describe('ConfirmEmailUseCase', () => {
   beforeEach(() => {
     mockTokenRepo = {
       findByHash: jest.fn(),
+      findLatestByUserId: jest.fn(),
       create: jest.fn(),
       markUsed: jest.fn(),
       deleteByUserId: jest.fn(),

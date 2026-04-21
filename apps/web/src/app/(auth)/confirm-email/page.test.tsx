@@ -24,10 +24,6 @@ vi.mock("@/lib/apiClient", () => ({
   },
 }));
 
-vi.mock("@/hooks/useAuth", () => ({
-  useAuth: vi.fn().mockReturnValue({ user: null }),
-}));
-
 vi.mock("next/link", () => ({
   default: ({
     href,
@@ -45,29 +41,12 @@ vi.mock("next/link", () => ({
 }));
 
 import { authApi, ApiError } from "@/lib/apiClient";
-import { useAuth } from "@/hooks/useAuth";
 import ConfirmEmailPage from "./page";
-import type { AuthUser } from "@/types/auth";
-
-const mockUser: AuthUser = {
-  id: "u1",
-  name: "Test User",
-  email: "test@example.com",
-  role: "USER",
-  emailVerifiedAt: null,
-};
 
 describe("ConfirmEmailPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetSearchParam.mockReturnValue("valid-token");
-    vi.mocked(useAuth).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-    });
   });
 
   it("shows 'Verificando...' while loading", async () => {
@@ -111,42 +90,17 @@ describe("ConfirmEmailPage", () => {
     });
   });
 
-  it("shows 'Reenviar correo de verificación' button when user is authenticated and token is invalid", async () => {
+  it("shows 'Iniciar sesión' link when user is not authenticated and token is invalid", async () => {
     vi.mocked(authApi.confirmEmail).mockRejectedValue(
       new ApiError(400, "Bad Request"),
     );
-    vi.mocked(useAuth).mockReturnValue({
-      user: mockUser,
-      isAuthenticated: true,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-    });
 
     render(<ConfirmEmailPage />);
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /reenviar correo/i }),
+        screen.getByText(/vuelve a iniciar sesión para solicitar un nuevo correo/i),
       ).toBeInTheDocument();
-    });
-  });
-
-  it("shows 'Iniciar sesión' link when user is not authenticated and token is invalid", async () => {
-    vi.mocked(authApi.confirmEmail).mockRejectedValue(
-      new ApiError(400, "Bad Request"),
-    );
-    vi.mocked(useAuth).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-    });
-
-    render(<ConfirmEmailPage />);
-
-    await waitFor(() => {
       const loginLink = screen.getByText("Iniciar sesión");
       expect(loginLink).toBeInTheDocument();
       expect(loginLink.closest("a")).toHaveAttribute("href", "/login");

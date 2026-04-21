@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../../../users/domain/user.entity';
 import { USER_REPOSITORY, UserRepository } from '../../../users/domain/user.repository';
+import { EmailNotVerifiedError } from '../../domain/errors/email-not-verified.error';
 import { InvalidCredentialsError } from '../../domain/errors/invalid-credentials.error';
 
 @Injectable()
@@ -24,6 +25,10 @@ export class LoginUserUseCase {
     const passwordMatches = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatches) {
       throw new InvalidCredentialsError();
+    }
+
+    if (!user.emailVerifiedAt) {
+      throw new EmailNotVerifiedError();
     }
 
     return user;

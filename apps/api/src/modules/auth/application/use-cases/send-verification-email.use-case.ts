@@ -9,6 +9,9 @@ import {
 import { EMAIL_SERVICE, EmailService } from '../services/email.service';
 import { UserEntity } from '../../../users/domain/user.entity';
 
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+const EMAIL_VERIFICATION_RESEND_COOLDOWN_MS = 60 * 1000;
+
 @Injectable()
 export class SendVerificationEmailUseCase {
   private readonly logger = new Logger(SendVerificationEmailUseCase.name);
@@ -23,6 +26,12 @@ export class SendVerificationEmailUseCase {
   async execute(user: UserEntity): Promise<void> {
     this.logger.log(`Sending verification email to user: ${user.id}`);
 
+    const latestToken = await this.tokenRepo.findLatestByUserId(user.id);
+    if (latestToken && Date.now() - latestToken.createdAt.getTime() < EMAIL_VERIFICATION_RESEND_COOLDOWN_MS) {
+      this.logger.warn(`Skipping verification email due to cooldown for user: ${user.id}`);
+      return;
+    }
+
     await this.tokenRepo.deleteByUserId(user.id);
 
     const rawToken = uuidv4();
@@ -33,7 +42,7 @@ export class SendVerificationEmailUseCase {
         id: uuidv4(),
         tokenHash,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
         usedAt: null,
         createdAt: new Date(),
       }),

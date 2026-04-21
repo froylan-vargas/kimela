@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { authApi, ApiError } from "@/lib/apiClient";
 import styles from "./page.module.scss";
 
@@ -11,13 +10,9 @@ type Status = "loading" | "success" | "error" | "no-token";
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams();
-  const { user } = useAuth();
   const token = searchParams.get("token");
 
   const [status, setStatus] = useState<Status>(token ? "loading" : "no-token");
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendSent, setResendSent] = useState(false);
-  const [resendError, setResendError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -33,19 +28,6 @@ function ConfirmEmailContent() {
         }
       });
   }, [token]);
-
-  async function handleResend() {
-    setResendLoading(true);
-    setResendError(null);
-    try {
-      await authApi.resendVerification();
-      setResendSent(true);
-    } catch {
-      setResendError("No se pudo enviar el correo. Inténtalo de nuevo.");
-    } finally {
-      setResendLoading(false);
-    }
-  }
 
   if (status === "loading") {
     return (
@@ -94,33 +76,13 @@ function ConfirmEmailContent() {
           <div className={styles.error}>
             El enlace ha expirado o no es válido.
           </div>
-
-          {user ? (
-            resendSent ? (
-              <p className={styles.successText}>
-                Correo de verificación enviado. Revisa tu bandeja de entrada.
-              </p>
-            ) : (
-              <>
-                {resendError && (
-                  <div className={styles.error}>{resendError}</div>
-                )}
-                <button
-                  className={styles.submit}
-                  onClick={handleResend}
-                  disabled={resendLoading}
-                >
-                  {resendLoading
-                    ? "Enviando..."
-                    : "Reenviar correo de verificación"}
-                </button>
-              </>
-            )
-          ) : (
-            <Link href="/login" className={styles.actionLink}>
-              Iniciar sesión
-            </Link>
-          )}
+          <p className={styles.statusText}>
+            Vuelve a iniciar sesión para solicitar un nuevo correo de
+            verificación.
+          </p>
+          <Link href="/login" className={styles.actionLink}>
+            Iniciar sesión
+          </Link>
         </div>
       </div>
     </div>

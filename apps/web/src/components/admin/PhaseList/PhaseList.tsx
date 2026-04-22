@@ -39,6 +39,7 @@ interface SortablePhaseItemProps {
   onDelete: (phaseId: string) => void;
   onActivate: (phaseId: string) => void;
   onComplete: (phaseId: string) => void;
+  canActivate: boolean;
   canComplete: boolean;
 }
 
@@ -49,6 +50,7 @@ function SortablePhaseItem({
   onDelete,
   onActivate,
   onComplete,
+  canActivate,
   canComplete,
 }: SortablePhaseItemProps) {
   const {
@@ -106,7 +108,14 @@ function SortablePhaseItem({
           className={styles.activateBtn}
           aria-label={`Iniciar fase ${phase.name}`}
           onClick={() => onActivate(phase.id)}
+          disabled={!canActivate}
+          title={!canActivate ? "Ya existe una fase activa en este evento" : undefined}
         >
+          {!canActivate && (
+            <span className={styles.disabledActionIcon} aria-hidden="true">
+              <BlockedIcon />
+            </span>
+          )}
           Iniciar
         </button>
       )}
@@ -124,14 +133,16 @@ function SortablePhaseItem({
         </button>
       )}
 
-      <button
-        type="button"
-        className={styles.deleteBtn}
-        aria-label={`Eliminar fase ${phase.name}`}
-        onClick={() => onDelete(phase.id)}
-      >
-        ×
-      </button>
+      {phase.status === "UPCOMING" && (
+        <button
+          type="button"
+          className={styles.deleteBtn}
+          aria-label={`Eliminar fase ${phase.name}`}
+          onClick={() => onDelete(phase.id)}
+        >
+          ×
+        </button>
+      )}
     </li>
   );
 }
@@ -149,6 +160,15 @@ function DragIcon() {
   );
 }
 
+function BlockedIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M3.5 8.5L8.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 interface PhaseListProps {
   phases: Phase[];
   selectedPhaseId?: string;
@@ -157,6 +177,7 @@ interface PhaseListProps {
   onDelete: (phaseId: string) => void;
   onActivate: (phaseId: string) => void;
   onComplete: (phaseId: string) => void;
+  canActivatePhase: (phase: Phase) => boolean;
   canCompletePhase: (phase: Phase) => boolean;
 }
 
@@ -168,6 +189,7 @@ export default function PhaseList({
   onDelete,
   onActivate,
   onComplete,
+  canActivatePhase,
   canCompletePhase,
 }: PhaseListProps) {
   const sensors = useSensors(
@@ -219,6 +241,7 @@ export default function PhaseList({
               onDelete={onDelete}
               onActivate={onActivate}
               onComplete={onComplete}
+              canActivate={canActivatePhase(phase)}
               canComplete={canCompletePhase(phase)}
             />
           ))}

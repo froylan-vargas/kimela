@@ -1,0 +1,85 @@
+@use "../../../styles/variables" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-md;
+}
+
+.eyebrow,
+.groupEyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-text-secondary;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: $color-text-main;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: $color-text-secondary;
+}
+
+.link {
+  color: $color-text-main;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.groups,
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.groupHeader {
+  h3 {
+    margin: 0;
+    color: $color-text-main;
+  }
+}
+
+.state {
+  padding: $spacing-lg;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: $color-text-secondary;
+}
+
+@media (max-width: 720px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}

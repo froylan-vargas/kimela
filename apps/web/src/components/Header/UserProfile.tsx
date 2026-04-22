@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Icon from "@/components/Icon/Icon";
 import { useAuth } from "@/hooks/useAuth";
 import styles from "./UserProfile.module.scss";
 
@@ -29,7 +30,7 @@ export default function UserProfile({ name }: UserProfileProps) {
 
   return (
     <div className={styles.userProfile}>
-      <i className={`ph-bold ph-bell ${styles.bellIcon}`} />
+      <Icon name="bell" className={styles.bellIcon} />
       <div className={styles.avatar} title={name}>
         {getInitials(name)}
       </div>
@@ -39,7 +40,7 @@ export default function UserProfile({ name }: UserProfileProps) {
         aria-label="Sign out"
         title="Sign out"
       >
-        <i className="ph-bold ph-sign-out" />
+        <Icon name="sign-out" />
       </button>
     </div>
   );

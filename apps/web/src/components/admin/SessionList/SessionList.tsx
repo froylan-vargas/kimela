@@ -33,6 +33,9 @@ function ContenderAvatar({ name, imgUrl }: ContenderAvatarProps) {
   return (
     <div className={styles.avatar}>
       {imgUrl ? (
+        // Remote contender images come from arbitrary catalog URLs, so we intentionally
+        // render them directly instead of forcing Next Image remote configuration here.
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={imgUrl} alt={name} className={styles.avatarImg} />
       ) : (
         <span className={styles.avatarFallback} aria-hidden="true" />

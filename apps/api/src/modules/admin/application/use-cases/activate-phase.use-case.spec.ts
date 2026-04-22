@@ -2,6 +2,7 @@ import { NotFoundException, UnprocessableEntityException } from '@nestjs/common'
 import { ActivatePhaseUseCase } from './activate-phase.use-case';
 import { PhaseRepository } from '../../domain/phase.repository';
 import { PhaseEntity } from '../../domain/phase.entity';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const makePhase = (overrides: Partial<PhaseEntity> = {}): PhaseEntity =>
   new PhaseEntity({
@@ -34,7 +35,7 @@ describe('ActivatePhaseUseCase', () => {
       qimela: { updateMany: jest.fn().mockResolvedValue({ count: 0 }) },
     };
 
-    useCase = new ActivatePhaseUseCase(mockPhaseRepository, mockPrisma as any);
+    useCase = new ActivatePhaseUseCase(mockPhaseRepository, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {
@@ -66,10 +67,24 @@ describe('ActivatePhaseUseCase', () => {
       );
     });
 
+    it('throws UnprocessableEntityException when another phase in the event is ACTIVE', async () => {
+      mockPhaseRepository.findById.mockResolvedValue(makePhase({ status: 'UPCOMING' }));
+      mockPhaseRepository.findByEvent.mockResolvedValue([
+        makePhase({ id: 'phase-1', status: 'UPCOMING' }),
+        makePhase({ id: 'phase-2', status: 'ACTIVE', order: 2 }),
+      ]);
+
+      await expect(useCase.execute({ phaseId: 'phase-1' })).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+      expect(mockPhaseRepository.updateStatus).not.toHaveBeenCalled();
+    });
+
     it('updates phase status to ACTIVE when current status is UPCOMING', async () => {
       // Arrange
       const updatedPhase = makePhase({ status: 'ACTIVE' });
       mockPhaseRepository.findById.mockResolvedValue(makePhase({ status: 'UPCOMING' }));
+      mockPhaseRepository.findByEvent.mockResolvedValue([makePhase({ status: 'UPCOMING' })]);
       mockPhaseRepository.updateStatus.mockResolvedValue(updatedPhase);
 
       // Act
@@ -83,6 +98,7 @@ describe('ActivatePhaseUseCase', () => {
       // Arrange
       const updatedPhase = makePhase({ status: 'ACTIVE' });
       mockPhaseRepository.findById.mockResolvedValue(makePhase({ status: 'UPCOMING' }));
+      mockPhaseRepository.findByEvent.mockResolvedValue([makePhase({ status: 'UPCOMING' })]);
       mockPhaseRepository.updateStatus.mockResolvedValue(updatedPhase);
 
       // Act
@@ -99,6 +115,7 @@ describe('ActivatePhaseUseCase', () => {
       // Arrange
       const updatedPhase = makePhase({ status: 'ACTIVE' });
       mockPhaseRepository.findById.mockResolvedValue(makePhase({ status: 'UPCOMING' }));
+      mockPhaseRepository.findByEvent.mockResolvedValue([makePhase({ status: 'UPCOMING' })]);
       mockPhaseRepository.updateStatus.mockResolvedValue(updatedPhase);
 
       // Act

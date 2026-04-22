@@ -1,4 +1,5 @@
 import { GetEventsForQimelaUseCase } from './get-events-for-qimela.use-case';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const SPORT_ID = 'sport-uuid';
 
@@ -30,7 +31,7 @@ describe('GetEventsForQimelaUseCase', () => {
 
   beforeEach(() => {
     mockPrisma = { event: { findMany: jest.fn() } };
-    useCase = new GetEventsForQimelaUseCase(mockPrisma as any);
+    useCase = new GetEventsForQimelaUseCase(mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

@@ -3,6 +3,7 @@ import { GetQimelaByIdUseCase } from './get-qimela-by-id.use-case';
 import { QimelaRepository } from '../../domain/qimela.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const QIMELA_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const CREATOR_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
@@ -48,7 +49,7 @@ describe('GetQimelaByIdUseCase', () => {
       qimelaRule: { findMany: jest.fn().mockResolvedValue([]) },
     };
 
-    useCase = new GetQimelaByIdUseCase(mockQimelaRepository, mockPrisma as any);
+    useCase = new GetQimelaByIdUseCase(mockQimelaRepository, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

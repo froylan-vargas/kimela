@@ -91,6 +91,7 @@ export default function CreateQimelaForm() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const sportId = state.sport?.id ?? null;
 
   useEffect(() => {
     setSportsLoading(true);
@@ -103,16 +104,16 @@ export default function CreateQimelaForm() {
   }, []);
 
   useEffect(() => {
-    if (!state.sport) {
+    if (!sportId) {
       setEvents([]);
       return;
     }
     setEventsLoading(true);
     qimelasApi
-      .getEvents(state.sport.id)
+      .getEvents(sportId)
       .then((res) => setEvents(res.data))
       .finally(() => setEventsLoading(false));
-  }, [state.sport?.id]);
+  }, [sportId]);
 
   const filteredRules = state.sport
     ? allRules.filter((r) => r.sessionFormat === state.sport!.sessionFormat)

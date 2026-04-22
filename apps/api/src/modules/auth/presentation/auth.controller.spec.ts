@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthController } from './auth.controller';
 import { RegisterUserUseCase } from '../application/use-cases/register-user.use-case';
 import { RefreshTokenUseCase } from '../application/use-cases/refresh-token.use-case';
@@ -18,6 +18,24 @@ import { CurrentUserPayload } from './decorators/current-user.decorator';
 import { EmailAlreadyExistsError } from '../domain/errors/email-already-exists.error';
 import { InvalidVerificationTokenError } from '../domain/errors/invalid-verification-token.error';
 import { InvalidResetTokenError } from '../domain/errors/invalid-reset-token.error';
+import { RegisterDto } from '../application/dtos/register.dto';
+
+type AuthenticatedRequest = Request & { user: UserEntity };
+
+function makeLoginRequest(user: UserEntity): AuthenticatedRequest {
+  return {
+    user,
+    cookies: {},
+    signedCookies: {},
+  } as unknown as AuthenticatedRequest;
+}
+
+function makeCookieRequest(cookies: Record<string, string>): Request {
+  return {
+    cookies,
+    signedCookies: {},
+  } as unknown as Request;
+}
 
 function makeMockRes() {
   const res = {
@@ -97,7 +115,7 @@ describe('AuthController', () => {
   // ─── POST /auth/register ────────────────────────────────────────────────────
 
   describe('POST /auth/register', () => {
-    const registerDto = {
+    const registerDto: RegisterDto = {
       email: 'new@example.com',
       name: 'NewUser',
       password: 'Password1!',
@@ -112,7 +130,7 @@ describe('AuthController', () => {
       const res = makeMockRes();
 
       // Act
-      await controller.register(registerDto as any, res);
+      await controller.register(registerDto, res);
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(201);
@@ -132,7 +150,7 @@ describe('AuthController', () => {
       const res = makeMockRes();
 
       // Act & Assert
-      await expect(controller.register(registerDto as any, res)).rejects.toThrow(ConflictException);
+      await expect(controller.register(registerDto, res)).rejects.toThrow(ConflictException);
     });
 
     it('sets access_token and refresh_token cookies on success', async () => {
@@ -144,7 +162,7 @@ describe('AuthController', () => {
       const res = makeMockRes();
 
       // Act
-      await controller.register(registerDto as any, res);
+      await controller.register(registerDto, res);
 
       // Assert
       const cookieCalls = (res.cookie as jest.Mock).mock.calls.map((c: unknown[]) => c[0]);
@@ -160,7 +178,7 @@ describe('AuthController', () => {
       const user = makeUser();
       mockRefreshTokenRepository.create.mockResolvedValue(undefined);
       mockJwtService.sign.mockReturnValue('mock-access-token');
-      const req = { user } as any;
+      const req = makeLoginRequest(user);
       const res = makeMockRes();
 
       // Act
@@ -182,7 +200,7 @@ describe('AuthController', () => {
       const user = makeUser();
       mockRefreshTokenRepository.create.mockResolvedValue(undefined);
       mockJwtService.sign.mockReturnValue('mock-access-token');
-      const req = { user } as any;
+      const req = makeLoginRequest(user);
       const res = makeMockRes();
 
       // Act
@@ -204,7 +222,7 @@ describe('AuthController', () => {
       mockRefreshTokenUseCase.execute.mockResolvedValue({ userId: user.id, newRefreshToken: 'new-token' });
       mockUserRepository.findById.mockResolvedValue(user);
       mockJwtService.sign.mockReturnValue('mock-access-token');
-      const req = { cookies: { refresh_token: 'valid-refresh-token' } } as any;
+      const req = makeCookieRequest({ refresh_token: 'valid-refresh-token' });
       const res = makeMockRes();
 
       // Act
@@ -219,7 +237,7 @@ describe('AuthController', () => {
 
     it('throws UnauthorizedException when no refresh token cookie', async () => {
       // Arrange
-      const req = { cookies: {} } as any;
+      const req = makeCookieRequest({});
       const res = makeMockRes();
 
       // Act & Assert
@@ -233,7 +251,7 @@ describe('AuthController', () => {
     it('returns 204 and clears cookies', async () => {
       // Arrange
       mockLogoutUserUseCase.execute.mockResolvedValue(undefined);
-      const req = { cookies: { refresh_token: 'some-token' } } as any;
+      const req = makeCookieRequest({ refresh_token: 'some-token' });
       const res = makeMockRes();
 
       // Act
@@ -248,7 +266,7 @@ describe('AuthController', () => {
 
     it('does not throw when no refresh token cookie is present', async () => {
       // Arrange
-      const req = { cookies: {} } as any;
+      const req = makeCookieRequest({});
       const res = makeMockRes();
 
       // Act & Assert

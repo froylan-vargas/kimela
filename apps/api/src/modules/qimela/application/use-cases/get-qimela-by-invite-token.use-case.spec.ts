@@ -2,6 +2,7 @@ import { GoneException, NotFoundException } from '@nestjs/common';
 import { GetQimelaByInviteTokenUseCase } from './get-qimela-by-invite-token.use-case';
 import { InviteTokenRepository } from '../../domain/invite-token.repository';
 import { InviteTokenEntity } from '../../domain/invite-token.entity';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const QIMELA_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const VALID_TOKEN = 'a'.repeat(64);
@@ -36,7 +37,7 @@ describe('GetQimelaByInviteTokenUseCase', () => {
 
     useCase = new GetQimelaByInviteTokenUseCase(
       mockInviteTokenRepository,
-      mockPrismaService as any,
+      mockPrismaService as unknown as PrismaService,
     );
   });
 

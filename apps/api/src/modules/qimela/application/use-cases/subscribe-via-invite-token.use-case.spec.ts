@@ -10,6 +10,7 @@ import { QimelaRepository } from '../../domain/qimela.repository';
 import { InviteTokenEntity } from '../../domain/invite-token.entity';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const QIMELA_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const CREATOR_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
@@ -75,7 +76,7 @@ describe('SubscribeViaInviteTokenUseCase', () => {
     useCase = new SubscribeViaInviteTokenUseCase(
       mockInviteTokenRepo,
       mockQimelaRepo,
-      mockPrisma as any,
+      mockPrisma as unknown as PrismaService,
     );
   });
 

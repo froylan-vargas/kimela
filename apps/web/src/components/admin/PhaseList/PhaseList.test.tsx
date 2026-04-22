@@ -49,6 +49,7 @@ const defaultProps = {
   onDelete: vi.fn(),
   onActivate: vi.fn(),
   onComplete: vi.fn(),
+  canActivatePhase: () => true,
   canCompletePhase: () => true,
 };
 

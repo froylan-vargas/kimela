@@ -5,6 +5,7 @@ import { RuleRepository } from '../../domain/rule.repository';
 import { RuleEntity } from '../../domain/rule.entity';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -75,7 +76,7 @@ describe('CreateQimelaUseCase', () => {
     useCase = new CreateQimelaUseCase(
       mockQimelaRepository,
       mockRuleRepository,
-      mockPrisma as any,
+      mockPrisma as unknown as PrismaService,
     );
   });
 
@@ -98,7 +99,7 @@ describe('CreateQimelaUseCase', () => {
 
     it('throws UnprocessableEntityException when points are below rule minimum', async () => {
       // Arrange
-      mockRuleRepository.findByIds.mockResolvedValue([makeRule({ minPoints: 4 } as any)]);
+      mockRuleRepository.findByIds.mockResolvedValue([makeRule({ minPoints: 4 })]);
 
       // Act + Assert
       await expect(
@@ -108,7 +109,7 @@ describe('CreateQimelaUseCase', () => {
 
     it('throws UnprocessableEntityException when points exceed rule maximum', async () => {
       // Arrange
-      mockRuleRepository.findByIds.mockResolvedValue([makeRule({ maxPoints: 2 } as any)]);
+      mockRuleRepository.findByIds.mockResolvedValue([makeRule({ maxPoints: 2 })]);
 
       // Act + Assert
       await expect(

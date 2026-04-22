@@ -7,10 +7,14 @@ import { GetRulesUseCase, GetRulesResponse } from '../application/use-cases/get-
 import { CreateQimelaUseCase, CreateQimelaResponse } from '../application/use-cases/create-qimela.use-case';
 import { UpdateQimelaUseCase, UpdateQimelaResponse } from '../application/use-cases/update-qimela.use-case';
 import { PaginatedQimelaResponse } from '../application/dtos/qimela.dto';
+import { GetUpcomingSessionsUseCase, GetUpcomingSessionsResponse } from '../application/use-cases/get-upcoming-sessions.use-case';
+import { GetAllSessionsUseCase, GetAllSessionsResponse } from '../application/use-cases/get-all-sessions.use-case';
+import { SaveSessionPicksUseCase, SaveSessionPicksResponse } from '../application/use-cases/save-session-picks.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
 import { UpdateQimelaRequestDto } from './dtos/update-qimela-request.dto';
+import { SavePicksRequestDto } from './dtos/save-picks-request.dto';
 
 @Controller('qimelas')
 export class QimelaController {
@@ -24,6 +28,9 @@ export class QimelaController {
     private readonly getRules: GetRulesUseCase,
     private readonly createQimela: CreateQimelaUseCase,
     private readonly updateQimela: UpdateQimelaUseCase,
+    private readonly getUpcomingSessions: GetUpcomingSessionsUseCase,
+    private readonly getAllSessions: GetAllSessionsUseCase,
+    private readonly saveSessionPicks: SaveSessionPicksUseCase,
   ) {}
 
   @Get()
@@ -61,6 +68,45 @@ export class QimelaController {
   ): Promise<GetQimelaByIdResponse> {
     this.logger.log(`GET /qimelas/${id} requested`);
     return this.getQimelaById.execute(id);
+  }
+
+  @Get(':qimelaId/sessions/upcoming')
+  async getUpcoming(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<GetUpcomingSessionsResponse> {
+    this.logger.log(`GET /qimelas/${qimelaId}/sessions/upcoming requested by user ${user.id}`);
+    return this.getUpcomingSessions.execute({ qimelaId, userId: user.id });
+  }
+
+  @Get(':qimelaId/sessions')
+  async getSessions(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<GetAllSessionsResponse> {
+    this.logger.log(`GET /qimelas/${qimelaId}/sessions requested by user ${user.id}`);
+    return this.getAllSessions.execute({ qimelaId, userId: user.id });
+  }
+
+  @Post(':qimelaId/sessions/:sessionId/picks')
+  @HttpCode(HttpStatus.OK)
+  async savePicks(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: SavePicksRequestDto,
+  ): Promise<SaveSessionPicksResponse> {
+    this.logger.log(`POST /qimelas/${qimelaId}/sessions/${sessionId}/picks requested by user ${user.id}`);
+    return this.saveSessionPicks.execute({
+      qimelaId,
+      sessionId,
+      userId: user.id,
+      picks: body.picks.map((pick) => ({
+        pickCategoryId: pick.pickCategoryId,
+        value: pick.value ?? null,
+        pickedContenderId: pick.pickedContenderId ?? null,
+      })),
+    });
   }
 
   @Patch(':id')

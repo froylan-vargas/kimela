@@ -8,6 +8,7 @@ import { QimelaRepository } from '../../domain/qimela.repository';
 import { RuleRepository } from '../../domain/rule.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -80,10 +81,14 @@ describe('UpdateQimelaUseCase', () => {
     mockPrisma = {
       phase: { findUnique: jest.fn() },
       qimelaRule: { deleteMany: jest.fn(), createMany: jest.fn() },
-      $transaction: jest.fn((fn: any) => fn(mockPrisma)),
+      $transaction: jest.fn((fn: (tx: typeof mockPrisma) => unknown) => fn(mockPrisma)),
     };
 
-    useCase = new UpdateQimelaUseCase(mockQimelaRepository, mockRuleRepository, mockPrisma as any);
+    useCase = new UpdateQimelaUseCase(
+      mockQimelaRepository,
+      mockRuleRepository,
+      mockPrisma as unknown as PrismaService,
+    );
   });
 
   // ─── Authorization & basic guards ─────────────────────────────────────────

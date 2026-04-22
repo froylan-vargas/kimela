@@ -185,6 +185,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   padding: 2px $spacing-sm;
   border-radius: $radius-sm;
   font-family: $font-family-base;
@@ -213,6 +214,20 @@
     background: #e0f2fe;
     border-color: #0369a1;
   }
+
+  &:disabled {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+    opacity: 1;
+
+    &:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #64748b;
+    }
+  }
 }
 
 .completeBtn {
@@ -237,4 +252,11 @@
       color: $color-text-secondary;
     }
   }
+}
+
+.disabledActionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
 }

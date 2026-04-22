@@ -2,6 +2,7 @@ import { NotFoundException, UnprocessableEntityException } from '@nestjs/common'
 import { CompletePhaseUseCase } from './complete-phase.use-case';
 import { PhaseRepository } from '../../domain/phase.repository';
 import { PhaseEntity } from '../../domain/phase.entity';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const makePhase = (overrides: Partial<PhaseEntity> = {}): PhaseEntity =>
   new PhaseEntity({
@@ -38,7 +39,7 @@ describe('CompletePhaseUseCase', () => {
       qimela: { updateMany: jest.fn().mockResolvedValue({ count: 0 }) },
     };
 
-    useCase = new CompletePhaseUseCase(mockPhaseRepository, mockPrisma as any);
+    useCase = new CompletePhaseUseCase(mockPhaseRepository, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

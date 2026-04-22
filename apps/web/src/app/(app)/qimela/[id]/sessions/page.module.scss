@@ -1,0 +1,122 @@
+@use "../../../../../styles/variables" as *;
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: $spacing-lg 40px $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: $spacing-md;
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    color: $color-text-main;
+  }
+}
+
+.eyebrow,
+.groupEyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-text-secondary;
+}
+
+.link {
+  color: $color-text-main;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.groups,
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.groupHeader h2 {
+  margin: 0;
+  color: $color-text-main;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.filter {
+  appearance: none;
+  border: none;
+  padding: 10px 20px;
+  border-radius: $radius-pill;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.filterActive {
+  opacity: 1;
+  box-shadow: 0 10px 20px rgba(16, 24, 40, 0.1);
+  transform: translateY(-1px);
+}
+
+.filterPending {
+  background: #d6f2c2;
+  color: #2f5f18;
+}
+
+.filterRegistered {
+  background: #fff2b0;
+  color: #7a6200;
+}
+
+.state {
+  padding: $spacing-lg;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: $color-text-secondary;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: $spacing-lg;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

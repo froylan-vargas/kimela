@@ -1,4 +1,11 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import RegisterPage from "./page";
 import { authApi } from "@/lib/apiClient";
@@ -10,9 +17,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/apiClient", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/apiClient")>(
-    "@/lib/apiClient"
-  );
+  const actual =
+    await vi.importActual<typeof import("@/lib/apiClient")>("@/lib/apiClient");
 
   return {
     ...actual,
@@ -60,7 +66,7 @@ describe("RegisterPage", () => {
         screen.getByLabelText(/nombre con el que te verán los demás/i),
         {
           target: { value: "NewUser" },
-        }
+        },
       );
       fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
         target: { value: "new@example.com" },
@@ -76,7 +82,7 @@ describe("RegisterPage", () => {
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith(
-        "/register/success?email=new%40example.com"
+        "/register/success?email=new%40example.com",
       );
     });
   });
@@ -89,7 +95,7 @@ describe("RegisterPage", () => {
     expect(screen.getByText(/al menos una minúscula/i)).toBeInTheDocument();
     expect(screen.getByText(/al menos un número/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/al menos un carácter especial/i)
+      screen.getByText(/al menos un carácter especial/i),
     ).toBeInTheDocument();
 
     await act(async () => {
@@ -99,17 +105,96 @@ describe("RegisterPage", () => {
     });
 
     expect(
-      screen.queryByText(/al menos 8 caracteres/i)
+      screen.queryByText(/al menos 8 caracteres/i),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/al menos una mayúscula/i)
+      screen.queryByText(/al menos una mayúscula/i),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/al menos una minúscula/i)
+      screen.queryByText(/al menos una minúscula/i),
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/al menos un número/i)).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/al menos un carácter especial/i)
+      screen.queryByText(/al menos un carácter especial/i),
     ).not.toBeInTheDocument();
+  });
+
+  it("accepts display names with spaces, periods, underscores, and hyphens", async () => {
+    vi.mocked(authApi.register).mockResolvedValue({
+      id: "user-1",
+      email: "new@example.com",
+      name: "Laura Gomez",
+      role: "USER",
+      emailVerifiedAt: null,
+    });
+
+    const validNames = [
+      "Laura Gomez",
+      "froylan.vargas",
+      "camilo_ramones",
+      "ana-maria",
+    ];
+
+    for (const name of validNames) {
+      render(<RegisterPage />);
+
+      await act(async () => {
+        fireEvent.change(
+          screen.getByLabelText(/nombre con el que te verán los demás/i),
+          { target: { value: name } },
+        );
+        fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
+          target: { value: "new@example.com" },
+        });
+        fireEvent.change(screen.getByLabelText(/^contraseña\s*$/i), {
+          target: { value: "Password1!" },
+        });
+        fireEvent.change(screen.getByLabelText(/confirmar contraseña/i), {
+          target: { value: "Password1!" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: /crear cuenta/i }));
+      });
+
+      await waitFor(() => {
+        expect(authApi.register).toHaveBeenCalledWith({
+          name,
+          email: "new@example.com",
+          password: "Password1!",
+        });
+      });
+
+      cleanup();
+      vi.clearAllMocks();
+    }
+  });
+
+  it("shows an error when the display name contains unsupported characters", async () => {
+    render(<RegisterPage />);
+
+    await act(async () => {
+      fireEvent.change(
+        screen.getByLabelText(/nombre con el que te verán los demás/i),
+        {
+          target: { value: "camilo@ramones" },
+        },
+      );
+      fireEvent.change(screen.getByLabelText(/correo electrónico/i), {
+        target: { value: "new@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/^contraseña\s*$/i), {
+        target: { value: "Password1!" },
+      });
+      fireEvent.change(screen.getByLabelText(/confirmar contraseña/i), {
+        target: { value: "Password1!" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: /crear cuenta/i }));
+    });
+
+    expect(
+      screen.getByText(
+        /El nombre con el que te verán solo puede contener letras, números, espacios, puntos, guiones y guion bajo/i,
+      ),
+    ).toBeInTheDocument();
+    expect(authApi.register).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimela Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --primary-yellow: #FFD100;
+            --primary-yellow-hover: #E6BC00;
+            --primary-yellow-light: #FFF9E5;
+            --bg-color: #FAFAFB;
+            --surface-color: rgba(255, 255, 255, 0.75); /* Glassmorphism surface */
+            --text-main: #1A1A1A;
+            --text-secondary: #71717A;
+            --border-color: rgba(228, 228, 231, 0.8); /* Semi-transparent border */
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            z-index: 0;
+        }
+
+        /* Abstract Background Shapes for elegance and shine */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        .bg-shape-1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #FFD100 0%, rgba(255,209,0,0) 100%);
+            top: -150px;
+            right: -200px;
+        }
+
+        .bg-shape-2 {
+            width: 450px;
+            height: 450px;
+            background: linear-gradient(135deg, #FFAA00 0%, rgba(255,170,0,0.1) 100%);
+            bottom: 5%;
+            left: -150px;
+            opacity: 0.4;
+        }
+        
+        .bg-shape-3 {
+            width: 300px;
+            height: 300px;
+            background: #FFE066;
+            top: 20%;
+            left: 20%;
+            filter: blur(140px);
+            opacity: 0.3;
+        }
+
+        /* Top Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.85); /* Slightly frosty nav */
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            color: var(--primary-yellow);
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(255, 209, 0, 0.4));
+        }
+
+        /* Kimela Selector */
+        .kimela-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .kimela-selector:hover {
+            border-color: var(--primary-yellow);
+            background: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.15);
+        }
+
+        .selector-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .selector-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-main);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Main Dashboard Content */
+        .dashboard {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* Swapped: Leaderboard (1fr) | Next Matches (2fr) */
+            gap: 32px;
+            z-index: 1; /* Above shapes */
+            position: relative;
+        }
+
+        .header-section {
+            grid-column: 1 / -1;
+            margin-bottom: 8px;
+        }
+
+        .header-section h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .header-section p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* Cards with Glassmorphism and Elegant Shadows */
+        .card {
+            background: var(--surface-color);
+            backdrop-filter: blur(24px); /* Frosty effect over shapes */
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.8); /* Subtle glow highlight */
+            transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+            border-color: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary-yellow);
+            filter: drop-shadow(0 2px 4px rgba(255, 209, 0, 0.3));
+        }
+
+        .btn-expand {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 100px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-expand:hover {
+            background: #FFFFFF;
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--primary-yellow) 0%, #F5C900 100%);
+            color: var(--text-main);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(255, 209, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(255, 209, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(255, 209, 0, 0.3);
+        }
+
+        /* Leaderboard */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            transition: background 0.2s ease, transform 0.2s ease;
+            background: rgba(255,255,255, 0.4);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255,255,255, 0.9);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border-color: #FFFFFF;
+        }
+
+        .rank {
+            width: 32px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .rank.top-1 { color: #D4AF37; font-size: 18px; text-shadow: 0 2px 4px rgba(212, 175, 55, 0.3); }
+        .rank.top-2 { color: #9CA3AF; font-size: 16px; }
+        .rank.top-3 { color: #CD7F32; font-size: 16px; }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .player-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+        
+        .top-1 .player-avatar { border-color: #FFD100; background: var(--primary-yellow-light); color: #B38F00;}
+
+        .player-name {
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .points {
+            font-weight: 700;
+            font-size: 16px;
+            background: #FFFFFF;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 4px 12px;
+            border-radius: 100px;
+            color: var(--text-main);
+        }
+
+        /* Matches List */
+        .match-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .match-item {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .match-item:hover {
+            border-color: var(--primary-yellow);
+            background: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+            transform: translateY(-1px);
+        }
+
+        .match-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .teams {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100px;
+        }
+
+        .team-logo {
+            width: 54px;
+            height: 54px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        .team-name {
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .vs {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0 16px;
+            background: rgba(255,255,255,0.8);
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+        }
+
+        .prediction-inputs {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #FFFFFF;
+            padding: 10px 16px;
+            border-radius: 100px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
+        }
+
+        .score-input {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+        }
+
+        .score-input:focus {
+            border-color: var(--primary-yellow);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px var(--primary-yellow-light);
+        }
+
+        .score-separator {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .match-item {
+                flex-direction: column;
+                gap: 24px;
+            }
+            .dashboard .card:first-child {
+                order: 2; /* Keep Next match on top on mobile, or Leaderboard depending on pref */
+            }
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 16px 20px; /* Small left padding before logo, right padding after profile */
+            }
+            .kimela-selector {
+                margin: 0 12px; /* Margin before and after the dropdown */
+            }
+            .logo {
+                font-size: 0;
+            }
+            .logo i {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Subtle elegant background shapes -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="ph-fill ph-trophy"></i>
+        </div>
+
+        <div class="kimela-selector" style="margin: 0 auto;">
+            <div style="display: flex; flex-direction: column;">
+                <span class="selector-label">KIMELA ACTUAL</span>
+                <span class="selector-value">Champions League 2026</span>
+            </div>
+            <i class="ph ph-caret-up-down"></i>
+        </div>
+
+        <div class="user-profile">
+            <i class="ph ph-bell" style="font-size: 24px; color: var(--text-secondary);"></i>
+            <div class="avatar">FV</div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="header-section">
+            <h1>Hola de nuevo, Froylan! 👋</h1>
+            <p>Aquí está lo que está pasando en la kimela Champions League 2026.</p>
+        </div>
+
+        <!-- Left Column: Leaderboard (Swapped) -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="ph-fill ph-ranking"></i>
+                    Posiciones
+                </h2>
+                <button class="btn-expand">
+                    Más datos <i class="ph ph-arrows-out-simple"></i>
+                </button>
+            </div>
+
+            <div class="leaderboard-list">
+                <div class="leaderboard-item">
+                    <div class="rank top-1">1</div>
+                    <div class="player-info">
+                        <div class="player-avatar">JD</div>
+                        <div class="player-name">John Doe</div>
+                    </div>
+                    <div class="points">124</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank top-2">2</div>
+                    <div class="player-info">
+                        <div class="player-avatar">AS</div>
+                        <div class="player-name">Alex Smith</div>
+                    </div>
+                    <div class="points">118</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank top-3">3</div>
+                    <div class="player-info">
+                        <div class="player-avatar">FV</div>
+                        <div class="player-name">Froylan Vargas</div>
+                    </div>
+                    <div class="points">110</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank">4</div>
+                    <div class="player-info">
+                        <div class="player-avatar">MJ</div>
+                        <div class="player-name">Mike Johnson</div>
+                    </div>
+                    <div class="points">95</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="rank">5</div>
+                    <div class="player-info">
+                        <div class="player-avatar">SL</div>
+                        <div class="player-name">Sarah Lee</div>
+                    </div>
+                    <div class="points">88</div>
+                </div>
+                 <div class="leaderboard-item">
+                    <div class="rank">6</div>
+                    <div class="player-info">
+                        <div class="player-avatar">PK</div>
+                        <div class="player-name">Paul King</div>
+                    </div>
+                    <div class="points">82</div>
+                </div>
+                 <div class="leaderboard-item">
+                    <div class="rank">7</div>
+                    <div class="player-info">
+                        <div class="player-avatar">ER</div>
+                        <div class="player-name">Elena Rose</div>
+                    </div>
+                    <div class="points">79</div>
+                </div>
+                  <div class="leaderboard-item">
+                    <div class="rank">8</div>
+                    <div class="player-info">
+                        <div class="player-avatar">DT</div>
+                        <div class="player-name">Dan Torres</div>
+                    </div>
+                    <div class="points">75</div>
+                </div>
+                  <div class="leaderboard-item">
+                    <div class="rank">9</div>
+                    <div class="player-info">
+                        <div class="player-avatar">LW</div>
+                        <div class="player-name">Linda Wu</div>
+                    </div>
+                    <div class="points">70</div>
+                </div>
+                   <div class="leaderboard-item">
+                    <div class="rank">10</div>
+                    <div class="player-info">
+                        <div class="player-avatar">CJ</div>
+                        <div class="player-name">Chris Jones</div>
+                    </div>
+                    <div class="points">68</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Matches -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="ph-fill ph-calendar-check"></i>
+                    Próximos partidos
+                </h2>
+                <button class="btn-expand">
+                    Ver todos los partidos <i class="ph ph-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="match-list">
+                <!-- Match 1 -->
+                <div class="match-item">
+                    <div style="flex: 1;">
+                        <div class="match-date">Tomorrow • 14:00 PM</div>
+                        <div class="teams">
+                            <div class="team">
+                                <div class="team-logo">🇪🇸</div>
+                                <div class="team-name">Real Madrid</div>
+                            </div>
+                            <span class="vs">VS</span>
+                            <div class="team">
+                                <div class="team-logo">🇩🇪</div>
+                                <div class="team-name">Bayern</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-inputs">
+                        <input type="text" class="score-input" placeholder="-" maxlength="2">
+                        <span class="score-separator">:</span>
+                        <input type="text" class="score-input" placeholder="-" maxlength="2">
+                    </div>
+                </div>
+
+                <!-- Match 2 -->
+                <div class="match-item">
+                    <div style="flex: 1;">
+                        <div class="match-date">Wed, Apr 8 • 14:00 PM</div>
+                        <div class="teams">
+                            <div class="team">
+                                <div class="team-logo">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+                                <div class="team-name">Man City</div>
+                            </div>
+                            <span class="vs">VS</span>
+                            <div class="team">
+                                <div class="team-logo">🇫🇷</div>
+                                <div class="team-name">PSG</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-inputs">
+                        <input type="text" class="score-input" placeholder="-" maxlength="2">
+                        <span class="score-separator">:</span>
+                        <input type="text" class="score-input" placeholder="-" maxlength="2">
+                    </div>
+                </div>
+
+                <!-- Match 3 -->
+                <div class="match-item">
+                    <div style="flex: 1;">
+                        <div class="match-date">Thu, Apr 9 • 12:00 PM</div>
+                        <div class="teams">
+                            <div class="team">
+                                <div class="team-logo">🇮🇹</div>
+                                <div class="team-name">Juventus</div>
+                            </div>
+                            <span class="vs">VS</span>
+                            <div class="team">
+                                <div class="team-logo">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+                                <div class="team-name">Arsenal</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-inputs">
+                        <input type="text" class="score-input" placeholder="-" maxlength="2">
+                        <span class="score-separator">:</span>
+                        <input type="text" class="score-input" placeholder="-" maxlength="2">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary">
+                <i class="ph ph-check-circle" style="font-size: 18px;"></i>
+                Guardar predicciones
+            </button>
+        </div>
+
+    </main>
+
+</body>
+</html>

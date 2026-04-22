@@ -109,6 +109,10 @@ export default function EventManagementPage({
     return !sessions.some((s) => s.status === "SCHEDULED" || s.status === "LIVE");
   }
 
+  function canActivatePhase(phase: Phase): boolean {
+    return !displayedPhases.some((item) => item.id !== phase.id && item.status === "ACTIVE");
+  }
+
   async function handleDeletePhase(phaseId: string) {
     const prev = queryClient.getQueryData<Phase[]>(["admin", "phases", eventId]) ?? [];
     const updated = prev.filter((p) => p.id !== phaseId);
@@ -117,9 +121,11 @@ export default function EventManagementPage({
     if (selectedPhase?.id === phaseId) setSelectedPhase(null);
     try {
       await adminApi.deletePhase(eventId, phaseId);
+      toast("Fase eliminada correctamente.", "success");
     } catch (err) {
       console.error('[EventManagementPage] Failed to delete phase', err);
       queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], prev);
+      toast(toUserMessage(err), "error");
     }
   }
 
@@ -188,6 +194,7 @@ export default function EventManagementPage({
               onDelete={handleDeletePhase}
               onActivate={handleActivatePhase}
               onComplete={handleCompletePhase}
+              canActivatePhase={canActivatePhase}
               canCompletePhase={canCompletePhase}
             />
           )}

@@ -4,6 +4,7 @@ import type { SportEvent } from "@/types/event";
 import type { QimelaEvent, QimelaDetail, Rule, CreateQimelaBody, UpdateQimelaBody } from "@/types/qimela";
 import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
 import type { Session } from "@/types/session";
+import type { PhaseSessionsGroup, SavePredictionPickInput } from "@/types/prediction";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -205,6 +206,32 @@ export const qimelasApi = {
       method: "PATCH",
       body: JSON.stringify(body),
     });
+  },
+
+  getUpcomingSessions(qimelaId: string): Promise<{ data: PhaseSessionsGroup[] }> {
+    return apiFetch<{ data: PhaseSessionsGroup[] }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/sessions/upcoming`
+    );
+  },
+
+  getAllSessions(qimelaId: string): Promise<{ data: PhaseSessionsGroup[] }> {
+    return apiFetch<{ data: PhaseSessionsGroup[] }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/sessions`
+    );
+  },
+
+  saveSessionPicks(
+    qimelaId: string,
+    sessionId: string,
+    picks: SavePredictionPickInput[],
+  ): Promise<{ data: { sessionId: string; picks: SavePredictionPickInput[] } }> {
+    return apiFetch<{ data: { sessionId: string; picks: SavePredictionPickInput[] } }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/sessions/${encodeURIComponent(sessionId)}/picks`,
+      {
+        method: "POST",
+        body: JSON.stringify({ picks }),
+      },
+    );
   },
 };
 

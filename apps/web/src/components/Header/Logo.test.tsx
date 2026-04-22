@@ -36,8 +36,8 @@ function wrapper({ children }: { children: ReactNode }) {
 describe("Logo", () => {
   it("renders the trophy icon", () => {
     render(<Logo />, { wrapper });
-    const icon = screen.getByRole("link").querySelector("i");
-    expect(icon).toHaveClass("ph-trophy");
+    const icon = screen.getByRole("link").querySelector("[data-icon='trophy']");
+    expect(icon).toBeInTheDocument();
   });
 
   it("navigates to the default href when clicked", () => {

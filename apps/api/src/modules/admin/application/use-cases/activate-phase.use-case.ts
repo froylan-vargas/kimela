@@ -39,6 +39,15 @@ export class ActivatePhaseUseCase {
       );
     }
 
+    const eventPhases = await this.phaseRepository.findByEvent({ eventId: phase.eventId });
+    const activePhase = eventPhases.find((eventPhase) => eventPhase.status === 'ACTIVE');
+
+    if (activePhase) {
+      throw new UnprocessableEntityException(
+        `La fase ${phaseId} no puede activarse: el evento ya tiene una fase activa (${activePhase.id})`,
+      );
+    }
+
     const updated = await this.phaseRepository.updateStatus(phaseId, 'ACTIVE');
 
     await this.prisma.qimela.updateMany({

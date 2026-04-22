@@ -7,10 +7,15 @@ import { GetEventsForQimelaUseCase } from '../application/use-cases/get-events-f
 import { GetRulesUseCase } from '../application/use-cases/get-rules.use-case';
 import { CreateQimelaUseCase } from '../application/use-cases/create-qimela.use-case';
 import { UpdateQimelaUseCase } from '../application/use-cases/update-qimela.use-case';
+import { GetUpcomingSessionsUseCase } from '../application/use-cases/get-upcoming-sessions.use-case';
+import { GetAllSessionsUseCase } from '../application/use-cases/get-all-sessions.use-case';
+import { SaveSessionPicksUseCase } from '../application/use-cases/save-session-picks.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
 import { PaginatedQimelaResponse } from '../application/dtos/qimela.dto';
+import { SavePicksRequestDto } from './dtos/save-picks-request.dto';
+import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
 import { CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { UserRole } from '../../users/domain/user-role.enum';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
@@ -51,6 +56,9 @@ describe('QimelaController', () => {
   let getRules: jest.Mocked<GetRulesUseCase>;
   let createQimela: jest.Mocked<CreateQimelaUseCase>;
   let updateQimela: jest.Mocked<UpdateQimelaUseCase>;
+  let getUpcomingSessions: jest.Mocked<GetUpcomingSessionsUseCase>;
+  let getAllSessions: jest.Mocked<GetAllSessionsUseCase>;
+  let saveSessionPicks: jest.Mocked<SaveSessionPicksUseCase>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -63,6 +71,9 @@ describe('QimelaController', () => {
         { provide: GetRulesUseCase, useValue: { execute: jest.fn() } },
         { provide: CreateQimelaUseCase, useValue: { execute: jest.fn() } },
         { provide: UpdateQimelaUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetUpcomingSessionsUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetAllSessionsUseCase, useValue: { execute: jest.fn() } },
+        { provide: SaveSessionPicksUseCase, useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -77,6 +88,9 @@ describe('QimelaController', () => {
     getRules = module.get(GetRulesUseCase);
     createQimela = module.get(CreateQimelaUseCase);
     updateQimela = module.get(UpdateQimelaUseCase);
+    getUpcomingSessions = module.get(GetUpcomingSessionsUseCase);
+    getAllSessions = module.get(GetAllSessionsUseCase);
+    saveSessionPicks = module.get(SaveSessionPicksUseCase);
   });
 
   // ─── getQimelas ──────────────────────────────────────────────────────────
@@ -188,6 +202,53 @@ describe('QimelaController', () => {
 
       // Assert
       expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('getUpcoming', () => {
+    it('delegates to use case with qimelaId and userId', async () => {
+      getUpcomingSessions.execute.mockResolvedValue({ data: [] });
+
+      await controller.getUpcoming(QIMELA_ID, MOCK_USER);
+
+      expect(getUpcomingSessions.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        userId: MOCK_USER_ID,
+      });
+    });
+  });
+
+  describe('getSessions', () => {
+    it('delegates to use case with qimelaId and userId', async () => {
+      getAllSessions.execute.mockResolvedValue({ data: [] });
+
+      await controller.getSessions(QIMELA_ID, MOCK_USER);
+
+      expect(getAllSessions.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        userId: MOCK_USER_ID,
+      });
+    });
+  });
+
+  describe('savePicks', () => {
+    it('delegates to use case with qimelaId, sessionId, userId and picks', async () => {
+      saveSessionPicks.execute.mockResolvedValue({
+        data: { sessionId: 'session-1', picks: [] },
+      });
+
+      const body: SavePicksRequestDto = {
+        picks: [{ pickCategoryId: 'cat-1', value: '2' }],
+      };
+
+      await controller.savePicks(QIMELA_ID, 'session-1', MOCK_USER, body);
+
+      expect(saveSessionPicks.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        sessionId: 'session-1',
+        userId: MOCK_USER_ID,
+        picks: [{ pickCategoryId: 'cat-1', value: '2', pickedContenderId: null }],
+      });
     });
   });
 
@@ -334,7 +395,7 @@ describe('QimelaController', () => {
       };
       createQimela.execute.mockResolvedValue(mockResponse);
 
-      const body = {
+      const body: CreateQimelaRequestDto = {
         name: 'My Pool',
         sportId: SPORT_ID,
         eventId: EVENT_ID,
@@ -345,7 +406,7 @@ describe('QimelaController', () => {
       };
 
       // Act
-      await controller.create(MOCK_USER, body as any);
+      await controller.create(MOCK_USER, body);
 
       // Assert
       expect(createQimela.execute).toHaveBeenCalledWith({
@@ -377,7 +438,7 @@ describe('QimelaController', () => {
       };
       createQimela.execute.mockResolvedValue(mockResponse);
 
-      const body = {
+      const body: CreateQimelaRequestDto = {
         name: 'My Pool',
         sportId: SPORT_ID,
         eventId: EVENT_ID,
@@ -388,7 +449,7 @@ describe('QimelaController', () => {
       };
 
       // Act
-      const result = await controller.create(MOCK_USER, body as any);
+      const result = await controller.create(MOCK_USER, body);
 
       // Assert
       expect(result).toEqual(mockResponse);

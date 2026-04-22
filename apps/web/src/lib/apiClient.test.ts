@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiFetch, ApiError } from "@/lib/apiClient";
+import { apiFetch } from "@/lib/apiClient";
 
 describe("apiFetch", () => {
   afterEach(() => {
@@ -30,7 +30,7 @@ describe("apiFetch", () => {
         method: "POST",
         body: JSON.stringify({ email: "pending@example.com", password: "Password1!" }),
       })
-    ).rejects.toMatchObject<ApiError>({
+    ).rejects.toMatchObject({
       status: 401,
       message: "Email not verified",
       code: "EMAIL_NOT_VERIFIED",

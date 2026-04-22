@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/components/Icon/Icon";
 import { useQimelaContext } from "@/context/QimelaContext";
 import styles from "./Logo.module.scss";
 
@@ -19,7 +20,7 @@ export default function Logo({ href = "/" }: LogoProps) {
 
   return (
     <Link href={href} className={styles.logo} onClick={handleClick}>
-      <i className={`ph-bold ph-trophy ${styles.icon}`} />
+      <Icon name="trophy" className={styles.icon} />
     </Link>
   );
 }

@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { authApi, ApiError } from "@/lib/apiClient";
 import styles from "./page.module.scss";
 
+const NAME_MAX_LENGTH = 30;
+const NAME_ALLOWED_PATTERN = /^[\p{L}\p{N}._ -]+$/u;
+
 const PASSWORD_REQUIREMENTS = [
   {
     id: "length",
@@ -36,8 +39,12 @@ const PASSWORD_REQUIREMENTS = [
 
 function validateName(name: string): string | null {
   if (name.length < 4) return "El nombre debe tener al menos 4 caracteres";
-  if (name.length > 20) return "El nombre no puede tener más de 20 caracteres";
-  if (/\s/.test(name)) return "El nombre debe ser una sola palabra";
+  if (name.length > NAME_MAX_LENGTH) {
+    return `El nombre no puede tener más de ${NAME_MAX_LENGTH} caracteres`;
+  }
+  if (!NAME_ALLOWED_PATTERN.test(name)) {
+    return "El nombre con el que te verán solo puede contener letras, números, espacios, puntos, guiones y guion bajo";
+  }
   return null;
 }
 
@@ -72,12 +79,11 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const unmetPasswordRequirements = PASSWORD_REQUIREMENTS.filter(
-    (requirement) => !requirement.isMet(password)
+    (requirement) => !requirement.isMet(password),
   );
 
   function handleNameChange(value: string) {
-    // Strip spaces to enforce single word
-    setName(value.replace(/\s/g, ""));
+    setName(value);
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -159,7 +165,7 @@ export default function RegisterPage() {
               placeholder="Jugador"
               required
               minLength={4}
-              maxLength={20}
+              maxLength={NAME_MAX_LENGTH}
               autoComplete="off"
             />
           </div>

@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException, UnprocessableEntityException } 
 import { UploadSessionsUseCase } from './upload-sessions.use-case';
 import { SessionRepository } from '../../domain/session.repository';
 import { SessionEntity } from '../../domain/session.entity';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
 
 const VALID_HEADERS = 'equipo_local,equipo_visitante,fecha,hora';
 
@@ -35,7 +36,7 @@ describe('UploadSessionsUseCase', () => {
     };
     mockPrisma = { phase: { findUnique: jest.fn().mockResolvedValue({ status: 'UPCOMING' }) } };
 
-    useCase = new UploadSessionsUseCase(mockSessionRepository, mockPrisma as any);
+    useCase = new UploadSessionsUseCase(mockSessionRepository, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

@@ -5,6 +5,12 @@ import { useQimelaContext } from "@/context/QimelaContext";
 import type { Qimela } from "@/types/qimela";
 
 vi.mock("@/context/QimelaContext");
+vi.mock("@/components/dashboard/ParticipantDashboard", () => ({
+  default: ({ qimela }: { qimela: Qimela }) => <div>{qimela.name} - Participant</div>,
+}));
+vi.mock("@/components/dashboard/CreatorDashboard", () => ({
+  default: ({ qimela }: { qimela: Qimela }) => <div>{qimela.name} - Creator</div>,
+}));
 
 const subscriberQimela: Qimela = {
   id: "s1",

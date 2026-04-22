@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Icon from "@/components/Icon/Icon";
 import { useQimelas } from "@/hooks/useQimelas";
 import { useQimelaContext } from "@/context/QimelaContext";
 import QimelaDropdown from "./QimelaDropdown";
@@ -69,8 +70,9 @@ export default function QimelaSelector() {
       >
         <span className={styles.selectorLabel}>Qimela</span>
         <span className={styles.selectorValue}>{getPillLabel()}</span>
-        <i
-          className={`ph-bold ${isOpen ? "ph-caret-up" : "ph-caret-down"} ${styles.caretIcon}`}
+        <Icon
+          name={isOpen ? "caret-up" : "caret-down"}
+          className={styles.caretIcon}
         />
       </button>
 

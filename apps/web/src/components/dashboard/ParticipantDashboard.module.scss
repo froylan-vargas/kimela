@@ -1,0 +1,38 @@
+@use "../../styles/variables" as *;
+
+.layout {
+  display: grid;
+  gap: $spacing-lg;
+}
+
+.hero {
+  padding: $spacing-xl;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 0, 0.24), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.74));
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.08);
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    color: $color-text-main;
+  }
+
+  p {
+    max-width: 60ch;
+    margin: $spacing-sm 0 0;
+    color: $color-text-secondary;
+  }
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-text-secondary;
+}

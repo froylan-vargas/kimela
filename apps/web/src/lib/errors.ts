@@ -10,6 +10,12 @@ const CODE_MESSAGES: Record<string, string> = {
   RULE_ABOVE_MAX_POINTS:
     "Uno de los valores ingresados supera el máximo permitido.",
   QIMELA_COMPLETED_UNEDITABLE: "No se puede editar una qimela completada.",
+  PICKS_DEADLINE_PASSED:
+    "No puedes registrar pronósticos para partidos que comienzan en menos de 3 minutos.",
+  PICKS_SESSION_NOT_OPEN:
+    "Solo puedes registrar pronósticos en sesiones programadas.",
+  PICK_CATEGORY_NOT_IN_SESSION:
+    "La categoría de pronóstico no pertenece a esta sesión.",
 };
 
 export function toUserMessage(err: unknown): string {

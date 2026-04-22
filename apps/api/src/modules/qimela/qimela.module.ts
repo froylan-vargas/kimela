@@ -11,6 +11,9 @@ import { GenerateInviteTokenUseCase } from './application/use-cases/generate-inv
 import { RevokeInviteTokenUseCase } from './application/use-cases/revoke-invite-token.use-case';
 import { GetQimelaByInviteTokenUseCase } from './application/use-cases/get-qimela-by-invite-token.use-case';
 import { SubscribeViaInviteTokenUseCase } from './application/use-cases/subscribe-via-invite-token.use-case';
+import { GetUpcomingSessionsUseCase } from './application/use-cases/get-upcoming-sessions.use-case';
+import { GetAllSessionsUseCase } from './application/use-cases/get-all-sessions.use-case';
+import { SaveSessionPicksUseCase } from './application/use-cases/save-session-picks.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -28,6 +31,9 @@ import { InviteController } from './presentation/invite.controller';
     RevokeInviteTokenUseCase,
     GetQimelaByInviteTokenUseCase,
     SubscribeViaInviteTokenUseCase,
+    GetUpcomingSessionsUseCase,
+    GetAllSessionsUseCase,
+    SaveSessionPicksUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

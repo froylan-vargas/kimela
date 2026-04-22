@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
-import Script from "next/script";
 import "../styles/globals.scss";
 import Providers from "./providers";
 
@@ -22,12 +21,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={outfit.variable}>
-      <head>
-        <Script
-          src="https://unpkg.com/@phosphor-icons/web"
-          strategy="beforeInteractive"
-        />
-      </head>
       <body>
         <Providers>
           {children}

@@ -11,12 +11,14 @@ out/
 .env
 apps/api/.env
 apps/web/.env
-docs/
 
 # Logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Docs
+docs/infra
 
 # OS
 .DS_Store

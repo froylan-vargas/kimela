@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/Icon/Icon";
 import { useToastItems, type ToastItem as ToastItemType } from "@/context/ToastContext";
 import styles from "./Toast.module.scss";
 
@@ -14,9 +15,9 @@ export default function ToastItem({ item }: Props) {
     <div className={`${styles.toast} ${styles[`toast--${item.variant}`]}`}>
       <span className={styles.icon}>
         {item.variant === "success" ? (
-          <i className="ph ph-check-circle" />
+          <Icon name="check-circle" />
         ) : (
-          <i className="ph ph-x-circle" />
+          <Icon name="x-circle" />
         )}
       </span>
       <span className={styles.message}>{item.message}</span>
@@ -26,7 +27,7 @@ export default function ToastItem({ item }: Props) {
         onClick={() => remove(item.id)}
         aria-label="Cerrar notificación"
       >
-        <i className="ph ph-x" />
+        <Icon name="x" />
       </button>
     </div>
   );

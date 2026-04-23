@@ -12,6 +12,7 @@ const makeSession = (overrides: Partial<ConstructorParameters<typeof SessionEnti
     sportId: 'sport-1',
     home: { id: 'contender-1', name: 'Team A', imgUrl: 'https://example.com/a.png' },
     away: { id: 'contender-2', name: 'Team B', imgUrl: null },
+    score: { home: null, away: null },
     ...overrides,
   });
 
@@ -50,6 +51,7 @@ describe('GetSessionsByPhaseUseCase', () => {
         status: 'SCHEDULED',
         home: { id: 'contender-1', name: 'Team A', imgUrl: 'https://example.com/a.png' },
         away: { id: 'contender-2', name: 'Team B', imgUrl: null },
+        score: { home: null, away: null },
       });
     });
 

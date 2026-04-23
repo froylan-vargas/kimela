@@ -10,6 +10,7 @@ import { PaginatedQimelaResponse } from '../application/dtos/qimela.dto';
 import { GetUpcomingSessionsUseCase, GetUpcomingSessionsResponse } from '../application/use-cases/get-upcoming-sessions.use-case';
 import { GetAllSessionsUseCase, GetAllSessionsResponse } from '../application/use-cases/get-all-sessions.use-case';
 import { SaveSessionPicksUseCase, SaveSessionPicksResponse } from '../application/use-cases/save-session-picks.use-case';
+import { GetLeaderboardUseCase, GetLeaderboardResponse } from '../application/use-cases/get-leaderboard.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
@@ -31,6 +32,7 @@ export class QimelaController {
     private readonly getUpcomingSessions: GetUpcomingSessionsUseCase,
     private readonly getAllSessions: GetAllSessionsUseCase,
     private readonly saveSessionPicks: SaveSessionPicksUseCase,
+    private readonly getLeaderboard: GetLeaderboardUseCase,
   ) {}
 
   @Get()
@@ -68,6 +70,14 @@ export class QimelaController {
   ): Promise<GetQimelaByIdResponse> {
     this.logger.log(`GET /qimelas/${id} requested`);
     return this.getQimelaById.execute(id);
+  }
+
+  @Get(':qimelaId/leaderboard')
+  async listLeaderboard(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+  ): Promise<GetLeaderboardResponse> {
+    this.logger.log(`GET /qimelas/${qimelaId}/leaderboard requested`);
+    return this.getLeaderboard.execute(qimelaId);
   }
 
   @Get(':qimelaId/sessions/upcoming')

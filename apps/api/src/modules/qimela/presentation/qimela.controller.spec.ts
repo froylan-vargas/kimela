@@ -10,6 +10,7 @@ import { UpdateQimelaUseCase } from '../application/use-cases/update-qimela.use-
 import { GetUpcomingSessionsUseCase } from '../application/use-cases/get-upcoming-sessions.use-case';
 import { GetAllSessionsUseCase } from '../application/use-cases/get-all-sessions.use-case';
 import { SaveSessionPicksUseCase } from '../application/use-cases/save-session-picks.use-case';
+import { GetLeaderboardUseCase } from '../application/use-cases/get-leaderboard.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
@@ -59,6 +60,7 @@ describe('QimelaController', () => {
   let getUpcomingSessions: jest.Mocked<GetUpcomingSessionsUseCase>;
   let getAllSessions: jest.Mocked<GetAllSessionsUseCase>;
   let saveSessionPicks: jest.Mocked<SaveSessionPicksUseCase>;
+  let getLeaderboard: jest.Mocked<GetLeaderboardUseCase>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -74,6 +76,7 @@ describe('QimelaController', () => {
         { provide: GetUpcomingSessionsUseCase, useValue: { execute: jest.fn() } },
         { provide: GetAllSessionsUseCase, useValue: { execute: jest.fn() } },
         { provide: SaveSessionPicksUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetLeaderboardUseCase, useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -91,6 +94,7 @@ describe('QimelaController', () => {
     getUpcomingSessions = module.get(GetUpcomingSessionsUseCase);
     getAllSessions = module.get(GetAllSessionsUseCase);
     saveSessionPicks = module.get(SaveSessionPicksUseCase);
+    getLeaderboard = module.get(GetLeaderboardUseCase);
   });
 
   // ─── getQimelas ──────────────────────────────────────────────────────────
@@ -215,6 +219,18 @@ describe('QimelaController', () => {
         qimelaId: QIMELA_ID,
         userId: MOCK_USER_ID,
       });
+    });
+  });
+
+  describe('listLeaderboard', () => {
+    it('delegates to the leaderboard use case with the qimela id', async () => {
+      const response = { data: [] };
+      getLeaderboard.execute.mockResolvedValue(response);
+
+      const result = await controller.listLeaderboard(QIMELA_ID);
+
+      expect(getLeaderboard.execute).toHaveBeenCalledWith(QIMELA_ID);
+      expect(result).toEqual(response);
     });
   });
 

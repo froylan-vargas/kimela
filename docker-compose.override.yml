@@ -9,6 +9,7 @@ services:
     volumes:
       - ./apps/api/src:/app/apps/api/src
       - ./apps/api/dist:/app/apps/api/dist
+      - ./apps/api/prisma:/app/apps/api/prisma
 
   web:
     build:

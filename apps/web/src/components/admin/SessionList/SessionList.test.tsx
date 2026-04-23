@@ -10,6 +10,7 @@ const makeSession = (overrides: Partial<Session> = {}): Session => ({
   status: "SCHEDULED",
   home: { id: "c1", name: "Team A", imgUrl: null },
   away: { id: "c2", name: "Team B", imgUrl: null },
+  score: { home: null, away: null },
   ...overrides,
 });
 

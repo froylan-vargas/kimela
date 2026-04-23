@@ -11,6 +11,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseInterceptors,
@@ -46,9 +47,11 @@ import {
   UploadSessionsUseCase,
   UploadSessionsResponse,
 } from '../application/use-cases/upload-sessions.use-case';
+import { SaveSessionResultsUseCase } from '../application/use-cases/save-session-results.use-case';
 import { GetEventsRequestDto } from './dtos/get-events-request.dto';
 import { CreatePhaseRequestDto } from './dtos/create-phase-request.dto';
 import { ReorderPhasesRequestDto } from './dtos/reorder-phases-request.dto';
+import { SaveSessionResultsDto } from '../application/dtos/save-session-results.dto';
 
 @Controller('admin')
 @Roles(UserRole.ADMIN)
@@ -66,6 +69,7 @@ export class AdminController {
     private readonly completePhaseUseCase: CompletePhaseUseCase,
     private readonly getSessionsByPhase: GetSessionsByPhaseUseCase,
     private readonly uploadSessions: UploadSessionsUseCase,
+    private readonly saveSessionResultsUseCase: SaveSessionResultsUseCase,
   ) {}
 
   @Get('sports')
@@ -171,5 +175,18 @@ export class AdminController {
       phaseId,
       fileBuffer: file.buffer,
     });
+  }
+
+  @Put('events/:eventId/phases/:phaseId/sessions/:sessionId/results')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async saveSessionResults(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('phaseId', ParseUUIDPipe) phaseId: string,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @Body() body: SaveSessionResultsDto,
+  ): Promise<void> {
+    this.logger.log(`PUT /admin/events/${eventId}/phases/${phaseId}/sessions/${sessionId}/results requested`);
+
+    await this.saveSessionResultsUseCase.execute({ eventId, phaseId, sessionId, homeScore: body.homeScore, awayScore: body.awayScore });
   }
 }

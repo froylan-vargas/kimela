@@ -44,7 +44,9 @@
       "Bash(gcloud --version)",
       "Bash(lsof -iTCP:5433 -sTCP:LISTEN)",
       "Bash(nc -zv 127.0.0.1 5433)",
-      "Bash(lsof *)"
+      "Bash(lsof *)",
+      "Bash(docker exec *)",
+      "Bash(docker cp *)"
     ]
   }
 }

@@ -6,6 +6,11 @@ export interface ContenderInfoDto {
   imgUrl: string | null;
 }
 
+export interface SessionScoreDto {
+  home: string | null;
+  away: string | null;
+}
+
 export interface SessionDto {
   id: string;
   name: string;
@@ -13,4 +18,5 @@ export interface SessionDto {
   status: SessionStatus;
   home: ContenderInfoDto;
   away: ContenderInfoDto;
+  score: SessionScoreDto;
 }

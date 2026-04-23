@@ -14,6 +14,7 @@ import { SubscribeViaInviteTokenUseCase } from './application/use-cases/subscrib
 import { GetUpcomingSessionsUseCase } from './application/use-cases/get-upcoming-sessions.use-case';
 import { GetAllSessionsUseCase } from './application/use-cases/get-all-sessions.use-case';
 import { SaveSessionPicksUseCase } from './application/use-cases/save-session-picks.use-case';
+import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -34,6 +35,7 @@ import { InviteController } from './presentation/invite.controller';
     GetUpcomingSessionsUseCase,
     GetAllSessionsUseCase,
     SaveSessionPicksUseCase,
+    GetLeaderboardUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

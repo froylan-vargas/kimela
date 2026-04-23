@@ -21,6 +21,7 @@ const makeSession = (overrides: Partial<ConstructorParameters<typeof SessionEnti
     sportId: 'sport-1',
     home: { id: 'c-1', name: 'Team A', imgUrl: null },
     away: { id: 'c-2', name: 'Team B', imgUrl: null },
+    score: { home: null, away: null },
     ...overrides,
   });
 

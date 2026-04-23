@@ -10,12 +10,12 @@ import { useToast } from "@/context/ToastContext";
 import { toUserMessage } from "@/lib/errors";
 import PhaseList from "@/components/admin/PhaseList/PhaseList";
 import PhaseForm from "@/components/admin/PhaseForm/PhaseForm";
-import SessionList from "@/components/admin/SessionList/SessionList";
+import SessionResultsEditor from "@/components/admin/SessionResultsEditor/SessionResultsEditor";
 import SessionUpload from "@/components/admin/SessionUpload/SessionUpload";
 import type { Phase } from "@/types/phase";
 import styles from "./page.module.scss";
 
-type Tab = "partidos" | "csv";
+type Tab = "csv" | "resultados";
 
 interface EventManagementPageProps {
   params: Promise<{ eventId: string }>;
@@ -35,7 +35,7 @@ export default function EventManagementPage({
   const { data: phases, isLoading: phasesLoading, isError: phasesError } = usePhases(eventId);
 
   const [selectedPhase, setSelectedPhase] = useState<Phase | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>("partidos");
+  const [activeTab, setActiveTab] = useState<Tab>("resultados");
   const [showPhaseForm, setShowPhaseForm] = useState(false);
   const [localPhases, setLocalPhases] = useState<Phase[] | null>(null);
   const [isUploading, startUploadTransition] = useTransition();
@@ -54,11 +54,12 @@ export default function EventManagementPage({
     setLocalPhases(null);
     setShowPhaseForm(false);
     setSelectedPhase(phase);
+    setActiveTab("resultados");
   }
 
   function handlePhaseSelect(phase: Phase) {
     setSelectedPhase(phase);
-    setActiveTab("partidos");
+    setActiveTab("resultados");
   }
 
   async function handleReorder(reordered: Phase[]) {
@@ -139,7 +140,7 @@ export default function EventManagementPage({
           await queryClient.invalidateQueries({
             queryKey: ["admin", "sessions", eventId, selectedPhase.id],
           });
-          setActiveTab("partidos");
+          setActiveTab("resultados");
           toast(`${res.data.length} sesiones cargadas correctamente.`, "success");
           resolve();
         } catch (err) {
@@ -240,37 +241,40 @@ export default function EventManagementPage({
                   <button
                     type="button"
                     role="tab"
-                    aria-selected={activeTab === "partidos"}
-                    className={`${styles.tab} ${activeTab === "partidos" ? styles.tabActive : ""}`}
-                    onClick={() => setActiveTab("partidos")}
-                  >
-                    Partidos
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
                     aria-selected={activeTab === "csv"}
                     className={`${styles.tab} ${activeTab === "csv" ? styles.tabActive : ""}`}
                     onClick={() => setActiveTab("csv")}
                   >
                     Cargar CSV
                   </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "resultados"}
+                    className={`${styles.tab} ${activeTab === "resultados" ? styles.tabActive : ""}`}
+                    onClick={() => setActiveTab("resultados")}
+                  >
+                    Resultados
+                  </button>
                 </div>
               </div>
 
               <div className={styles.panelBody}>
-                {activeTab === "partidos" && (
-                  <SessionList
-                    sessions={sessions ?? []}
-                    isLoading={sessionsLoading}
-                    isError={sessionsError}
-                  />
-                )}
-
                 {activeTab === "csv" && (
                   <SessionUpload
                     onUpload={handleUpload}
                     isUploading={isUploading}
+                  />
+                )}
+
+                {activeTab === "resultados" && (
+                  <SessionResultsEditor
+                    eventId={eventId}
+                    phaseId={selectedPhase.id}
+                    sessions={sessions ?? []}
+                    isLoading={sessionsLoading}
+                    isError={sessionsError}
+                    isPhaseActive={selectedPhase.status === "ACTIVE"}
                   />
                 )}
               </div>

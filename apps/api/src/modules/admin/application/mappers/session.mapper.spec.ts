@@ -11,6 +11,7 @@ const makeSession = (overrides: Partial<ConstructorParameters<typeof SessionEnti
     sportId: 'sport-1',
     home: { id: 'contender-1', name: 'Team A', imgUrl: 'https://example.com/a.png' },
     away: { id: 'contender-2', name: 'Team B', imgUrl: null },
+    score: { home: null, away: null },
     ...overrides,
   });
 
@@ -31,6 +32,7 @@ describe('SessionMapper', () => {
         status: 'SCHEDULED',
         home: { id: 'contender-1', name: 'Team A', imgUrl: 'https://example.com/a.png' },
         away: { id: 'contender-2', name: 'Team B', imgUrl: null },
+        score: { home: null, away: null },
       });
     });
 
@@ -67,6 +69,17 @@ describe('SessionMapper', () => {
 
       // Assert
       expect(dto.status).toBe('COMPLETED');
+    });
+
+    it('maps completed scores when present', () => {
+      const entity = makeSession({
+        status: 'COMPLETED',
+        score: { home: '2', away: '1' },
+      });
+
+      const dto = SessionMapper.toDto(entity);
+
+      expect(dto.score).toEqual({ home: '2', away: '1' });
     });
   });
 

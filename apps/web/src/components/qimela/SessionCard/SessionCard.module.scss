@@ -12,31 +12,44 @@
   box-shadow: 0 20px 44px rgba(16, 24, 40, 0.08);
 }
 
-.meta {
+.header {
   display: flex;
   justify-content: space-between;
-  gap: $spacing-md;
   align-items: flex-start;
+  gap: $spacing-md;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .phase {
-  margin: 0 0 4px;
+  margin: 0;
   color: $color-text-secondary;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.title {
-  margin: 0;
-  font-size: 20px;
-  color: $color-text-main;
-}
-
 .date {
   margin: 0;
   font-size: 14px;
+  font-weight: 600;
   color: $color-text-secondary;
+}
+
+.savedNotice {
+  margin: 0;
+  max-width: 260px;
+  align-self: center;
+  text-align: center;
+  color: #1f6f68;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
 }
 
 .teams {
@@ -126,6 +139,7 @@
 .footer {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: $spacing-sm;
 }
 
@@ -142,7 +156,7 @@
 }
 
 .button {
-  align-self: flex-start;
+  align-self: center;
   min-width: 132px;
   height: 44px;
   padding: 0 $spacing-lg;
@@ -165,10 +179,25 @@
   }
 }
 
+.buttonSaved {
+  background: linear-gradient(180deg, #8ae0d2 0%, #39b7a5 100%);
+  color: #063d37;
+  box-shadow: 0 10px 20px rgba(57, 183, 165, 0.24);
+}
+
 @media (max-width: 720px) {
-  .meta {
+  .header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+  }
+
+  .meta {
+    align-items: center;
+    text-align: center;
+  }
+
+  .savedNotice {
+    max-width: none;
   }
 
   .teams {
@@ -210,12 +239,10 @@
   }
 
   .footer {
-    align-items: center;
     text-align: center;
   }
 
   .button {
-    align-self: center;
     width: min(100%, 264px);
   }
 }

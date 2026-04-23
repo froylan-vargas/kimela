@@ -20,6 +20,15 @@ const SESSION_WITH_CONTENDERS_INCLUDE = {
       },
     },
   },
+  results: {
+    include: {
+      pickCategory: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  },
 } as const;
 
 @Injectable()

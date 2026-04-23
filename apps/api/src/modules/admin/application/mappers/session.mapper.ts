@@ -18,6 +18,10 @@ export class SessionMapper {
         name: entity.away.name,
         imgUrl: entity.away.imgUrl,
       },
+      score: {
+        home: entity.score.home,
+        away: entity.score.away,
+      },
     };
   }
 

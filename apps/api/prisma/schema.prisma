@@ -30,6 +30,8 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
   picks                   UserPick[]
+  sessionPoints           UserSessionPoints[]
+  qimelaPoints            UserQimelaPoints[]
 
   @@map("users")
 }
@@ -72,8 +74,10 @@ model Qimela {
   endPhaseId String? @map("end_phase_id")
   endPhase   Phase?  @relation("QimelaEndPhase", fields: [endPhaseId], references: [id])
 
-  rules       QimelaRule[]
-  inviteToken InviteToken?
+  rules         QimelaRule[]
+  inviteToken   InviteToken?
+  sessionPoints UserSessionPoints[]
+  qimelaPoints  UserQimelaPoints[]
 
   @@map("qimelas")
 }
@@ -292,6 +296,7 @@ model Session {
   results           SessionResult[]
   sessionCategories SessionPickCategory[]
   picks             UserPick[]
+  userSessionPoints UserSessionPoints[]
 
   @@map("sessions")
 }
@@ -430,4 +435,45 @@ model QimelaRule {
 
   @@unique([qimelaId, ruleId])
   @@map("qimela_rules")
+}
+
+// ─── Points / Leaderboard ─────────────────────────────────────────────────────
+
+model UserSessionPoints {
+  id          String   @id @default(uuid())
+  points      Int
+  exactResult Boolean  @default(false) @map("exact_result")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  qimelaId String @map("qimela_id")
+  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sessionId, qimelaId])
+  @@index([qimelaId, userId])
+  @@map("user_session_points")
+}
+
+model UserQimelaPoints {
+  id                String   @id @default(uuid())
+  totalPoints       Int      @default(0) @map("total_points")
+  exactResultsCount Int      @default(0) @map("exact_results_count")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  qimelaId String @map("qimela_id")
+  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, qimelaId])
+  @@index([qimelaId, totalPoints(sort: Desc), exactResultsCount(sort: Desc)])
+  @@map("user_qimela_points")
 }

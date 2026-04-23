@@ -10,10 +10,12 @@ import { UploadSessionsUseCase } from '../application/use-cases/upload-sessions.
 import { DeletePhaseUseCase } from '../application/use-cases/delete-phase.use-case';
 import { ActivatePhaseUseCase } from '../application/use-cases/activate-phase.use-case';
 import { CompletePhaseUseCase } from '../application/use-cases/complete-phase.use-case';
+import { SaveSessionResultsUseCase } from '../application/use-cases/save-session-results.use-case';
+import { PgBossModule } from '../../../shared/queue/pgboss.module';
 import { AdminController } from './admin.controller';
 
 @Module({
-  imports: [AdminInfrastructureModule],
+  imports: [AdminInfrastructureModule, PgBossModule],
   providers: [
     GetSportsUseCase,
     GetActiveEventsBySportUseCase,
@@ -25,6 +27,7 @@ import { AdminController } from './admin.controller';
     CompletePhaseUseCase,
     GetSessionsByPhaseUseCase,
     UploadSessionsUseCase,
+    SaveSessionResultsUseCase,
   ],
   controllers: [AdminController],
 })

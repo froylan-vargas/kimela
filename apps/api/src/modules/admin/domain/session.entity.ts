@@ -6,6 +6,11 @@ export interface ContenderInfo {
   imgUrl: string | null;
 }
 
+export interface SessionScoreResult {
+  home: string | null;
+  away: string | null;
+}
+
 export interface SessionProps {
   id: string;
   name: string;
@@ -15,6 +20,7 @@ export interface SessionProps {
   sportId: string;
   home: ContenderInfo;
   away: ContenderInfo;
+  score: SessionScoreResult;
 }
 
 export class SessionEntity {
@@ -26,6 +32,7 @@ export class SessionEntity {
   readonly sportId: string;
   readonly home: ContenderInfo;
   readonly away: ContenderInfo;
+  readonly score: SessionScoreResult;
 
   constructor(props: SessionProps) {
     this.id = props.id;
@@ -36,5 +43,6 @@ export class SessionEntity {
     this.sportId = props.sportId;
     this.home = props.home;
     this.away = props.away;
+    this.score = props.score;
   }
 }

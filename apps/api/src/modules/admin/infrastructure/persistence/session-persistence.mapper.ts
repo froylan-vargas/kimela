@@ -17,6 +17,12 @@ interface PrismaSessionWithContenders {
   phaseId: string;
   sportId: string;
   contenders: PrismaSessionContender[];
+  results?: {
+    value: string | null;
+    pickCategory: {
+      name: string;
+    };
+  }[];
 }
 
 export class SessionPersistenceMapper {
@@ -42,6 +48,13 @@ export class SessionPersistenceMapper {
       imgUrl: awayContender.contender.imgUrl,
     };
 
+    const homeScore =
+      raw.results?.find((result) => result.pickCategory.name === 'score_home')
+        ?.value ?? null;
+    const awayScore =
+      raw.results?.find((result) => result.pickCategory.name === 'score_away')
+        ?.value ?? null;
+
     return new SessionEntity({
       id: raw.id,
       name: raw.name,
@@ -51,6 +64,10 @@ export class SessionPersistenceMapper {
       sportId: raw.sportId,
       home,
       away,
+      score: {
+        home: homeScore,
+        away: awayScore,
+      },
     });
   }
 }

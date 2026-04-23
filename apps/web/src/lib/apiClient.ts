@@ -314,6 +314,22 @@ export const adminApi = {
     );
   },
 
+  saveSessionResults(
+    eventId: string,
+    phaseId: string,
+    sessionId: string,
+    homeScore: string,
+    awayScore: string,
+  ): Promise<void> {
+    return apiFetch<void>(
+      `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/sessions/${encodeURIComponent(sessionId)}/results`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ homeScore, awayScore }),
+      },
+    );
+  },
+
   async uploadSessions(
     eventId: string,
     phaseId: string,

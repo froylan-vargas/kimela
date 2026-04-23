@@ -57,6 +57,14 @@ export default function SessionCard({ session, qimelaId }: SessionCardProps) {
   const [currentTime, setCurrentTime] = useState<number | null>(null);
 
   useEffect(() => {
+    setHomeScore(homePick?.value ?? "");
+  }, [homePick?.value]);
+
+  useEffect(() => {
+    setAwayScore(awayPick?.value ?? "");
+  }, [awayPick?.value]);
+
+  useEffect(() => {
     setCurrentTime(Date.now());
 
     const intervalId = window.setInterval(() => {
@@ -69,6 +77,7 @@ export default function SessionCard({ session, qimelaId }: SessionCardProps) {
   const isTooClose =
     currentTime !== null &&
     new Date(session.scheduledAt).getTime() - currentTime < PICKS_DEADLINE_MS;
+  const hasSavedPrediction = session.hasUserPicks;
   const hasRequiredCategories = !!homePick && !!awayPick;
   const isValid = isValidScore(homeScore) && isValidScore(awayScore);
   const isDisabled =
@@ -90,7 +99,12 @@ export default function SessionCard({ session, qimelaId }: SessionCardProps) {
           { pickCategoryId: awayPick.pickCategoryId, value: awayScore },
         ],
       });
-      toast("Pronóstico guardado correctamente.", "success");
+      toast(
+        hasSavedPrediction
+          ? "Pronóstico actualizado correctamente."
+          : "Pronóstico guardado correctamente.",
+        "success",
+      );
     } catch (err) {
       toast(toUserMessage(err), "error");
     }
@@ -98,13 +112,17 @@ export default function SessionCard({ session, qimelaId }: SessionCardProps) {
 
   return (
     <article className={styles.card}>
-      <div className={styles.meta}>
-        <div>
+      <div className={styles.header}>
+        <div className={styles.meta}>
           <p className={styles.phase}>{session.phaseName}</p>
           <p className={styles.date}>
             {formatScheduledAt(session.scheduledAt)}
           </p>
         </div>
+
+        {hasSavedPrediction && (
+          <p className={styles.savedNotice}>Guardado, aún puedes editar</p>
+        )}
       </div>
 
       <div className={styles.teams}>
@@ -171,11 +189,15 @@ export default function SessionCard({ session, qimelaId }: SessionCardProps) {
         )}
         <button
           type="button"
-          className={styles.button}
+          className={`${styles.button} ${hasSavedPrediction ? styles.buttonSaved : ""}`}
           disabled={isDisabled}
           onClick={handleSave}
         >
-          {savePrediction.isPending ? "Guardando..." : "Guardar"}
+          {savePrediction.isPending
+            ? "Guardando..."
+            : hasSavedPrediction
+              ? "Actualizar"
+              : "Guardar"}
         </button>
       </div>
     </article>

@@ -17,7 +17,7 @@ export default function QimelaSelector() {
   const activeQimelas = data?.data.filter(
     (q) => q.status === "UPCOMING" || q.status === "ACTIVE",
   ) ?? [];
-  const participatingQimelas = activeQimelas;
+  const participatingQimelas = activeQimelas.filter((k) => k.role === "SUBSCRIBER");
   const creatorQimelas = activeQimelas.filter((k) => k.role === "CREATOR");
 
   // Default: last qimela with SUBSCRIBER role — never a creator-only qimela
@@ -28,6 +28,15 @@ export default function QimelaSelector() {
       selectQimela(defaultQimela, "SUBSCRIBER");
     }
   }, [defaultQimela]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep selectedQimela in sync when the list refetches (e.g. after a name edit)
+  useEffect(() => {
+    if (!selectedQimela || !data) return;
+    const fresh = data.data.find((q) => q.id === selectedQimela.id);
+    if (fresh && fresh.name !== selectedQimela.name) {
+      selectQimela(fresh, viewAs ?? "CREATOR");
+    }
+  }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Click-outside to close
   useEffect(() => {

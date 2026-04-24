@@ -76,6 +76,7 @@ export interface QimelaDetail {
   endPhaseId: string | null;
   creatorId: string;
   eventId: string | null;
+  isSubscribed: boolean;
   phases: QimelaDetailPhase[];
   rules: QimelaDetailRule[];
 }

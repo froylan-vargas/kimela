@@ -227,6 +227,7 @@ export default function CreateQimelaForm() {
               dispatch({ type: "SET_NAME", value: e.target.value })
             }
             placeholder="Nombre de tu qimela"
+            maxLength={50}
             disabled={isPending}
             aria-required="true"
           />

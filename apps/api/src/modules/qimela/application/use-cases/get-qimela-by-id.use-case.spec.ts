@@ -34,6 +34,7 @@ describe('GetQimelaByIdUseCase', () => {
   let mockPrisma: {
     phase: { findMany: jest.Mock };
     qimelaRule: { findMany: jest.Mock };
+    subscription: { findFirst: jest.Mock };
   };
 
   beforeEach(() => {
@@ -47,6 +48,7 @@ describe('GetQimelaByIdUseCase', () => {
     mockPrisma = {
       phase: { findMany: jest.fn().mockResolvedValue([]) },
       qimelaRule: { findMany: jest.fn().mockResolvedValue([]) },
+      subscription: { findFirst: jest.fn().mockResolvedValue(null) },
     };
 
     useCase = new GetQimelaByIdUseCase(mockQimelaRepository, mockPrisma as unknown as PrismaService);
@@ -58,7 +60,7 @@ describe('GetQimelaByIdUseCase', () => {
       mockQimelaRepository.findById.mockResolvedValue(null);
 
       // Act + Assert
-      await expect(useCase.execute(QIMELA_ID)).rejects.toThrow(NotFoundException);
+      await expect(useCase.execute(QIMELA_ID, CREATOR_ID)).rejects.toThrow(NotFoundException);
     });
 
     it('looks up qimela by the provided id', async () => {
@@ -66,7 +68,7 @@ describe('GetQimelaByIdUseCase', () => {
       mockQimelaRepository.findById.mockResolvedValue(makeQimela());
 
       // Act
-      await useCase.execute(QIMELA_ID);
+      await useCase.execute(QIMELA_ID, CREATOR_ID);
 
       // Assert
       expect(mockQimelaRepository.findById).toHaveBeenCalledWith(QIMELA_ID);
@@ -77,7 +79,7 @@ describe('GetQimelaByIdUseCase', () => {
       mockQimelaRepository.findById.mockResolvedValue(makeQimela());
 
       // Act
-      const result = await useCase.execute(QIMELA_ID);
+      const result = await useCase.execute(QIMELA_ID, CREATOR_ID);
 
       // Assert
       expect(result.data).toEqual({
@@ -90,6 +92,7 @@ describe('GetQimelaByIdUseCase', () => {
         leagueId: LEAGUE_ID,
         startPhaseId: 'phase-1',
         endPhaseId: 'phase-2',
+        isSubscribed: false,
         phases: [],
         rules: [],
       });
@@ -102,7 +105,7 @@ describe('GetQimelaByIdUseCase', () => {
       );
 
       // Act
-      const result = await useCase.execute(QIMELA_ID);
+      const result = await useCase.execute(QIMELA_ID, CREATOR_ID);
 
       // Assert
       expect(result.data.startPhaseId).toBeNull();

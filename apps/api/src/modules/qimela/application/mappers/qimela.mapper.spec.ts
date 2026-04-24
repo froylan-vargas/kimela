@@ -46,6 +46,18 @@ describe('QimelaMapper', () => {
       expect(dto.role).toBe('SUBSCRIBER');
     });
 
+    it('uses explicit role override when provided', () => {
+      // Arrange — creator, but overridden to SUBSCRIBER
+      const entity = makeEntity({ creatorId: 'user-abc' });
+      const userId = 'user-abc';
+
+      // Act
+      const dto = QimelaMapper.toDto(entity, userId, 'SUBSCRIBER');
+
+      // Assert
+      expect(dto.role).toBe('SUBSCRIBER');
+    });
+
     it('maps all entity fields to dto correctly', () => {
       // Arrange
       const entity = makeEntity();

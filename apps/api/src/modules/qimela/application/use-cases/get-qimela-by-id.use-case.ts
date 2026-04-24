@@ -30,6 +30,7 @@ export interface GetQimelaByIdResponse {
     leagueId: string | null;
     startPhaseId: string | null;
     endPhaseId: string | null;
+    isSubscribed: boolean;
     phases: GetQimelaByIdPhase[];
     rules: GetQimelaByIdRule[];
   };
@@ -45,7 +46,7 @@ export class GetQimelaByIdUseCase {
     private readonly prisma: PrismaService,
   ) {}
 
-  async execute(id: string): Promise<GetQimelaByIdResponse> {
+  async execute(id: string, userId: string): Promise<GetQimelaByIdResponse> {
     this.logger.log(`Getting qimela by id ${id}`);
 
     const qimela = await this.qimelaRepository.findById(id);
@@ -53,8 +54,8 @@ export class GetQimelaByIdUseCase {
       throw new NotFoundException(`Qimela ${id} not found`);
     }
 
-    // Fetch event phases and qimela rules in parallel
-    const [phases, qimelaRules] = await Promise.all([
+    // Fetch event phases, qimela rules, and subscription status in parallel
+    const [phases, qimelaRules, subscription] = await Promise.all([
       qimela.eventId
         ? this.prisma.phase.findMany({
             where: { eventId: qimela.eventId },
@@ -65,6 +66,10 @@ export class GetQimelaByIdUseCase {
       this.prisma.qimelaRule.findMany({
         where: { qimelaId: id },
         include: { rule: true },
+      }),
+      this.prisma.subscription.findFirst({
+        where: { qimelaId: id, userId },
+        select: { id: true },
       }),
     ]);
 
@@ -79,6 +84,7 @@ export class GetQimelaByIdUseCase {
         leagueId: qimela.leagueId,
         startPhaseId: qimela.startPhaseId,
         endPhaseId: qimela.endPhaseId,
+        isSubscribed: subscription !== null,
         phases: phases.map((p) => ({
           id: p.id,
           name: p.name,

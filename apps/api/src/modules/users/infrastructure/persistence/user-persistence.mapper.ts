@@ -11,6 +11,7 @@ export class UserPersistenceMapper {
       passwordHash: raw.passwordHash,
       role: raw.role as unknown as UserRole,
       emailVerifiedAt: raw.emailVerifiedAt,
+      imageUrl: raw.imageUrl,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     });

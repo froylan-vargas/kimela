@@ -46,7 +46,15 @@
       "Bash(nc -zv 127.0.0.1 5433)",
       "Bash(lsof *)",
       "Bash(docker exec *)",
-      "Bash(docker cp *)"
+      "Bash(docker cp *)",
+      "Bash(open *)",
+      "Bash(DATABASE_URL=\"postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public\" npx prisma migrate dev --name add-user-image-url --schema apps/api/prisma/schema.prisma)",
+      "Bash(node_modules/.bin/prisma migrate *)",
+      "Bash(node_modules/.bin/prisma generate *)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(xargs cat *)",
+      "Bash(xargs perl *)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

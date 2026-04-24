@@ -40,6 +40,7 @@ describe('ConfirmEmailUseCase', () => {
       create: jest.fn(),
       verifyEmail: jest.fn(),
       updatePassword: jest.fn(),
+      updateProfile: jest.fn(),
     };
 
     useCase = new ConfirmEmailUseCase(mockTokenRepo, mockUserRepo);

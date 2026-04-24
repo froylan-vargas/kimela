@@ -9,6 +9,7 @@ import { RolesGuard } from './modules/auth/presentation/guards/roles.guard';
 import { HealthController } from './health.controller';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { AdminModule } from './modules/admin/presentation/admin.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AdminModule } from './modules/admin/presentation/admin.module';
     AuthModule,
     JobsModule,
     AdminModule,
+    UsersModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -8,4 +8,5 @@ export interface UserRepository {
   create(user: UserEntity): Promise<UserEntity>;
   verifyEmail(userId: string): Promise<void>;
   updatePassword(userId: string, passwordHash: string): Promise<void>;
+  updateProfile(userId: string, data: { name?: string; imageUrl?: string }): Promise<UserEntity>;
 }

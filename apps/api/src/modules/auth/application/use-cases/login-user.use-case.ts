@@ -27,7 +27,8 @@ export class LoginUserUseCase {
       throw new InvalidCredentialsError();
     }
 
-    if (!user.emailVerifiedAt) {
+    const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION !== 'false';
+    if (requireVerification && !user.emailVerifiedAt) {
       throw new EmailNotVerifiedError();
     }
 

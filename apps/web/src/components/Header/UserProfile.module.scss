@@ -4,12 +4,38 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.menuWrapper {
+  position: relative;
+}
+
+.iconButton,
+.avatarButton {
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  border-radius: $radius-pill;
+}
+
+.iconButton {
+  width: 40px;
+  height: 40px;
+  color: $color-text-secondary;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: $color-text-main;
+    background: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .bellIcon {
   font-size: 24px;
-  color: $color-text-secondary;
 }
 
 .avatar {
@@ -22,26 +48,92 @@
   justify-content: center;
   font-weight: 600;
   font-size: 14px;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.logoutButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  padding: $spacing-sm;
+  z-index: $z-dropdown;
+}
+
+.accountMenu {
+  min-width: 200px;
+}
+
+.menuTitle {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
   color: $color-text-secondary;
-  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.emptyState {
+  margin: 0;
+  font-size: 14px;
+  color: $color-text-secondary;
+}
+
+.menuItem {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
   border-radius: $radius-sm;
-  transition: color 0.15s ease, background 0.15s ease;
+  background: none;
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 500;
+  color: $color-text-main;
+  cursor: pointer;
+  text-align: left;
 
   &:hover {
-    color: $color-text-main;
-    background: rgba(0, 0, 0, 0.05);
+    background: $color-primary-light;
+  }
+}
+
+.menuIcon {
+  font-size: 18px;
+  color: $color-text-secondary;
+}
+
+.mobileOnly {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .notificationsButton {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: inline-flex;
+  }
+
+  .dropdownMenu {
+    right: 0;
+    min-width: min(220px, calc(100vw - 32px));
   }
 }

@@ -169,7 +169,7 @@
   &:focus {
     outline: none;
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.25);
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
   }
 
   &:disabled {
@@ -201,7 +201,7 @@
   &:focus {
     outline: none;
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.25);
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
   }
 
   &:disabled {
@@ -221,7 +221,7 @@
   align-self: flex-start;
   padding: $spacing-sm $spacing-md;
   background: $color-primary;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   border: none;
   border-radius: $radius-sm;
   font-family: $font-family-base;
@@ -270,4 +270,3 @@
   color: $color-text-secondary;
   margin-top: -$spacing-xs;
 }
-

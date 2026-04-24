@@ -15,6 +15,7 @@ const mockUser: AuthUser = {
   email: "test@example.com",
   role: "USER",
   emailVerifiedAt: null,
+      imageUrl: null,
 };
 
 const adminUser: AuthUser = {
@@ -23,6 +24,7 @@ const adminUser: AuthUser = {
   email: "admin@example.com",
   role: "ADMIN",
   emailVerifiedAt: "2026-01-01T00:00:00.000Z",
+  imageUrl: null,
 };
 
 describe("RoleGuard", () => {
@@ -37,6 +39,7 @@ describe("RoleGuard", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(
@@ -55,6 +58,7 @@ describe("RoleGuard", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(
@@ -74,6 +78,7 @@ describe("RoleGuard", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(
@@ -93,6 +98,7 @@ describe("RoleGuard", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(
@@ -111,6 +117,7 @@ describe("RoleGuard", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(
@@ -130,6 +137,7 @@ describe("RoleGuard", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     const { container } = render(

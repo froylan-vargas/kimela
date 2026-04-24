@@ -39,6 +39,7 @@ const mockUser: AuthUser = {
   email: "test@example.com",
   role: "USER",
   emailVerifiedAt: null,
+      imageUrl: null,
 };
 
 const adminUser: AuthUser = {
@@ -47,11 +48,12 @@ const adminUser: AuthUser = {
   email: "admin@example.com",
   role: "ADMIN",
   emailVerifiedAt: "2026-01-01T00:00:00.000Z",
+  imageUrl: null,
 };
 
 function makeWrapper(_user: AuthUser | null = null) {
   return function Wrapper({ children }: { children: ReactNode }) {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
     return (
       <QueryClientProvider client={queryClient}>
         <AuthProvider>{children}</AuthProvider>

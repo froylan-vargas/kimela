@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { inviteApi, ApiError } from "@/lib/apiClient";
 import { useAuthContext } from "@/context/AuthContext";
+import { useQimelaContext } from "@/context/QimelaContext";
 import { useToast } from "@/context/ToastContext";
 import { toUserMessage } from "@/lib/errors";
 import styles from "./page.module.scss";
@@ -26,7 +28,9 @@ export default function InvitePage() {
   const { token } = useParams<{ token: string }>();
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuthContext();
+  const { clearQimela } = useQimelaContext();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [invite, setInvite] = useState<InviteInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,8 +60,10 @@ export default function InvitePage() {
     setSubscribing(true);
     try {
       await inviteApi.subscribe(token);
+      await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
+      clearQimela();
       toast("Te suscribiste correctamente.", "success");
-      router.push(`/qimela/${invite!.qimelaId}`);
+      router.push("/dashboard");
     } catch (err) {
       toast(toUserMessage(err), "error");
     } finally {

@@ -93,7 +93,7 @@
   font-size: $font-size-base;
   font-weight: 600;
   font-family: $font-family-base;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   cursor: pointer;
   transition: background 0.15s ease;
   margin-top: $spacing-xs;
@@ -114,27 +114,27 @@
   gap: $spacing-sm;
   padding: $spacing-md;
   border-radius: $radius-sm;
-  background: #fff8e6;
-  border: 1px solid #f1d17a;
+  background: rgba($color-primary-light, 0.9);
+  border: 1px solid rgba($color-primary, 0.35);
 }
 
 .verificationText {
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
-  color: #6b540f;
+  color: $color-primary-text;
 }
 
 .secondaryButton {
   width: 100%;
   padding: 12px;
   background: transparent;
-  border: 1px solid #d9b550;
+  border: 1px solid rgba($color-primary, 0.45);
   border-radius: $radius-sm;
   font-size: $font-size-base;
   font-weight: 600;
   font-family: $font-family-base;
-  color: #5f490c;
+  color: $color-primary-text;
   cursor: pointer;
   transition:
     background 0.15s ease,

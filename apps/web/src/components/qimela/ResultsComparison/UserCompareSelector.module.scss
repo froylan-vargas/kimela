@@ -1,0 +1,227 @@
+@use "../../../styles/variables" as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.toggle {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: $color-text-main;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+  padding: 6px 0;
+
+  &:focus-visible {
+    outline: 3px solid rgba($color-primary, 0.28);
+    outline-offset: 2px;
+    border-radius: $radius-sm;
+  }
+}
+
+.toggleLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.count {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: $radius-pill;
+  background: rgba($color-primary, 0.2);
+  color: $color-primary-text;
+}
+
+.chevron {
+  font-size: 12px;
+  color: $color-text-secondary;
+}
+
+.clear {
+  appearance: none;
+  border: 1px solid rgba(228, 228, 231, 0.8);
+  background: rgba(255, 255, 255, 0.8);
+  color: $color-text-secondary;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: $radius-pill;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-text-main;
+    border-color: rgba(161, 161, 170, 0.8);
+  }
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 4px;
+  border-radius: $radius-pill;
+  background: rgba($color-primary-light, 0.95);
+  border: 1px solid rgba($color-primary, 0.32);
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-main;
+}
+
+.pillAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pillName {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pillRemove {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: $color-text-secondary;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+
+  &:hover {
+    color: $color-text-main;
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding-top: 4px;
+}
+
+.search {
+  appearance: none;
+  padding: 10px 14px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(228, 228, 231, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  font-family: inherit;
+  font-size: 14px;
+  color: $color-text-main;
+
+  &:focus-visible {
+    outline: 3px solid rgba($color-primary, 0.28);
+    outline-offset: 2px;
+    border-color: rgba($color-primary, 0.5);
+  }
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 8px 10px;
+  border-radius: $radius-sm;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  input[type="checkbox"] {
+    accent-color: $color-primary;
+    cursor: pointer;
+  }
+}
+
+.itemDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+
+  input[type="checkbox"] {
+    cursor: not-allowed;
+  }
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  font-size: 12px;
+  font-weight: 700;
+  color: $color-text-main;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-main;
+}
+
+.empty {
+  padding: 12px;
+  font-size: 13px;
+  color: $color-text-secondary;
+  text-align: center;
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: $color-text-secondary;
+}

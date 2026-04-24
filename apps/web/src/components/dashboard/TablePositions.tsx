@@ -1,70 +1,28 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { useQimelaPhases } from "@/hooks/useQimelaPhases";
+import PhaseFilter from "@/components/qimela/ResultsComparison/PhaseFilter";
 import styles from "./TablePositions.module.scss";
 
+const PAGE_SIZE = 6;
+
 interface TablePositionsProps {
-  qimelaName: string;
+  qimelaId: string;
+  currentUserId?: string;
 }
 
-interface PositionRow {
-  rank: number;
-  playerName: string;
-  initials: string;
-  hits: number;
-  streak: string;
-  points: number;
-  isCurrentUser?: boolean;
+function AvatarCell({ imageUrl, initials }: { imageUrl: string | null; initials: string }) {
+  if (imageUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={imageUrl} alt={initials} className={styles.avatarImg} aria-hidden="true" />
+    );
+  }
+  return <>{initials}</>;
 }
-
-export const MOCK_POSITIONS: PositionRow[] = [
-  {
-    rank: 1,
-    playerName: "Ana Torres",
-    initials: "AT",
-    hits: 18,
-    streak: "+12",
-    points: 124,
-  },
-  {
-    rank: 2,
-    playerName: "Diego Ruiz",
-    initials: "DR",
-    hits: 17,
-    streak: "+8",
-    points: 118,
-  },
-  {
-    rank: 3,
-    playerName: "Froylan Vargas",
-    initials: "FV",
-    hits: 16,
-    streak: "+6",
-    points: 110,
-    isCurrentUser: true,
-  },
-  {
-    rank: 4,
-    playerName: "Sofia Mena",
-    initials: "SM",
-    hits: 14,
-    streak: "+4",
-    points: 95,
-  },
-  {
-    rank: 5,
-    playerName: "Carlos Diaz",
-    initials: "CD",
-    hits: 13,
-    streak: "+2",
-    points: 88,
-  },
-  {
-    rank: 6,
-    playerName: "Laura Campos",
-    initials: "LC",
-    hits: 12,
-    streak: "-1",
-    points: 82,
-  },
-];
 
 function getRankTone(rank: number) {
   if (rank === 1) return styles.rankGold;
@@ -73,156 +31,211 @@ function getRankTone(rank: number) {
   return "";
 }
 
-export function getPositionsSummary() {
-  const leader = MOCK_POSITIONS[0];
-  const currentUser = MOCK_POSITIONS.find((entry) => entry.isCurrentUser) ?? null;
+export default function TablePositions({ qimelaId, currentUserId }: TablePositionsProps) {
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const { data: phases } = useQimelaPhases(qimelaId);
+  const { data, isLoading, isError } = useLeaderboard(qimelaId, currentUserId, selectedPhaseId ?? undefined);
 
-  return {
-    leader,
-    currentUser,
-    openPredictions: 3,
-  };
-}
-
-export default function TablePositions({ qimelaName }: TablePositionsProps) {
-  const { leader, currentUser } = getPositionsSummary();
+  useEffect(() => {
+    setPage(0);
+  }, [selectedPhaseId]);
 
   return (
     <section className={styles.card} aria-labelledby="table-positions-title">
       <div className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Panorama general</p>
-          <h2 className={styles.title} id="table-positions-title">
-            Posiciones
-          </h2>
-          <p className={styles.subtitle}>
-            Así va la tabla de <strong>{qimelaName}</strong> con datos simulados
-            mientras llega la integración real.
-          </p>
-        </div>
-        <div className={styles.summary}>
-          <span className={styles.summaryLabel}>Líder actual</span>
-          <strong>{leader.playerName}</strong>
-          <span>{leader.points} pts</span>
-        </div>
+        <h2 className={styles.title} id="table-positions-title">
+          Posiciones
+        </h2>
+        <Link
+          className={styles.resultsLink}
+          href={`/qimela/${qimelaId}/results`}
+        >
+          Resultados
+        </Link>
       </div>
 
-      {currentUser && (
-        <div className={styles.callout}>
-          <div>
-            <p className={styles.calloutLabel}>Tu posición</p>
-            <strong>
-              {currentUser.rank}. {currentUser.playerName}
-            </strong>
-          </div>
-          <span className={styles.calloutPoints}>{currentUser.points} pts</span>
+      {phases && phases.length > 0 && (
+        <PhaseFilter
+          phases={phases}
+          selectedPhaseId={selectedPhaseId}
+          onChange={setSelectedPhaseId}
+          placeholder="Todo el evento"
+        />
+      )}
+
+      {isLoading && <div className={styles.state}>Cargando posiciones...</div>}
+      {isError && (
+        <div className={styles.state}>
+          No se pudieron cargar las posiciones.
         </div>
       )}
 
-      <div className={styles.mobileList} aria-label="Listado de posiciones">
-        {MOCK_POSITIONS.map((entry) => (
-          <article
-            key={entry.playerName}
-            className={`${styles.mobileRow} ${entry.isCurrentUser ? styles.currentRow : ""}`}
-          >
-            <div className={styles.mobileTop}>
-              <span className={`${styles.rank} ${getRankTone(entry.rank)}`}>
-                {entry.rank}
-              </span>
-              <div className={styles.player}>
-                <span className={styles.avatar} aria-hidden="true">
-                  {entry.initials}
-                </span>
-                <span className={styles.playerText}>
-                  <span className={styles.playerName}>{entry.playerName}</span>
-                  {entry.isCurrentUser && (
-                    <span className={styles.youBadge}>Tú</span>
-                  )}
-                </span>
-              </div>
-              <span className={styles.points}>{entry.points}</span>
-            </div>
-            <div className={styles.mobileStats}>
-              <div>
-                <span className={styles.mobileLabel}>Aciertos</span>
-                <strong>{entry.hits}</strong>
-              </div>
-              <div>
-                <span className={styles.mobileLabel}>Racha</span>
-                <strong
-                  className={
-                    entry.streak.startsWith("-")
-                      ? styles.streakDown
-                      : styles.streakUp
-                  }
-                >
-                  {entry.streak}
-                </strong>
-              </div>
-              <div>
-                <span className={styles.mobileLabel}>Puntos</span>
-                <strong>{entry.points}</strong>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+      {data && data.length === 0 && (
+        <div className={styles.state}>Aún no hay posiciones registradas.</div>
+      )}
 
-      <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th scope="col">Pos.</th>
-              <th scope="col">Participante</th>
-              <th scope="col">Aciertos</th>
-              <th scope="col">Racha</th>
-              <th scope="col">Puntos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MOCK_POSITIONS.map((entry) => (
-              <tr
-                key={entry.playerName}
-                className={entry.isCurrentUser ? styles.currentRow : undefined}
-              >
-                <td data-label="Posición">
+      {data && data.length > 0 && (() => {
+        const totalPages = Math.ceil(data.length / PAGE_SIZE);
+        const visibleData = data.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+        const currentUserInPage = visibleData.some((e) => e.isCurrentUser);
+        const currentUserEntry = !currentUserInPage ? data.find((e) => e.isCurrentUser) : null;
+
+        return (
+          <>
+            <div className={styles.mobileList} aria-label="Listado de posiciones">
+              {visibleData.map((entry) => (
+                <article
+                  key={entry.userId}
+                  className={`${styles.mobileRow} ${entry.isCurrentUser ? styles.currentRow : ""}`}
+                >
                   <span className={`${styles.rank} ${getRankTone(entry.rank)}`}>
                     {entry.rank}
                   </span>
-                </td>
-                <td data-label="Participante">
                   <div className={styles.player}>
                     <span className={styles.avatar} aria-hidden="true">
-                      {entry.initials}
+                      <AvatarCell imageUrl={entry.imageUrl} initials={entry.initials} />
                     </span>
                     <span className={styles.playerText}>
-                      <span className={styles.playerName}>{entry.playerName}</span>
+                      <span className={styles.playerName}>{entry.userName}</span>
                       {entry.isCurrentUser && (
                         <span className={styles.youBadge}>Tú</span>
                       )}
                     </span>
                   </div>
-                </td>
-                <td data-label="Aciertos">{entry.hits}</td>
-                <td data-label="Racha">
-                  <span
-                    className={
-                      entry.streak.startsWith("-")
-                        ? styles.streakDown
-                        : styles.streakUp
-                    }
-                  >
-                    {entry.streak}
-                  </span>
-                </td>
-                <td data-label="Puntos">
-                  <span className={styles.points}>{entry.points}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <div className={styles.mobileSecondary}>
+                    <span className={styles.mobileExactos}>{entry.exactResultsCount} exactos</span>
+                    <span className={styles.points}>{entry.totalPoints}</span>
+                  </div>
+                </article>
+              ))}
+              {currentUserEntry && (
+                <>
+                  <div className={styles.pinnedSeparator} aria-hidden="true" />
+                  <article className={`${styles.mobileRow} ${styles.currentRow}`}>
+                    <span className={`${styles.rank} ${getRankTone(currentUserEntry.rank)}`}>
+                      {currentUserEntry.rank}
+                    </span>
+                    <div className={styles.player}>
+                      <span className={styles.avatar} aria-hidden="true">
+                        <AvatarCell imageUrl={currentUserEntry.imageUrl} initials={currentUserEntry.initials} />
+                      </span>
+                      <span className={styles.playerText}>
+                        <span className={styles.playerName}>{currentUserEntry.userName}</span>
+                        <span className={styles.youBadge}>Tú</span>
+                      </span>
+                    </div>
+                    <div className={styles.mobileSecondary}>
+                      <span className={styles.mobileExactos}>{currentUserEntry.exactResultsCount} exactos</span>
+                      <span className={styles.points}>{currentUserEntry.totalPoints}</span>
+                    </div>
+                  </article>
+                </>
+              )}
+            </div>
+
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos.</th>
+                    <th scope="col">Participante</th>
+                    <th scope="col">Puntos</th>
+                    <th scope="col">Aciertos</th>
+                    <th scope="col">Exactos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleData.map((entry) => (
+                    <tr
+                      key={entry.userId}
+                      className={entry.isCurrentUser ? styles.currentRow : undefined}
+                    >
+                      <td>
+                        <span className={`${styles.rank} ${getRankTone(entry.rank)}`}>
+                          {entry.rank}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.player}>
+                          <span className={styles.avatar} aria-hidden="true">
+                            {entry.initials}
+                          </span>
+                          <span className={styles.playerText}>
+                            <span className={styles.playerName}>{entry.userName}</span>
+                            {entry.isCurrentUser && (
+                              <span className={styles.youBadge}>Tú</span>
+                            )}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={styles.points}>{entry.totalPoints}</span>
+                      </td>
+                      <td>{entry.correctPicksCount}</td>
+                      <td>{entry.exactResultsCount}</td>
+                    </tr>
+                  ))}
+                  {currentUserEntry && (
+                    <>
+                      <tr className={styles.pinnedSeparatorRow} aria-hidden="true">
+                        <td colSpan={5} />
+                      </tr>
+                      <tr className={styles.currentRow}>
+                        <td>
+                          <span className={`${styles.rank} ${getRankTone(currentUserEntry.rank)}`}>
+                            {currentUserEntry.rank}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.player}>
+                            <span className={styles.avatar} aria-hidden="true">
+                              {currentUserEntry.initials}
+                            </span>
+                            <span className={styles.playerText}>
+                              <span className={styles.playerName}>{currentUserEntry.userName}</span>
+                              <span className={styles.youBadge}>Tú</span>
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className={styles.points}>{currentUserEntry.totalPoints}</span>
+                        </td>
+                        <td>{currentUserEntry.correctPicksCount}</td>
+                        <td>{currentUserEntry.exactResultsCount}</td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className={styles.pagination} aria-label="Paginación de posiciones">
+                <button
+                  className={styles.pageBtn}
+                  onClick={() => setPage((p) => p - 1)}
+                  disabled={page === 0}
+                  aria-label="Página anterior"
+                >
+                  ‹
+                </button>
+                <span className={styles.pageInfo}>
+                  {page + 1} / {totalPages}
+                </span>
+                <button
+                  className={styles.pageBtn}
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page === totalPages - 1}
+                  aria-label="Página siguiente"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+          </>
+        );
+      })()}
     </section>
   );
 }

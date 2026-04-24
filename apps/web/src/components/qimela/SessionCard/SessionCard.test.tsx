@@ -213,4 +213,45 @@ describe("SessionCard", () => {
       screen.getByRole("button", { name: "Actualizar" }),
     ).toBeEnabled();
   });
+
+  it("can hide the phase name when rendered in compact dashboard mode", () => {
+    render(
+      <SessionCard
+        qimelaId="q1"
+        showPhaseName={false}
+        session={{
+          id: "s4",
+          name: "México vs Sudáfrica",
+          scheduledAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+          status: "SCHEDULED",
+          phaseId: "p1",
+          phaseName: "Grupos - Partido 1",
+          score: { home: null, away: null },
+          home: { id: "h4", name: "México", imgUrl: null },
+          away: { id: "a4", name: "Sudáfrica", imgUrl: null },
+          hasUserPicks: false,
+          picks: [
+            {
+              pickCategoryId: "home-pick",
+              name: "score_home",
+              label: "Goles local",
+              valueType: "SCALAR",
+              value: null,
+              pickedContenderId: null,
+            },
+            {
+              pickCategoryId: "away-pick",
+              name: "score_away",
+              label: "Goles visitante",
+              valueType: "SCALAR",
+              value: null,
+              pickedContenderId: null,
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.queryByText("Grupos - Partido 1")).not.toBeInTheDocument();
+  });
 });

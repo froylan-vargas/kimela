@@ -11,6 +11,8 @@ import { GetUpcomingSessionsUseCase } from '../application/use-cases/get-upcomin
 import { GetAllSessionsUseCase } from '../application/use-cases/get-all-sessions.use-case';
 import { SaveSessionPicksUseCase } from '../application/use-cases/save-session-picks.use-case';
 import { GetLeaderboardUseCase } from '../application/use-cases/get-leaderboard.use-case';
+import { GetQimelaPhasesUseCase } from '../application/use-cases/get-qimela-phases.use-case';
+import { GetQimelaResultsUseCase } from '../application/use-cases/get-qimela-results.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
@@ -77,6 +79,8 @@ describe('QimelaController', () => {
         { provide: GetAllSessionsUseCase, useValue: { execute: jest.fn() } },
         { provide: SaveSessionPicksUseCase, useValue: { execute: jest.fn() } },
         { provide: GetLeaderboardUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetQimelaPhasesUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetQimelaResultsUseCase, useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -229,7 +233,7 @@ describe('QimelaController', () => {
 
       const result = await controller.listLeaderboard(QIMELA_ID);
 
-      expect(getLeaderboard.execute).toHaveBeenCalledWith(QIMELA_ID);
+      expect(getLeaderboard.execute).toHaveBeenCalledWith(QIMELA_ID, undefined);
       expect(result).toEqual(response);
     });
   });

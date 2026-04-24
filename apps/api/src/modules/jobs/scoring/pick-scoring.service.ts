@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 export interface ScoredPick {
   points: number;
   exactResult: boolean;
+  correctPick: boolean;
 }
 
 interface UserPickRow {
@@ -50,10 +51,11 @@ export class PickScoringService {
 
     let totalPoints = 0;
     let exactResult = false;
+    const outcomeCorrect = actualOutcome !== null && userOutcome !== null && actualOutcome === userOutcome;
 
     for (const rule of rules) {
       if (rule.slug === 'session_winner') {
-        if (actualOutcome !== null && userOutcome !== null && actualOutcome === userOutcome) {
+        if (outcomeCorrect) {
           totalPoints += rule.points;
         }
       } else if (rule.slug === 'exact_session_result') {
@@ -64,7 +66,7 @@ export class PickScoringService {
       }
     }
 
-    return { points: totalPoints, exactResult };
+    return { points: totalPoints, exactResult, correctPick: outcomeCorrect || exactResult };
   }
 
   private deriveOutcome(

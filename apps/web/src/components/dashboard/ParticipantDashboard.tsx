@@ -3,8 +3,9 @@
 import { useState } from "react";
 import type { Qimela } from "@/types/qimela";
 import TablePositions from "@/components/dashboard/TablePositions";
-import { getPositionsSummary } from "@/components/dashboard/TablePositions";
 import UpcomingSessions from "@/components/qimela/UpcomingSessions/UpcomingSessions";
+import { useAuth } from "@/hooks/useAuth";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 import styles from "./ParticipantDashboard.module.scss";
 
 interface ParticipantDashboardProps {
@@ -17,31 +18,38 @@ export default function ParticipantDashboard({
   const [activeMobilePanel, setActiveMobilePanel] = useState<
     "sessions" | "positions"
   >("sessions");
-  const { currentUser, openPredictions } = getPositionsSummary();
+  const { user } = useAuth();
+  const { data: leaderboard } = useLeaderboard(qimela.id, user?.id);
+  const currentEntry = leaderboard?.find((entry) => entry.isCurrentUser);
 
   return (
     <section className={styles.layout}>
-      <div className={styles.hero}>
-        <p className={styles.eyebrow}>Vista del participante</p>
-        <h1>{qimela.name}</h1>
-        <p>
-          Revisa tu lugar en la tabla y los próximos partidos que todavía
-          puedes pronosticar.
-        </p>
-      </div>
-      {currentUser && (
-        <div className={styles.mobileSummary}>
-          <span>
-            Tu posición: <strong>{currentUser.rank}</strong>
-          </span>
-          <span>
-            <strong>{currentUser.points} pts</strong>
-          </span>
-          <span>
-            <strong>{openPredictions}</strong> abiertos
-          </span>
+      <div className={styles.summaryCard}>
+        <div className={styles.summaryPrimary}>
+          <h1>{qimela.name}</h1>
         </div>
-      )}
+        <div className={styles.summaryDivider} aria-hidden="true" />
+        <div className={styles.summaryStats}>
+          <div className={styles.summaryUser}>
+            <span className={styles.summaryLabel}>Usuario</span>
+            <span className={styles.summaryValue}>
+              {currentEntry?.userName ?? user?.name ?? "Sin registro"}
+            </span>
+          </div>
+          <div className={styles.summaryMetric}>
+            <span className={styles.summaryLabel}>Pos</span>
+            <span className={styles.summaryRank}>
+              {currentEntry?.rank ?? "-"}
+            </span>
+          </div>
+          <div className={styles.summaryMetric}>
+            <span className={styles.summaryLabel}>Puntos</span>
+            <span className={styles.summaryPoints}>
+              {currentEntry?.totalPoints ?? 0}
+            </span>
+          </div>
+        </div>
+      </div>
       <div
         className={styles.mobileSwitch}
         role="tablist"
@@ -76,7 +84,7 @@ export default function ParticipantDashboard({
             activeMobilePanel === "positions" ? styles.panelMobileVisible : ""
           }`}
         >
-          <TablePositions qimelaName={qimela.name} />
+          <TablePositions qimelaId={qimela.id} currentUserId={user?.id} />
         </div>
         <div
           className={`${styles.panel} ${

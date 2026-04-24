@@ -5,8 +5,8 @@
   align-items: center;
   justify-content: center;
   gap: $spacing-md;
-  background: #fff9e5;
-  border-bottom: 1px solid #ffd100;
+  background: $color-primary-light;
+  border-bottom: 1px solid rgba($color-primary, 0.35);
   padding: $spacing-sm $spacing-lg;
   font-size: 14px;
   color: $color-text-main;
@@ -24,7 +24,7 @@
     font-size: 14px;
     font-weight: 600;
     font-family: $font-family-base;
-    color: $color-text-main;
+    color: $color-primary-contrast;
     cursor: pointer;
     transition: background 0.15s ease;
     white-space: nowrap;

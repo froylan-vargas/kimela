@@ -72,7 +72,7 @@ describe("QimelaSessionsPage", () => {
     render(<QimelaSessionsPage />);
 
     expect(
-      screen.getByRole("link", { name: "Volver al dashboard" }),
+      screen.getByRole("link", { name: "Volver" }),
     ).toHaveAttribute("href", "/dashboard");
   });
 });

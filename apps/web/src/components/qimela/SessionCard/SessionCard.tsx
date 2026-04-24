@@ -27,21 +27,29 @@ function getInitials(name: string) {
 }
 
 function formatScheduledAt(dateString: string) {
+  // Sessions are stored as UTC without timezone conversion on CSV upload,
+  // so render in UTC to match the hora the admin provided.
   return new Intl.DateTimeFormat("es-MX", {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   }).format(new Date(dateString));
 }
 
 interface SessionCardProps {
   session: SessionPrediction;
   qimelaId: string;
+  showPhaseName?: boolean;
 }
 
-export default function SessionCard({ session, qimelaId }: SessionCardProps) {
+export default function SessionCard({
+  session,
+  qimelaId,
+  showPhaseName = true,
+}: SessionCardProps) {
   const { toast } = useToast();
   const savePrediction = useSavePrediction(qimelaId);
   const homePick = useMemo(
@@ -114,7 +122,6 @@ export default function SessionCard({ session, qimelaId }: SessionCardProps) {
     <article className={styles.card}>
       <div className={styles.header}>
         <div className={styles.meta}>
-          <p className={styles.phase}>{session.phaseName}</p>
           <p className={styles.date}>
             {formatScheduledAt(session.scheduledAt)}
           </p>

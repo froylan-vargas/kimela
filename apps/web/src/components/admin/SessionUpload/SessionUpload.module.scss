@@ -37,7 +37,7 @@
 }
 
 .dragging .icon {
-  color: $color-text-main;
+  color: $color-primary-contrast;
 }
 
 .hint {
@@ -49,7 +49,7 @@
 .chooseBtn {
   padding: $spacing-sm $spacing-md;
   background: $color-primary;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   border: none;
   border-radius: $radius-sm;
   font-family: $font-family-base;

@@ -23,12 +23,15 @@ interface ResultDraft {
 }
 
 function formatScheduledAt(value: string) {
+  // Sessions are stored as UTC without timezone conversion on CSV upload,
+  // so render in UTC to match the hora the admin provided.
   return new Intl.DateTimeFormat("es-MX", {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   }).format(new Date(value));
 }
 
@@ -192,7 +195,6 @@ export default function SessionResultsEditor({
               className={`${styles.card} ${isCompleted ? styles.cardCompleted : ""}`}
             >
               <div className={styles.header}>
-                <p className={styles.sessionName}>{session.name}</p>
                 <p className={styles.scheduledAt}>
                   {formatScheduledAt(session.scheduledAt)}
                 </p>

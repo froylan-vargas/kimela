@@ -18,14 +18,10 @@ export default function UpcomingSessions({ qimelaId }: UpcomingSessionsProps) {
     <section className={styles.section}>
       <div className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>Tus pronósticos</p>
           <h2 className={styles.title}>Próximos partidos</h2>
-          <p className={styles.subtitle}>
-            Guarda cada partido por separado antes del cierre de pronósticos.
-          </p>
         </div>
         <Link className={styles.link} href={`/qimela/${qimelaId}/sessions`}>
-          Ver todos los partidos
+          Ver todos
         </Link>
       </div>
 
@@ -46,12 +42,16 @@ export default function UpcomingSessions({ qimelaId }: UpcomingSessionsProps) {
           {data!.map((group) => (
             <section key={group.phaseId} className={styles.group}>
               <div className={styles.groupHeader}>
-                <p className={styles.groupEyebrow}>Fase {group.phaseOrder}</p>
                 <h3>{group.phaseName}</h3>
               </div>
               <div className={styles.stack}>
                 {group.sessions.map((session) => (
-                  <SessionCard key={session.id} session={session} qimelaId={qimelaId} />
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    qimelaId={qimelaId}
+                    showPhaseName={false}
+                  />
                 ))}
               </div>
             </section>

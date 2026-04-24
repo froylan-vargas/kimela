@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import QimelaSelector from "./QimelaSelector";
@@ -69,8 +69,9 @@ function mockUseQimelas(
   } as UseQueryResult<QimelasResponse, Error>);
 }
 
+let queryClient: QueryClient;
+
 function wrapper({ children }: { children: ReactNode }) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -82,7 +83,12 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe("QimelaSelector", () => {
   beforeEach(() => {
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
     mockUseQimelas();
+  });
+
+  afterEach(() => {
+    queryClient.clear();
   });
 
   it("shows 'Loading...' while fetching", () => {

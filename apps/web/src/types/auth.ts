@@ -6,4 +6,5 @@ export interface AuthUser {
   email: string;
   role: AuthRole;
   emailVerifiedAt: string | null;
+  imageUrl: string | null;
 }

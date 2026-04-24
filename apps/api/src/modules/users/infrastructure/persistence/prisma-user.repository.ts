@@ -54,4 +54,13 @@ export class PrismaUserRepository implements UserRepository {
       data: { passwordHash },
     });
   }
+
+  async updateProfile(userId: string, data: { name?: string; imageUrl?: string }): Promise<UserEntity> {
+    this.logger.debug(`Updating profile for user: ${userId}`);
+    const record = await this.prisma.user.update({
+      where: { id: userId },
+      data: { ...data },
+    });
+    return UserPersistenceMapper.toDomain(record);
+  }
 }

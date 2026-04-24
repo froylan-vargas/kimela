@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { qimelasApi, inviteApi } from "@/lib/apiClient";
 import { useAuthContext } from "@/context/AuthContext";
@@ -19,6 +20,7 @@ export default function QimelaDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuthContext();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [qimela, setQimela] = useState<QimelaDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,7 @@ export default function QimelaDetailPage() {
 
   const [shareLoading, setShareLoading] = useState(false);
   const [revoking, setRevoking] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
   const [editName, setEditName] = useState("");
   const [editStartPhaseId, setEditStartPhaseId] = useState<string | null>(null);
@@ -137,6 +140,20 @@ export default function QimelaDetailPage() {
     }
   }
 
+  async function handleSubscribe() {
+    setSubscribing(true);
+    try {
+      await qimelasApi.subscribe(id);
+      setQimela((prev) => prev ? { ...prev, isSubscribed: true } : prev);
+      await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
+      toast("Te has suscrito a la qimela.", "success");
+    } catch (err) {
+      toast(toUserMessage(err), "error");
+    } finally {
+      setSubscribing(false);
+    }
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!qimela || !hasChanged || isCompleted) return;
@@ -186,6 +203,7 @@ export default function QimelaDetailPage() {
       setEditName(res.data.name);
       setEditStartPhaseId(res.data.startPhaseId);
       setEditEndPhaseId(res.data.endPhaseId);
+      await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
       toast("Cambios guardados correctamente.", "success");
     } catch {
       setSaveError("No se pudieron guardar los cambios. Intenta de nuevo.");
@@ -204,6 +222,19 @@ export default function QimelaDetailPage() {
           {STATUS_LABELS[qimela.status] ?? qimela.status}
         </span>
       </div>
+
+      {isCreator && isUpcoming && !qimela.isSubscribed && (
+        <div className={styles.subscribeWrapper}>
+          <button
+            type="button"
+            className={styles.subscribeBtn}
+            onClick={handleSubscribe}
+            disabled={subscribing}
+          >
+            {subscribing ? "Suscribiendo..." : "Suscribirme"}
+          </button>
+        </div>
+      )}
 
       {isCreator && (
         <section className={styles.shareSection}>
@@ -249,6 +280,7 @@ export default function QimelaDetailPage() {
                   className={styles.input}
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  maxLength={50}
                   disabled={isActive}
                 />
               </div>

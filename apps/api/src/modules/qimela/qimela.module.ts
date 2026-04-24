@@ -17,6 +17,7 @@ import { SaveSessionPicksUseCase } from './application/use-cases/save-session-pi
 import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.use-case';
 import { GetQimelaPhasesUseCase } from './application/use-cases/get-qimela-phases.use-case';
 import { GetQimelaResultsUseCase } from './application/use-cases/get-qimela-results.use-case';
+import { SubscribeToQimelaUseCase } from './application/use-cases/subscribe-to-qimela.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -40,6 +41,7 @@ import { InviteController } from './presentation/invite.controller';
     GetLeaderboardUseCase,
     GetQimelaPhasesUseCase,
     GetQimelaResultsUseCase,
+    SubscribeToQimelaUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

@@ -54,6 +54,7 @@ const mockQimela = {
     eventId: null,
     startPhaseId: null,
     endPhaseId: null,
+    isSubscribed: false,
     phases: [],
     rules: [],
   },

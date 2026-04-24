@@ -295,6 +295,13 @@ export const qimelasApi = {
     );
   },
 
+  subscribe(qimelaId: string): Promise<{ data: { subscriptionId: string } }> {
+    return apiFetch<{ data: { subscriptionId: string } }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/subscribe`,
+      { method: "POST" },
+    );
+  },
+
   saveSessionPicks(
     qimelaId: string,
     sessionId: string,

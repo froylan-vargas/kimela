@@ -109,6 +109,37 @@
   }
 }
 
+// ─── Subscribe button ─────────────────────────────────────────────────────────
+
+.subscribeWrapper {
+  width: 100%;
+  max-width: 480px;
+  margin-top: -$spacing-md;
+  margin-bottom: $spacing-sm;
+}
+
+.subscribeBtn {
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary;
+  color: $color-primary-contrast;
+  border: none;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 // ─── Edit section ─────────────────────────────────────────────────────────────
 
 .editSection {

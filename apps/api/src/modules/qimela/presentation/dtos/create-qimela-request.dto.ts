@@ -14,7 +14,7 @@ export class QimelaRuleInputDto {
 export class CreateQimelaRequestDto {
   @IsString()
   @MinLength(8)
-  @MaxLength(40)
+  @MaxLength(50)
   name!: string;
 
   @IsUUID()

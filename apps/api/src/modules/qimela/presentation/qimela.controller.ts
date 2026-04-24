@@ -6,6 +6,7 @@ import { GetEventsForQimelaUseCase, GetEventsForQimelaResponse } from '../applic
 import { GetRulesUseCase, GetRulesResponse } from '../application/use-cases/get-rules.use-case';
 import { CreateQimelaUseCase, CreateQimelaResponse } from '../application/use-cases/create-qimela.use-case';
 import { UpdateQimelaUseCase, UpdateQimelaResponse } from '../application/use-cases/update-qimela.use-case';
+import { SubscribeToQimelaUseCase, SubscribeToQimelaResponse } from '../application/use-cases/subscribe-to-qimela.use-case';
 import { PaginatedQimelaResponse } from '../application/dtos/qimela.dto';
 import { GetUpcomingSessionsUseCase, GetUpcomingSessionsResponse } from '../application/use-cases/get-upcoming-sessions.use-case';
 import { GetAllSessionsUseCase, GetAllSessionsResponse } from '../application/use-cases/get-all-sessions.use-case';
@@ -37,6 +38,7 @@ export class QimelaController {
     private readonly getLeaderboard: GetLeaderboardUseCase,
     private readonly getQimelaPhases: GetQimelaPhasesUseCase,
     private readonly getQimelaResults: GetQimelaResultsUseCase,
+    private readonly subscribeToQimela: SubscribeToQimelaUseCase,
   ) {}
 
   @Get()
@@ -71,9 +73,20 @@ export class QimelaController {
   @Get(':id')
   async getById(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserPayload,
   ): Promise<GetQimelaByIdResponse> {
-    this.logger.log(`GET /qimelas/${id} requested`);
-    return this.getQimelaById.execute(id);
+    this.logger.log(`GET /qimelas/${id} requested by user ${user.id}`);
+    return this.getQimelaById.execute(id, user.id);
+  }
+
+  @Post(':id/subscribe')
+  @HttpCode(HttpStatus.CREATED)
+  async subscribe(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<SubscribeToQimelaResponse> {
+    this.logger.log(`POST /qimelas/${id}/subscribe requested by user ${user.id}`);
+    return this.subscribeToQimela.execute({ qimelaId: id, userId: user.id });
   }
 
   @Get(':qimelaId/leaderboard')

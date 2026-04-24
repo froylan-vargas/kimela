@@ -6,7 +6,7 @@ export class UpdateQimelaRequestDto {
   @IsOptional()
   @IsString()
   @MinLength(8)
-  @MaxLength(40)
+  @MaxLength(50)
   name?: string;
 
   @IsOptional()

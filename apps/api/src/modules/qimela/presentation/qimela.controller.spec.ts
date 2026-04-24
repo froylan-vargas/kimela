@@ -13,6 +13,7 @@ import { SaveSessionPicksUseCase } from '../application/use-cases/save-session-p
 import { GetLeaderboardUseCase } from '../application/use-cases/get-leaderboard.use-case';
 import { GetQimelaPhasesUseCase } from '../application/use-cases/get-qimela-phases.use-case';
 import { GetQimelaResultsUseCase } from '../application/use-cases/get-qimela-results.use-case';
+import { SubscribeToQimelaUseCase } from '../application/use-cases/subscribe-to-qimela.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
@@ -81,6 +82,7 @@ describe('QimelaController', () => {
         { provide: GetLeaderboardUseCase, useValue: { execute: jest.fn() } },
         { provide: GetQimelaPhasesUseCase, useValue: { execute: jest.fn() } },
         { provide: GetQimelaResultsUseCase, useValue: { execute: jest.fn() } },
+        { provide: SubscribeToQimelaUseCase, useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -160,7 +162,7 @@ describe('QimelaController', () => {
   // ─── getById ─────────────────────────────────────────────────────────────
 
   describe('getById', () => {
-    it('calls use case with the provided id', async () => {
+    it('calls use case with the provided id and user id', async () => {
       // Arrange
       const mockResponse = {
         data: {
@@ -173,6 +175,7 @@ describe('QimelaController', () => {
           leagueId: null,
           startPhaseId: null,
           endPhaseId: null,
+          isSubscribed: false,
           phases: [],
           rules: [],
         },
@@ -180,10 +183,10 @@ describe('QimelaController', () => {
       getQimelaById.execute.mockResolvedValue(mockResponse);
 
       // Act
-      await controller.getById(QIMELA_ID);
+      await controller.getById(QIMELA_ID, MOCK_USER);
 
       // Assert
-      expect(getQimelaById.execute).toHaveBeenCalledWith(QIMELA_ID);
+      expect(getQimelaById.execute).toHaveBeenCalledWith(QIMELA_ID, MOCK_USER_ID);
     });
 
     it('returns the qimela from the use case', async () => {
@@ -199,6 +202,7 @@ describe('QimelaController', () => {
           leagueId: null,
           startPhaseId: null,
           endPhaseId: null,
+          isSubscribed: false,
           phases: [],
           rules: [],
         },
@@ -206,7 +210,7 @@ describe('QimelaController', () => {
       getQimelaById.execute.mockResolvedValue(mockResponse);
 
       // Act
-      const result = await controller.getById(QIMELA_ID);
+      const result = await controller.getById(QIMELA_ID, MOCK_USER);
 
       // Assert
       expect(result).toEqual(mockResponse);

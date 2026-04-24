@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { GetQimelasForUserUseCase } from '../application/use-cases/get-qimelas-for-user.use-case';
 import { GetQimelaByIdUseCase, GetQimelaByIdResponse } from '../application/use-cases/get-qimela-by-id.use-case';
 import { GetSportsForQimelaUseCase, GetSportsForQimelaResponse } from '../application/use-cases/get-sports-for-qimela.use-case';
@@ -14,6 +14,8 @@ import { SaveSessionPicksUseCase, SaveSessionPicksResponse } from '../applicatio
 import { GetLeaderboardUseCase, GetLeaderboardResponse } from '../application/use-cases/get-leaderboard.use-case';
 import { GetQimelaPhasesUseCase, GetQimelaPhasesResponse } from '../application/use-cases/get-qimela-phases.use-case';
 import { GetQimelaResultsUseCase, GetQimelaResultsResponse } from '../application/use-cases/get-qimela-results.use-case';
+import { GetQimelaSubscribersUseCase, GetQimelaSubscribersResponse } from '../application/use-cases/get-qimela-subscribers.use-case';
+import { RemoveSubscriptionUseCase, RemoveSubscriptionResponse } from '../application/use-cases/remove-subscription.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
@@ -39,6 +41,8 @@ export class QimelaController {
     private readonly getQimelaPhases: GetQimelaPhasesUseCase,
     private readonly getQimelaResults: GetQimelaResultsUseCase,
     private readonly subscribeToQimela: SubscribeToQimelaUseCase,
+    private readonly getQimelaSubscribers: GetQimelaSubscribersUseCase,
+    private readonly removeSubscription: RemoveSubscriptionUseCase,
   ) {}
 
   @Get()
@@ -87,6 +91,39 @@ export class QimelaController {
   ): Promise<SubscribeToQimelaResponse> {
     this.logger.log(`POST /qimelas/${id}/subscribe requested by user ${user.id}`);
     return this.subscribeToQimela.execute({ qimelaId: id, userId: user.id });
+  }
+
+  @Get(':id/subscribers')
+  async listSubscribers(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+    @Query('search') search?: string,
+  ): Promise<GetQimelaSubscribersResponse> {
+    this.logger.log(`GET /qimelas/${id}/subscribers requested by user ${user.id}`);
+    return this.getQimelaSubscribers.execute({
+      qimelaId: id,
+      requesterId: user.id,
+      page: Math.max(1, parseInt(page, 10) || 1),
+      limit: Math.min(50, Math.max(1, parseInt(limit, 10) || 10)),
+      search: search?.trim() || undefined,
+    });
+  }
+
+  @Delete(':id/subscribers/:userId')
+  @HttpCode(HttpStatus.OK)
+  async removeSubscriber(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<RemoveSubscriptionResponse> {
+    this.logger.log(`DELETE /qimelas/${id}/subscribers/${userId} requested by user ${user.id}`);
+    return this.removeSubscription.execute({
+      qimelaId: id,
+      requesterId: user.id,
+      targetUserId: userId,
+    });
   }
 
   @Get(':qimelaId/leaderboard')

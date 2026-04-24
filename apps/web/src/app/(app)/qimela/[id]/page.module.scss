@@ -59,6 +59,47 @@
   }
 }
 
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+
+.tabContainer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  width: 100%;
+  max-width: 480px;
+}
+
+.tabBar {
+  display: flex;
+  border-bottom: 2px solid $color-border;
+  gap: 0;
+}
+
+.tab {
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-family: $font-family-base;
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-secondary;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover:not(.tabActive) {
+    color: $color-text-main;
+  }
+}
+
+.tabActive {
+  color: $color-primary-text;
+  border-bottom-color: $color-primary;
+}
+
 // ─── Share section ────────────────────────────────────────────────────────────
 
 .shareSection {

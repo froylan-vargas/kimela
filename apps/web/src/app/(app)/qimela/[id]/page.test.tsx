@@ -5,6 +5,15 @@ vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "qimela-uuid" }),
 }));
 
+vi.mock("@tanstack/react-query", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
+  return { ...actual, useQueryClient: () => ({ invalidateQueries: vi.fn() }) };
+});
+
+vi.mock("@/components/qimela/SubscribersList/SubscribersList", () => ({
+  default: () => null,
+}));
+
 vi.mock("@/lib/apiClient", () => ({
   qimelasApi: {
     getById: vi.fn(),

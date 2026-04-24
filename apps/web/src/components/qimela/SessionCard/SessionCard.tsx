@@ -48,7 +48,7 @@ interface SessionCardProps {
 export default function SessionCard({
   session,
   qimelaId,
-  showPhaseName = true,
+  showPhaseName: _showPhaseName = true,
 }: SessionCardProps) {
   const { toast } = useToast();
   const savePrediction = useSavePrediction(qimelaId);

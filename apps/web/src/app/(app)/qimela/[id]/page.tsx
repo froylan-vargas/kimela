@@ -8,6 +8,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { toUserMessage } from "@/lib/errors";
 import type { QimelaDetail } from "@/types/qimela";
+import SubscribersList from "@/components/qimela/SubscribersList/SubscribersList";
 import styles from "./page.module.scss";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -37,6 +38,8 @@ export default function QimelaDetailPage() {
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const [activeTab, setActiveTab] = useState<"subscribers" | "settings">("settings");
 
   useEffect(() => {
     qimelasApi
@@ -237,154 +240,180 @@ export default function QimelaDetailPage() {
       )}
 
       {isCreator && (
-        <section className={styles.shareSection}>
-          <h2 className={styles.editHeading}>Enlace de invitación</h2>
-          <p className={styles.shareDescription}>
-            Comparte este enlace para que otros usuarios puedan suscribirse a tu
-            qimela.
-          </p>
-          <div className={styles.shareActions}>
+        <div className={styles.tabContainer}>
+          <div className={styles.tabBar} role="tablist">
             <button
+              role="tab"
               type="button"
-              className={styles.saveBtn}
-              onClick={handleShare}
-              disabled={shareLoading}
+              aria-selected={activeTab === "settings"}
+              className={`${styles.tab} ${activeTab === "settings" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("settings")}
             >
-              {shareLoading ? "Generando..." : "Copiar enlace"}
+              qimela
             </button>
             <button
+              role="tab"
               type="button"
-              className={styles.revokeBtn}
-              onClick={handleRevoke}
-              disabled={revoking}
+              aria-selected={activeTab === "subscribers"}
+              className={`${styles.tab} ${activeTab === "subscribers" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("subscribers")}
             >
-              {revoking ? "Revocando..." : "Revocar enlace"}
+              Participantes
             </button>
           </div>
-        </section>
-      )}
 
-      {isCreator && !isCompleted && (
-        <section className={styles.editSection}>
-          <h2 className={styles.editHeading}>Editar qimela</h2>
-          <form onSubmit={handleSave} noValidate>
-            <div className={styles.fields}>
-              {/* Name — editable only when UPCOMING */}
-              <div className={styles.field}>
-                <label htmlFor="edit-name" className={styles.label}>
-                  Nombre
-                </label>
-                <input
-                  id="edit-name"
-                  type="text"
-                  className={styles.input}
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  maxLength={50}
-                  disabled={isActive}
-                />
-              </div>
+          {activeTab === "subscribers" && (
+            <SubscribersList qimelaId={id} />
+          )}
 
-              {/* Start Phase — editable only when UPCOMING */}
-              {sortedPhases.length > 0 && (
-                <div className={styles.field}>
-                  <label htmlFor="edit-start-phase" className={styles.label}>
-                    Fase inicial
-                  </label>
-                  <select
-                    id="edit-start-phase"
-                    className={styles.select}
-                    value={editStartPhaseId ?? ""}
-                    onChange={(e) => handleStartPhaseChange(e.target.value)}
-                    disabled={isActive}
+          {activeTab === "settings" && (
+            <>
+              <section className={styles.shareSection}>
+                <h2 className={styles.editHeading}>Enlace de invitación</h2>
+                <p className={styles.shareDescription}>
+                  Comparte este enlace para que otros usuarios puedan suscribirse a tu
+                  qimela.
+                </p>
+                <div className={styles.shareActions}>
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={handleShare}
+                    disabled={shareLoading}
                   >
-                    <option value="">Selecciona la fase inicial</option>
-                    {sortedPhases.map((phase) => (
-                      <option key={phase.id} value={phase.id}>
-                        {phase.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* End Phase — editable for both UPCOMING and ACTIVE */}
-              {sortedPhases.length > 0 && (
-                <div className={styles.field}>
-                  <label htmlFor="edit-end-phase" className={styles.label}>
-                    Fase final
-                  </label>
-                  <select
-                    id="edit-end-phase"
-                    className={styles.select}
-                    value={editEndPhaseId ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setEditEndPhaseId(val === "" ? null : val);
-                    }}
-                    disabled={!editStartPhaseId}
+                    {shareLoading ? "Generando..." : "Copiar enlace"}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.revokeBtn}
+                    onClick={handleRevoke}
+                    disabled={revoking}
                   >
-                    <option value="">Selecciona la fase final</option>
-                    {endPhaseOptions.map((phase) => (
-                      <option key={phase.id} value={phase.id}>
-                        {phase.name}
-                      </option>
-                    ))}
-                  </select>
+                    {revoking ? "Revocando..." : "Revocar enlace"}
+                  </button>
                 </div>
-              )}
-            </div>
+              </section>
 
-            {/* Rules — editable only when UPCOMING */}
-            {qimela.rules.length > 0 && (
-              <div className={styles.rulesSection}>
-                <p className={styles.rulesHeading}>Puntos por regla</p>
-                <div className={styles.rulesGrid}>
-                  {qimela.rules.map((rule) => (
-                    <div key={rule.ruleId} className={styles.field}>
-                      <label
-                        htmlFor={`rule-${rule.ruleId}`}
-                        className={styles.label}
-                      >
-                        {rule.question}
-                      </label>
-                      <span className={styles.ruleRange}>
-                        min: {rule.minPoints}, max: {rule.maxPoints}
-                      </span>
-                      <input
-                        id={`rule-${rule.ruleId}`}
-                        type="number"
-                        className={styles.input}
-                        min={rule.minPoints}
-                        max={rule.maxPoints}
-                        value={editRuleValues[rule.ruleId] ?? ""}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          setEditRuleValues((prev) => ({
-                            ...prev,
-                            [rule.ruleId]:
-                              raw === "" ? "" : Number(raw),
-                          }));
-                        }}
-                        disabled={isActive}
-                      />
+              {!isCompleted && (
+                <section className={styles.editSection}>
+                  <h2 className={styles.editHeading}>Editar qimela</h2>
+                  <form onSubmit={handleSave} noValidate>
+                    <div className={styles.fields}>
+                      <div className={styles.field}>
+                        <label htmlFor="edit-name" className={styles.label}>
+                          Nombre
+                        </label>
+                        <input
+                          id="edit-name"
+                          type="text"
+                          className={styles.input}
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          maxLength={50}
+                          disabled={isActive}
+                        />
+                      </div>
+
+                      {sortedPhases.length > 0 && (
+                        <div className={styles.field}>
+                          <label htmlFor="edit-start-phase" className={styles.label}>
+                            Fase inicial
+                          </label>
+                          <select
+                            id="edit-start-phase"
+                            className={styles.select}
+                            value={editStartPhaseId ?? ""}
+                            onChange={(e) => handleStartPhaseChange(e.target.value)}
+                            disabled={isActive}
+                          >
+                            <option value="">Selecciona la fase inicial</option>
+                            {sortedPhases.map((phase) => (
+                              <option key={phase.id} value={phase.id}>
+                                {phase.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {sortedPhases.length > 0 && (
+                        <div className={styles.field}>
+                          <label htmlFor="edit-end-phase" className={styles.label}>
+                            Fase final
+                          </label>
+                          <select
+                            id="edit-end-phase"
+                            className={styles.select}
+                            value={editEndPhaseId ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setEditEndPhaseId(val === "" ? null : val);
+                            }}
+                            disabled={!editStartPhaseId}
+                          >
+                            <option value="">Selecciona la fase final</option>
+                            {endPhaseOptions.map((phase) => (
+                              <option key={phase.id} value={phase.id}>
+                                {phase.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {saveError && <p className={styles.saveError}>{saveError}</p>}
+                    {qimela.rules.length > 0 && (
+                      <div className={styles.rulesSection}>
+                        <p className={styles.rulesHeading}>Puntos por regla</p>
+                        <div className={styles.rulesGrid}>
+                          {qimela.rules.map((rule) => (
+                            <div key={rule.ruleId} className={styles.field}>
+                              <label
+                                htmlFor={`rule-${rule.ruleId}`}
+                                className={styles.label}
+                              >
+                                {rule.question}
+                              </label>
+                              <span className={styles.ruleRange}>
+                                min: {rule.minPoints}, max: {rule.maxPoints}
+                              </span>
+                              <input
+                                id={`rule-${rule.ruleId}`}
+                                type="number"
+                                className={styles.input}
+                                min={rule.minPoints}
+                                max={rule.maxPoints}
+                                value={editRuleValues[rule.ruleId] ?? ""}
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  setEditRuleValues((prev) => ({
+                                    ...prev,
+                                    [rule.ruleId]: raw === "" ? "" : Number(raw),
+                                  }));
+                                }}
+                                disabled={isActive}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-            <button
-              type="submit"
-              className={styles.saveBtn}
-              disabled={!hasChanged || saving}
-            >
-              {saving ? "Guardando..." : "Guardar cambios"}
-            </button>
-          </form>
-        </section>
+                    {saveError && <p className={styles.saveError}>{saveError}</p>}
+
+                    <button
+                      type="submit"
+                      className={styles.saveBtn}
+                      disabled={!hasChanged || saving}
+                    >
+                      {saving ? "Guardando..." : "Guardar cambios"}
+                    </button>
+                  </form>
+                </section>
+              )}
+            </>
+          )}
+        </div>
       )}
     </main>
   );

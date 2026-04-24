@@ -52,7 +52,7 @@
 .navCta {
   font-size: 14px;
   font-weight: 600;
-  color: #0a0a0a;
+  color: $color-primary-contrast;
   background: $color-primary;
   border: none;
   border-radius: $radius-pill;
@@ -88,8 +88,8 @@
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(255, 209, 0, 0.12) 0%,
-    rgba(255, 209, 0, 0.04) 40%,
+    rgba($color-primary, 0.18) 0%,
+    rgba($color-primary, 0.08) 40%,
     transparent 70%
   );
   top: 50%;
@@ -136,7 +136,7 @@
   font-size: 18px;
   font-weight: 700;
   font-family: $font-family-base;
-  color: #0a0a0a;
+  color: $color-primary-contrast;
   background: $color-primary;
   border: none;
   border-radius: $radius-md;
@@ -144,12 +144,12 @@
   text-decoration: none;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-  box-shadow: 0 0 24px rgba(255, 209, 0, 0.25);
+  box-shadow: 0 0 24px rgba($color-primary, 0.25);
 
   &:hover {
     background: $color-primary-hover;
     transform: translateY(-2px);
-    box-shadow: 0 0 32px rgba(255, 209, 0, 0.4);
+    box-shadow: 0 0 32px rgba($color-primary, 0.4);
   }
 }
 

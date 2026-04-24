@@ -36,6 +36,7 @@ export class RegisterUserUseCase {
       passwordHash,
       role: UserRole.USER,
       emailVerifiedAt: null,
+      imageUrl: null,
       createdAt: now,
       updatedAt: now,
     });

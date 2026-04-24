@@ -65,6 +65,7 @@ const creatorUser: AuthUser = {
   email: "creator@example.com",
   role: "USER",
   emailVerifiedAt: null,
+      imageUrl: null,
 };
 
 const otherUser: AuthUser = {
@@ -73,6 +74,7 @@ const otherUser: AuthUser = {
   email: "other@example.com",
   role: "USER",
   emailVerifiedAt: null,
+      imageUrl: null,
 };
 
 describe("QimelaDetailPage — Share section", () => {
@@ -85,6 +87,7 @@ describe("QimelaDetailPage — Share section", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
@@ -100,6 +103,7 @@ describe("QimelaDetailPage — Share section", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<QimelaDetailPage />);

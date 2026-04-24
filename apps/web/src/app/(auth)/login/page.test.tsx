@@ -58,6 +58,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
   });
 
@@ -94,6 +95,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<LoginPage />);
@@ -125,6 +127,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<LoginPage />);
@@ -158,6 +161,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<LoginPage />);
@@ -194,6 +198,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
     vi.mocked(authApi.resendVerification).mockResolvedValue(undefined);
 
@@ -233,6 +238,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<LoginPage />);
@@ -262,6 +268,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<LoginPage />);
@@ -291,6 +298,7 @@ describe("LoginPage", () => {
       isLoading: false,
       login: mockLogin,
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     // Override the search param for this test

@@ -13,13 +13,15 @@ export default function Header() {
   return (
     <header className={styles.navbar}>
       <Logo href="/dashboard" />
-      <QimelaSelector />
-      <nav className={styles.nav}>
-        <Link href="/qimela/create" className={styles.createLink}>
-          + Crear Qimela
-        </Link>
-      </nav>
-      {user && <UserProfile name={user.name} />}
+      <div className={styles.centerGroup}>
+        <QimelaSelector />
+        <nav className={styles.nav}>
+          <Link href="/qimela/create" className={styles.createLink}>
+            + Crear Qimela
+          </Link>
+        </nav>
+      </div>
+      {user && <UserProfile name={user.name} imageUrl={user.imageUrl} />}
     </header>
   );
 }

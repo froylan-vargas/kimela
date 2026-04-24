@@ -15,6 +15,8 @@ import { GetUpcomingSessionsUseCase } from './application/use-cases/get-upcoming
 import { GetAllSessionsUseCase } from './application/use-cases/get-all-sessions.use-case';
 import { SaveSessionPicksUseCase } from './application/use-cases/save-session-picks.use-case';
 import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.use-case';
+import { GetQimelaPhasesUseCase } from './application/use-cases/get-qimela-phases.use-case';
+import { GetQimelaResultsUseCase } from './application/use-cases/get-qimela-results.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -36,6 +38,8 @@ import { InviteController } from './presentation/invite.controller';
     GetAllSessionsUseCase,
     SaveSessionPicksUseCase,
     GetLeaderboardUseCase,
+    GetQimelaPhasesUseCase,
+    GetQimelaResultsUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

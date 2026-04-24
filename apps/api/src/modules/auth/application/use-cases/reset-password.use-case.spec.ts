@@ -44,6 +44,7 @@ describe('ResetPasswordUseCase', () => {
       create: jest.fn(),
       verifyEmail: jest.fn(),
       updatePassword: jest.fn(),
+      updateProfile: jest.fn(),
     };
 
     mockRefreshTokenRepo = {

@@ -8,10 +8,20 @@
   padding: $spacing-md 40px;
   display: flex;
   justify-content: space-between;
+  gap: $spacing-md;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: $z-navbar;
+}
+
+.centerGroup {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
 }
 
 .nav {
@@ -22,9 +32,10 @@
 .createLink {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: $spacing-sm $spacing-md;
   background: $color-primary;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   border-radius: $radius-sm;
   font-size: 14px;
   font-weight: 600;
@@ -33,5 +44,28 @@
 
   &:hover {
     background: $color-primary-hover;
+  }
+}
+
+@media (max-width: 767px) {
+  .navbar {
+    padding: $spacing-md;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .centerGroup {
+    display: contents;
+  }
+
+  .nav {
+    grid-column: 1 / -1;
+    order: 4;
+    width: 100%;
+  }
+
+  .createLink {
+    width: 100%;
   }
 }

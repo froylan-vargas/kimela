@@ -6,9 +6,17 @@
   gap: $spacing-sm;
   text-decoration: none;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.icon {
-  font-size: 28px;
-  color: $color-primary;
+.logoImage {
+  width: auto;
+  height: 32px;
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .logoImage {
+    height: 28px;
+  }
 }

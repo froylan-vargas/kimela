@@ -7,6 +7,7 @@ export interface UserProps {
   passwordHash: string;
   role: UserRole;
   emailVerifiedAt: Date | null;
+  imageUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +19,7 @@ export class UserEntity {
   readonly passwordHash: string;
   readonly role: UserRole;
   readonly emailVerifiedAt: Date | null;
+  readonly imageUrl: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
@@ -28,6 +30,7 @@ export class UserEntity {
     this.passwordHash = props.passwordHash;
     this.role = props.role;
     this.emailVerifiedAt = props.emailVerifiedAt;
+    this.imageUrl = props.imageUrl;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }

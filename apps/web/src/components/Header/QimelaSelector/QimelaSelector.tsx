@@ -65,10 +65,10 @@ export default function QimelaSelector() {
         className={styles.selectorPill}
         onClick={() => setIsOpen((prev) => !prev)}
         type="button"
+        aria-label="Seleccionar qimela"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className={styles.selectorLabel}>Qimela</span>
         <span className={styles.selectorValue}>{getPillLabel()}</span>
         <Icon
           name={isOpen ? "caret-up" : "caret-down"}

@@ -21,6 +21,7 @@ model User {
   role            UserRole  @default(USER)
   passwordHash    String    @map("password_hash")
   emailVerifiedAt DateTime? @map("email_verified_at")
+  imageUrl        String?   @map("image_url")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -440,11 +441,12 @@ model QimelaRule {
 // ─── Points / Leaderboard ─────────────────────────────────────────────────────
 
 model UserSessionPoints {
-  id          String   @id @default(uuid())
-  points      Int
-  exactResult Boolean  @default(false) @map("exact_result")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  points       Int
+  exactResult  Boolean  @default(false) @map("exact_result")
+  correctPick  Boolean  @default(false) @map("correct_pick")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id])
@@ -461,11 +463,12 @@ model UserSessionPoints {
 }
 
 model UserQimelaPoints {
-  id                String   @id @default(uuid())
-  totalPoints       Int      @default(0) @map("total_points")
-  exactResultsCount Int      @default(0) @map("exact_results_count")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(uuid())
+  totalPoints        Int      @default(0) @map("total_points")
+  correctPicksCount  Int      @default(0) @map("correct_picks_count")
+  exactResultsCount  Int      @default(0) @map("exact_results_count")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id])

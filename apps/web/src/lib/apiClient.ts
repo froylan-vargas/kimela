@@ -6,6 +6,54 @@ import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
 import type { Session } from "@/types/session";
 import type { PhaseSessionsGroup, SavePredictionPickInput } from "@/types/prediction";
 
+export interface LeaderboardEntry {
+  userId: string;
+  userName: string;
+  totalPoints: number;
+  correctPicksCount: number;
+  exactResultsCount: number;
+  rank: number;
+  imageUrl: string | null;
+}
+
+export type QimelaPhaseStatus = "COMPLETED" | "ACTIVE";
+
+export interface QimelaPhase {
+  id: string;
+  name: string;
+  order: number;
+  status: QimelaPhaseStatus;
+}
+
+export interface ComparisonContender {
+  id: string;
+  name: string;
+  imgUrl: string | null;
+}
+
+export interface ComparisonUserResult {
+  userId: string;
+  userName: string;
+  homePick: string | null;
+  awayPick: string | null;
+  points: number | null;
+}
+
+export interface ComparisonSession {
+  id: string;
+  name: string;
+  scheduledAt: string;
+  phaseId: string;
+  phaseName: string;
+  home: ComparisonContender;
+  away: ComparisonContender;
+  actualResult: {
+    homeScore: string | null;
+    awayScore: string | null;
+  };
+  users: ComparisonUserResult[];
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 const AUTH_ENDPOINTS = [
@@ -220,6 +268,33 @@ export const qimelasApi = {
     );
   },
 
+  getLeaderboard(qimelaId: string, phaseId?: string): Promise<{ data: LeaderboardEntry[] }> {
+    const url = phaseId
+      ? `/qimelas/${encodeURIComponent(qimelaId)}/leaderboard?phaseId=${encodeURIComponent(phaseId)}`
+      : `/qimelas/${encodeURIComponent(qimelaId)}/leaderboard`;
+    return apiFetch<{ data: LeaderboardEntry[] }>(url);
+  },
+
+  getPhases(qimelaId: string): Promise<{ data: QimelaPhase[] }> {
+    return apiFetch<{ data: QimelaPhase[] }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/phases`,
+    );
+  },
+
+  getResults(
+    qimelaId: string,
+    phaseId: string,
+    compareUserIds: string[],
+  ): Promise<{ data: ComparisonSession[] }> {
+    const params = new URLSearchParams({ phaseId });
+    if (compareUserIds.length > 0) {
+      params.set("userIds", compareUserIds.join(","));
+    }
+    return apiFetch<{ data: ComparisonSession[] }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/results?${params.toString()}`,
+    );
+  },
+
   saveSessionPicks(
     qimelaId: string,
     sessionId: string,
@@ -259,6 +334,45 @@ export const inviteApi = {
       `/qimelas/${encodeURIComponent(qimelaId)}/invite`,
       { method: "DELETE" },
     );
+  },
+};
+
+export const usersApi = {
+  updateProfile(name: string): Promise<AuthUser> {
+    return apiFetch<AuthUser>("/users/me/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    });
+  },
+
+  async uploadAvatar(file: File): Promise<AuthUser> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const url = `${API_URL}/users/me/avatar`;
+    const res = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (res.ok) return res.json() as Promise<AuthUser>;
+
+    if (res.status === 401) {
+      try {
+        await authApi.refresh();
+      } catch {
+        if (typeof window !== "undefined") window.location.href = "/login";
+        throw new ApiError(401, "Session expired");
+      }
+      const retry = await fetch(url, { method: "POST", credentials: "include", body: formData });
+      if (retry.ok) return retry.json() as Promise<AuthUser>;
+      const retryErr = await parseError(retry);
+      throw new ApiError(retry.status, retryErr.message, retryErr.code);
+    }
+
+    const err = await parseError(res);
+    throw new ApiError(res.status, err.message, err.code);
   },
 };
 

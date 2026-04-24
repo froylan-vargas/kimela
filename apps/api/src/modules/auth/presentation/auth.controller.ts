@@ -94,6 +94,7 @@ export class AuthController {
       name: user.name,
       role: user.role,
       emailVerifiedAt: user.emailVerifiedAt,
+      imageUrl: user.imageUrl,
     };
 
     res.status(HttpStatus.CREATED).json(body);
@@ -119,6 +120,7 @@ export class AuthController {
       name: user.name,
       role: user.role,
       emailVerifiedAt: user.emailVerifiedAt,
+      imageUrl: user.imageUrl,
     };
 
     res.status(HttpStatus.OK).json(body);
@@ -153,6 +155,7 @@ export class AuthController {
       name: user.name,
       role: user.role,
       emailVerifiedAt: user.emailVerifiedAt,
+      imageUrl: user.imageUrl,
     });
   }
 
@@ -172,7 +175,7 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(@CurrentUser() payload: CurrentUserPayload): Promise<CurrentUserPayload> {
+  async me(@CurrentUser() payload: CurrentUserPayload): Promise<AuthUserDto> {
     this.logger.log(`GET /auth/me - user: ${payload.id}`);
     const user = await this.userRepository.findById(payload.id);
     if (!user) {
@@ -181,8 +184,10 @@ export class AuthController {
     return {
       id: user.id,
       email: user.email,
+      name: user.name,
       role: user.role,
       emailVerifiedAt: user.emailVerifiedAt,
+      imageUrl: user.imageUrl,
     };
   }
 

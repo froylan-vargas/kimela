@@ -145,6 +145,7 @@ export class ScoringWorkerService implements OnModuleInit {
             qimelaId: qimela.id,
             points: scored.points,
             exactResult: scored.exactResult,
+            correctPick: scored.correctPick,
           },
         });
 
@@ -161,16 +162,22 @@ export class ScoringWorkerService implements OnModuleInit {
           where: { userId, qimelaId: qimela.id, exactResult: true },
         });
 
+        const correctCount = await tx.userSessionPoints.count({
+          where: { userId, qimelaId: qimela.id, correctPick: true },
+        });
+
         await tx.userQimelaPoints.upsert({
           where: { userId_qimelaId: { userId, qimelaId: qimela.id } },
           create: {
             userId,
             qimelaId: qimela.id,
             totalPoints: aggregate._sum.points ?? 0,
+            correctPicksCount: correctCount,
             exactResultsCount: exactCount,
           },
           update: {
             totalPoints: aggregate._sum.points ?? 0,
+            correctPicksCount: correctCount,
             exactResultsCount: exactCount,
           },
         });

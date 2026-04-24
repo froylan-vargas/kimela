@@ -31,6 +31,14 @@ vi.mock("@/context/ToastContext", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock("@/context/QimelaContext", () => ({
+  useQimelaContext: () => ({ clearQimela: vi.fn() }),
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+}));
+
 vi.mock("./page.module.scss", () => ({ default: {} }));
 
 import { inviteApi, ApiError } from "@/lib/apiClient";
@@ -54,6 +62,7 @@ const mockUser: AuthUser = {
   email: "test@example.com",
   role: "USER",
   emailVerifiedAt: null,
+      imageUrl: null,
 };
 
 describe("InvitePage", () => {
@@ -65,6 +74,7 @@ describe("InvitePage", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
   });
 
@@ -145,6 +155,7 @@ describe("InvitePage", () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
     });
 
     render(<InvitePage />);

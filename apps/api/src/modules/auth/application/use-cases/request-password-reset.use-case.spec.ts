@@ -15,6 +15,7 @@ const makeUser = (overrides: Partial<ConstructorParameters<typeof UserEntity>[0]
     passwordHash: 'hashed-password',
     role: UserRole.USER,
     emailVerifiedAt: null,
+    imageUrl: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
     ...overrides,
@@ -45,6 +46,7 @@ describe('RequestPasswordResetUseCase', () => {
       create: jest.fn(),
       verifyEmail: jest.fn(),
       updatePassword: jest.fn(),
+      updateProfile: jest.fn(),
     };
 
     useCase = new RequestPasswordResetUseCase(mockTokenRepo, mockEmailService, mockUserRepo);

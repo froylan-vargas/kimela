@@ -40,8 +40,8 @@
 }
 
 .badgeRace {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba($color-primary-light, 0.95);
+  color: $color-primary-text;
 }
 
 .league {
@@ -67,12 +67,14 @@
 .manageBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   margin-top: auto;
   padding: $spacing-sm $spacing-md;
   background: $color-primary;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   border: none;
   border-radius: $radius-sm;
+  font-family: $font-family-base;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

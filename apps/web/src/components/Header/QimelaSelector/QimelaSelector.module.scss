@@ -4,17 +4,23 @@
   position: relative;
   display: flex;
   align-items: center;
+  flex: 0 1 360px;
+  width: min(360px, 100%);
+  min-width: 0;
 }
 
 .selectorPill {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.6);
   padding: $spacing-sm $spacing-md;
   border-radius: $radius-pill;
   border: 1px solid $color-border;
   cursor: pointer;
+  width: 100%;
+  min-width: 0;
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
@@ -23,25 +29,28 @@
   &:hover {
     border-color: $color-primary;
     background: #fff;
-    box-shadow: 0 4px 12px rgba(255, 209, 0, 0.15);
+    box-shadow: 0 4px 12px rgba($color-primary, 0.15);
   }
-}
-
-.selectorLabel {
-  font-size: 12px;
-  color: $color-text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
 }
 
 .selectorValue {
   font-weight: 600;
   font-size: $font-size-base;
   color: $color-text-main;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .caretIcon {
   font-size: 14px;
   color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .selectorWrapper {
+    flex: 1 1 100%;
+    width: 100%;
+  }
 }

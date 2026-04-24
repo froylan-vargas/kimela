@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Logo from "./Logo";
@@ -22,8 +22,9 @@ function ContextDisplay() {
   return <div>{selectedQimela ? `Selected: ${selectedQimela.name}` : "No selection"}</div>;
 }
 
+let queryClient: QueryClient;
+
 function wrapper({ children }: { children: ReactNode }) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -34,10 +35,16 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe("Logo", () => {
-  it("renders the trophy icon", () => {
+  beforeEach(() => {
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+  });
+  it("renders the qimela logo image", () => {
     render(<Logo />, { wrapper });
-    const icon = screen.getByRole("link").querySelector("[data-icon='trophy']");
-    expect(icon).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Qimela" })).toBeInTheDocument();
   });
 
   it("navigates to the default href when clicked", () => {

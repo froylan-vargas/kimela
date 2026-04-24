@@ -1,0 +1,12 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+
+.field {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.select {
+  @include select-pill;
+}

@@ -16,6 +16,7 @@ const makeUser = (overrides: Partial<ConstructorParameters<typeof UserEntity>[0]
     passwordHash: bcrypt.hashSync(VALID_PASSWORD, 10),
     role: UserRole.USER,
     emailVerifiedAt: null,
+    imageUrl: null,
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
     ...overrides,
@@ -32,6 +33,7 @@ describe('LoginUserUseCase', () => {
       create: jest.fn(),
       verifyEmail: jest.fn(),
       updatePassword: jest.fn(),
+      updateProfile: jest.fn(),
     };
 
     useCase = new LoginUserUseCase(mockUserRepository);
@@ -72,12 +74,30 @@ describe('LoginUserUseCase', () => {
     });
 
     it('throws EmailNotVerifiedError when credentials are valid but email is not verified', async () => {
+      const originalValue = process.env.REQUIRE_EMAIL_VERIFICATION;
+      process.env.REQUIRE_EMAIL_VERIFICATION = 'true';
+
       const user = makeUser({ emailVerifiedAt: null });
       mockUserRepository.findByEmail.mockResolvedValue(user);
 
       await expect(useCase.execute(user.email, VALID_PASSWORD)).rejects.toThrow(
         EmailNotVerifiedError,
       );
+
+      process.env.REQUIRE_EMAIL_VERIFICATION = originalValue;
+    });
+
+    it('allows login without email verification when REQUIRE_EMAIL_VERIFICATION=false', async () => {
+      const originalValue = process.env.REQUIRE_EMAIL_VERIFICATION;
+      process.env.REQUIRE_EMAIL_VERIFICATION = 'false';
+
+      const user = makeUser({ emailVerifiedAt: null });
+      mockUserRepository.findByEmail.mockResolvedValue(user);
+
+      const result = await useCase.execute(user.email, VALID_PASSWORD);
+      expect(result).toBe(user);
+
+      process.env.REQUIRE_EMAIL_VERIFICATION = originalValue;
     });
 
     it('does not distinguish between user not found and wrong password (same error class)', async () => {

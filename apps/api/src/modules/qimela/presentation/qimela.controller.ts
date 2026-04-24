@@ -11,6 +11,8 @@ import { GetUpcomingSessionsUseCase, GetUpcomingSessionsResponse } from '../appl
 import { GetAllSessionsUseCase, GetAllSessionsResponse } from '../application/use-cases/get-all-sessions.use-case';
 import { SaveSessionPicksUseCase, SaveSessionPicksResponse } from '../application/use-cases/save-session-picks.use-case';
 import { GetLeaderboardUseCase, GetLeaderboardResponse } from '../application/use-cases/get-leaderboard.use-case';
+import { GetQimelaPhasesUseCase, GetQimelaPhasesResponse } from '../application/use-cases/get-qimela-phases.use-case';
+import { GetQimelaResultsUseCase, GetQimelaResultsResponse } from '../application/use-cases/get-qimela-results.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
@@ -33,6 +35,8 @@ export class QimelaController {
     private readonly getAllSessions: GetAllSessionsUseCase,
     private readonly saveSessionPicks: SaveSessionPicksUseCase,
     private readonly getLeaderboard: GetLeaderboardUseCase,
+    private readonly getQimelaPhases: GetQimelaPhasesUseCase,
+    private readonly getQimelaResults: GetQimelaResultsUseCase,
   ) {}
 
   @Get()
@@ -75,9 +79,39 @@ export class QimelaController {
   @Get(':qimelaId/leaderboard')
   async listLeaderboard(
     @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @Query('phaseId') phaseId?: string,
   ): Promise<GetLeaderboardResponse> {
     this.logger.log(`GET /qimelas/${qimelaId}/leaderboard requested`);
-    return this.getLeaderboard.execute(qimelaId);
+    return this.getLeaderboard.execute(qimelaId, phaseId);
+  }
+
+  @Get(':qimelaId/phases')
+  async listPhases(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<GetQimelaPhasesResponse> {
+    this.logger.log(`GET /qimelas/${qimelaId}/phases requested by user ${user.id}`);
+    return this.getQimelaPhases.execute({ qimelaId, userId: user.id });
+  }
+
+  @Get(':qimelaId/results')
+  async listResults(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('phaseId', ParseUUIDPipe) phaseId: string,
+    @Query('userIds') userIds?: string,
+  ): Promise<GetQimelaResultsResponse> {
+    this.logger.log(`GET /qimelas/${qimelaId}/results requested by user ${user.id}`);
+    const compareUserIds = (userIds ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0 && id !== user.id);
+    return this.getQimelaResults.execute({
+      qimelaId,
+      userId: user.id,
+      phaseId,
+      compareUserIds,
+    });
   }
 
   @Get(':qimelaId/sessions/upcoming')

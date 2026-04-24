@@ -1,5 +1,5 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuthContext } from "./AuthContext";
@@ -10,6 +10,7 @@ vi.mock("@/lib/apiClient", () => ({
     me: vi.fn(),
     login: vi.fn(),
     logout: vi.fn(),
+      updateUser: vi.fn(),
   },
   ApiError: class ApiError extends Error {
     constructor(
@@ -30,10 +31,12 @@ const mockUser: AuthUser = {
   email: "test@example.com",
   role: "USER",
   emailVerifiedAt: null,
+      imageUrl: null,
 };
 
+let queryClient: QueryClient;
+
 function renderWithAuth(ui: ReactNode) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>{ui}</AuthProvider>
@@ -54,7 +57,12 @@ function TestConsumer() {
 
 describe("AuthContext", () => {
   beforeEach(() => {
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    queryClient.clear();
   });
 
   it("initial state: isLoading=true, user=null before /auth/me resolves", async () => {

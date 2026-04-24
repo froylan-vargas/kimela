@@ -6,6 +6,7 @@ import { seedLeagues } from './leagues'
 import { seedContenders } from './contenders'
 import { seedPickCategories } from './pick-categories'
 import { seedRules } from './rules'
+import { seedTestUsers } from './users'
 
 config()
 
@@ -19,6 +20,7 @@ async function main() {
   await seedContenders(prisma, leagues)
   await seedPickCategories(prisma, sports)
   await seedRules(prisma)
+  await seedTestUsers(prisma)
   console.log('Done.')
 }
 

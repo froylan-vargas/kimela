@@ -251,4 +251,24 @@ describe("SessionResultsEditor", () => {
     expect(screen.getByLabelText("Resultado de Chivas")).toHaveValue("2");
     expect(screen.getByRole("button", { name: "Completado" })).toBeDisabled();
   });
+
+  it("does not render the session name in the results card header", () => {
+    render(
+      <SessionResultsEditor
+        {...DEFAULT_PROPS}
+        sessions={[
+          makeSession({
+            name: "AMÉRICA VS CHIVAS",
+            home: { id: "c1", name: "América", imgUrl: null },
+            away: { id: "c2", name: "Chivas", imgUrl: null },
+          }),
+        ]}
+        isLoading={false}
+        isError={false}
+        isPhaseActive={true}
+      />,
+    );
+
+    expect(screen.queryByText("AMÉRICA VS CHIVAS")).not.toBeInTheDocument();
+  });
 });

@@ -6,4 +6,5 @@ export interface AuthUserDto {
   name: string;
   role: UserRole;
   emailVerifiedAt: Date | null;
+  imageUrl: string | null;
 }

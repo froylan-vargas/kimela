@@ -64,7 +64,7 @@
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   margin: 0;
 }
 
@@ -124,12 +124,12 @@
   font-size: $font-size-base;
   font-weight: 600;
   font-family: $font-family-base;
-  color: $color-text-main;
+  color: $color-primary-contrast;
   cursor: pointer;
   transition: background 0.15s ease;
   margin-top: $spacing-xs;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: $color-primary-hover;
   }
 }

@@ -57,6 +57,7 @@ describe("RegisterPage", () => {
       name: "NewUser",
       role: "USER",
       emailVerifiedAt: null,
+      imageUrl: null,
     });
 
     render(<RegisterPage />);
@@ -126,6 +127,7 @@ describe("RegisterPage", () => {
       name: "Laura Gomez",
       role: "USER",
       emailVerifiedAt: null,
+      imageUrl: null,
     });
 
     const validNames = [

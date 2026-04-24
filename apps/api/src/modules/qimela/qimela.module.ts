@@ -18,6 +18,8 @@ import { GetLeaderboardUseCase } from './application/use-cases/get-leaderboard.u
 import { GetQimelaPhasesUseCase } from './application/use-cases/get-qimela-phases.use-case';
 import { GetQimelaResultsUseCase } from './application/use-cases/get-qimela-results.use-case';
 import { SubscribeToQimelaUseCase } from './application/use-cases/subscribe-to-qimela.use-case';
+import { GetQimelaSubscribersUseCase } from './application/use-cases/get-qimela-subscribers.use-case';
+import { RemoveSubscriptionUseCase } from './application/use-cases/remove-subscription.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -42,6 +44,8 @@ import { InviteController } from './presentation/invite.controller';
     GetQimelaPhasesUseCase,
     GetQimelaResultsUseCase,
     SubscribeToQimelaUseCase,
+    GetQimelaSubscribersUseCase,
+    RemoveSubscriptionUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

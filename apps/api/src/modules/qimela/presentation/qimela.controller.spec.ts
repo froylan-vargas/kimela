@@ -14,6 +14,8 @@ import { GetLeaderboardUseCase } from '../application/use-cases/get-leaderboard.
 import { GetQimelaPhasesUseCase } from '../application/use-cases/get-qimela-phases.use-case';
 import { GetQimelaResultsUseCase } from '../application/use-cases/get-qimela-results.use-case';
 import { SubscribeToQimelaUseCase } from '../application/use-cases/subscribe-to-qimela.use-case';
+import { GetQimelaSubscribersUseCase } from '../application/use-cases/get-qimela-subscribers.use-case';
+import { RemoveSubscriptionUseCase } from '../application/use-cases/remove-subscription.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
@@ -83,6 +85,8 @@ describe('QimelaController', () => {
         { provide: GetQimelaPhasesUseCase, useValue: { execute: jest.fn() } },
         { provide: GetQimelaResultsUseCase, useValue: { execute: jest.fn() } },
         { provide: SubscribeToQimelaUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetQimelaSubscribersUseCase, useValue: { execute: jest.fn() } },
+        { provide: RemoveSubscriptionUseCase, useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },

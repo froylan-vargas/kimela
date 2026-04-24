@@ -1,0 +1,87 @@
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+
+export interface GetQimelaSubscribersCommand {
+  qimelaId: string;
+  requesterId: string;
+  page: number;
+  limit: number;
+  search?: string;
+}
+
+export interface SubscriberDto {
+  userId: string;
+  name: string;
+  email: string;
+}
+
+export interface GetQimelaSubscribersResponse {
+  data: {
+    subscribers: SubscriberDto[];
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
+@Injectable()
+export class GetQimelaSubscribersUseCase {
+  private readonly logger = new Logger(GetQimelaSubscribersUseCase.name);
+
+  constructor(
+    @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async execute(command: GetQimelaSubscribersCommand): Promise<GetQimelaSubscribersResponse> {
+    this.logger.log(`Getting subscribers for qimela ${command.qimelaId}`);
+
+    const qimela = await this.qimelaRepository.findById(command.qimelaId);
+    if (!qimela) throw new NotFoundException('Qimela not found');
+    if (qimela.creatorId !== command.requesterId) {
+      throw new ForbiddenException('Only the creator can view subscribers');
+    }
+
+    const searchFilter = command.search
+      ? {
+          OR: [
+            { user: { name: { contains: command.search, mode: 'insensitive' as const } } },
+            { user: { email: { contains: command.search, mode: 'insensitive' as const } } },
+          ],
+        }
+      : {};
+
+    const where = { qimelaId: command.qimelaId, ...searchFilter };
+
+    const [total, subscriptions] = await Promise.all([
+      this.prisma.subscription.count({ where }),
+      this.prisma.subscription.findMany({
+        where,
+        include: { user: { select: { id: true, name: true, email: true } } },
+        orderBy: { createdAt: 'asc' },
+        skip: (command.page - 1) * command.limit,
+        take: command.limit,
+      }),
+    ]);
+
+    return {
+      data: {
+        subscribers: subscriptions.map((s) => ({
+          userId: s.user.id,
+          name: s.user.name,
+          email: s.user.email,
+        })),
+        total,
+        page: command.page,
+        limit: command.limit,
+      },
+    };
+  }
+}

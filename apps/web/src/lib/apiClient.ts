@@ -302,6 +302,25 @@ export const qimelasApi = {
     );
   },
 
+  getSubscribers(
+    qimelaId: string,
+    params: { page: number; limit: number; search?: string },
+  ): Promise<{ data: { subscribers: { userId: string; name: string; email: string }[]; total: number; page: number; limit: number } }> {
+    const qs = new URLSearchParams({
+      page: String(params.page),
+      limit: String(params.limit),
+    });
+    if (params.search) qs.set("search", params.search);
+    return apiFetch(`/qimelas/${encodeURIComponent(qimelaId)}/subscribers?${qs.toString()}`);
+  },
+
+  removeSubscriber(qimelaId: string, userId: string): Promise<{ data: { removed: boolean } }> {
+    return apiFetch(
+      `/qimelas/${encodeURIComponent(qimelaId)}/subscribers/${encodeURIComponent(userId)}`,
+      { method: "DELETE" },
+    );
+  },
+
   saveSessionPicks(
     qimelaId: string,
     sessionId: string,

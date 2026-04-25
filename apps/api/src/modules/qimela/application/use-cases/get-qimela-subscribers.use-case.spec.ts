@@ -27,8 +27,14 @@ const makeQimela = (overrides: Partial<ConstructorParameters<typeof QimelaEntity
     ...overrides,
   });
 
-const makeSubscription = (userId: string, name: string, email: string) => ({
+const makeSubscription = (
+  userId: string,
+  name: string,
+  email: string,
+  labels: { label: { id: string; name: string; color: string } }[] = [],
+) => ({
   user: { id: userId, name, email },
+  labels,
 });
 
 describe('GetQimelaSubscribersUseCase', () => {
@@ -116,8 +122,8 @@ describe('GetQimelaSubscribersUseCase', () => {
 
       // Assert
       expect(result.data.subscribers).toEqual([
-        { userId: 'u1', name: 'Ana Torres', email: 'ana@example.com' },
-        { userId: 'u2', name: 'Luis Ramos', email: 'luis@example.com' },
+        { userId: 'u1', name: 'Ana Torres', email: 'ana@example.com', labels: [] },
+        { userId: 'u2', name: 'Luis Ramos', email: 'luis@example.com', labels: [] },
       ]);
     });
 
@@ -198,6 +204,52 @@ describe('GetQimelaSubscribersUseCase', () => {
       expect(mockPrisma.subscription.count).toHaveBeenCalledWith({
         where: { qimelaId: QIMELA_ID },
       });
+    });
+
+    it('maps subscriber labels into id, name and color', async () => {
+      // Arrange
+      mockQimelaRepo.findById.mockResolvedValue(makeQimela());
+      mockPrisma.subscription.count.mockResolvedValue(1);
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        makeSubscription('u1', 'Ana Torres', 'ana@example.com', [
+          { label: { id: 'l1', name: 'VIP', color: '#ff0000' } },
+          { label: { id: 'l2', name: 'Casual', color: '#3b82f6' } },
+        ]),
+      ]);
+
+      // Act
+      const result = await useCase.execute({
+        qimelaId: QIMELA_ID,
+        requesterId: CREATOR_ID,
+        page: 1,
+        limit: 10,
+      });
+
+      // Assert
+      expect(result.data.subscribers[0].labels).toEqual([
+        { id: 'l1', name: 'VIP', color: '#ff0000' },
+        { id: 'l2', name: 'Casual', color: '#3b82f6' },
+      ]);
+    });
+
+    it('returns an empty labels array when a subscriber has no labels', async () => {
+      // Arrange
+      mockQimelaRepo.findById.mockResolvedValue(makeQimela());
+      mockPrisma.subscription.count.mockResolvedValue(1);
+      mockPrisma.subscription.findMany.mockResolvedValue([
+        makeSubscription('u1', 'Ana Torres', 'ana@example.com'),
+      ]);
+
+      // Act
+      const result = await useCase.execute({
+        qimelaId: QIMELA_ID,
+        requesterId: CREATOR_ID,
+        page: 1,
+        limit: 10,
+      });
+
+      // Assert
+      expect(result.data.subscribers[0].labels).toEqual([]);
     });
   });
 });

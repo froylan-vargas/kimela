@@ -16,6 +16,11 @@ import { GetQimelaResultsUseCase } from '../application/use-cases/get-qimela-res
 import { SubscribeToQimelaUseCase } from '../application/use-cases/subscribe-to-qimela.use-case';
 import { GetQimelaSubscribersUseCase } from '../application/use-cases/get-qimela-subscribers.use-case';
 import { RemoveSubscriptionUseCase } from '../application/use-cases/remove-subscription.use-case';
+import { CreateQimelaLabelUseCase } from '../application/use-cases/create-qimela-label.use-case';
+import { DeleteQimelaLabelUseCase } from '../application/use-cases/delete-qimela-label.use-case';
+import { GetQimelaLabelsUseCase } from '../application/use-cases/get-qimela-labels.use-case';
+import { ApplyLabelUseCase } from '../application/use-cases/apply-label.use-case';
+import { RemoveLabelUseCase } from '../application/use-cases/remove-label.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
@@ -29,6 +34,8 @@ import { PrismaService } from '../../../shared/prisma/prisma.service';
 const MOCK_USER_ID = 'e471c62d-6015-4ab9-b930-79db54ea75c0';
 const QIMELA_ID = 'f1234567-0000-0000-0000-000000000000';
 const SPORT_ID = 'a1234567-0000-0000-0000-000000000000';
+const LABEL_ID = 'e1111111-1111-1111-1111-111111111111';
+const TARGET_USER_ID = 'f2222222-2222-2222-2222-222222222222';
 
 const MOCK_USER: CurrentUserPayload = {
   id: MOCK_USER_ID,
@@ -66,6 +73,11 @@ describe('QimelaController', () => {
   let getAllSessions: jest.Mocked<GetAllSessionsUseCase>;
   let saveSessionPicks: jest.Mocked<SaveSessionPicksUseCase>;
   let getLeaderboard: jest.Mocked<GetLeaderboardUseCase>;
+  let createQimelaLabel: jest.Mocked<CreateQimelaLabelUseCase>;
+  let deleteQimelaLabel: jest.Mocked<DeleteQimelaLabelUseCase>;
+  let getQimelaLabels: jest.Mocked<GetQimelaLabelsUseCase>;
+  let applyLabel: jest.Mocked<ApplyLabelUseCase>;
+  let removeLabel: jest.Mocked<RemoveLabelUseCase>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -87,6 +99,11 @@ describe('QimelaController', () => {
         { provide: SubscribeToQimelaUseCase, useValue: { execute: jest.fn() } },
         { provide: GetQimelaSubscribersUseCase, useValue: { execute: jest.fn() } },
         { provide: RemoveSubscriptionUseCase, useValue: { execute: jest.fn() } },
+        { provide: CreateQimelaLabelUseCase, useValue: { execute: jest.fn() } },
+        { provide: DeleteQimelaLabelUseCase, useValue: { execute: jest.fn() } },
+        { provide: GetQimelaLabelsUseCase,   useValue: { execute: jest.fn() } },
+        { provide: ApplyLabelUseCase,        useValue: { execute: jest.fn() } },
+        { provide: RemoveLabelUseCase,       useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -105,6 +122,11 @@ describe('QimelaController', () => {
     getAllSessions = module.get(GetAllSessionsUseCase);
     saveSessionPicks = module.get(SaveSessionPicksUseCase);
     getLeaderboard = module.get(GetLeaderboardUseCase);
+    createQimelaLabel = module.get(CreateQimelaLabelUseCase);
+    deleteQimelaLabel = module.get(DeleteQimelaLabelUseCase);
+    getQimelaLabels   = module.get(GetQimelaLabelsUseCase);
+    applyLabel        = module.get(ApplyLabelUseCase);
+    removeLabel       = module.get(RemoveLabelUseCase);
   });
 
   // ─── getQimelas ──────────────────────────────────────────────────────────
@@ -481,6 +503,172 @@ describe('QimelaController', () => {
 
       // Assert
       expect(result).toEqual(mockResponse);
+    });
+  });
+
+  // ─── listLabels ───────────────────────────────────────────────────────────
+
+  describe('listLabels', () => {
+    it('calls getQimelaLabels.execute with qimelaId and requesterId', async () => {
+      // Arrange
+      const mockResponse = { data: { labels: [] } };
+      getQimelaLabels.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      await controller.listLabels(QIMELA_ID, MOCK_USER);
+
+      // Assert
+      expect(getQimelaLabels.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        requesterId: MOCK_USER_ID,
+      });
+    });
+
+    it('returns result from use case', async () => {
+      // Arrange
+      const mockResponse = {
+        data: {
+          labels: [{ id: LABEL_ID, name: 'VIP', color: '#ff0000' }],
+        },
+      };
+      getQimelaLabels.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      const result = await controller.listLabels(QIMELA_ID, MOCK_USER);
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
+  // ─── createLabel ──────────────────────────────────────────────────────────
+
+  describe('createLabel', () => {
+    it('calls createQimelaLabel.execute with qimelaId, requesterId, name, and color', async () => {
+      // Arrange
+      const mockResponse = { data: { id: LABEL_ID, name: 'VIP', color: '#ff0000' } };
+      createQimelaLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      await controller.createLabel(QIMELA_ID, MOCK_USER, { name: 'VIP', color: '#ff0000' });
+
+      // Assert
+      expect(createQimelaLabel.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        requesterId: MOCK_USER_ID,
+        name: 'VIP',
+        color: '#ff0000',
+      });
+    });
+
+    it('returns created label from use case', async () => {
+      // Arrange
+      const mockResponse = { data: { id: LABEL_ID, name: 'VIP', color: '#ff0000' } };
+      createQimelaLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      const result = await controller.createLabel(QIMELA_ID, MOCK_USER, { name: 'VIP', color: '#ff0000' });
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
+  // ─── deleteLabel ──────────────────────────────────────────────────────────
+
+  describe('deleteLabel', () => {
+    it('calls deleteQimelaLabel.execute with qimelaId, requesterId, and labelId', async () => {
+      // Arrange
+      const mockResponse = { data: { deleted: true } };
+      deleteQimelaLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      await controller.deleteLabel(QIMELA_ID, LABEL_ID, MOCK_USER);
+
+      // Assert
+      expect(deleteQimelaLabel.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        requesterId: MOCK_USER_ID,
+        labelId: LABEL_ID,
+      });
+    });
+
+    it('returns { data: { deleted: true } }', async () => {
+      // Arrange
+      const mockResponse = { data: { deleted: true } };
+      deleteQimelaLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      const result = await controller.deleteLabel(QIMELA_ID, LABEL_ID, MOCK_USER);
+
+      // Assert
+      expect(result).toEqual({ data: { deleted: true } });
+    });
+  });
+
+  // ─── applyLabelToSubscriber ───────────────────────────────────────────────
+
+  describe('applyLabelToSubscriber', () => {
+    it('calls applyLabel.execute with qimelaId, requesterId, targetUserId, and labelId', async () => {
+      // Arrange
+      const mockResponse = { data: { applied: true } };
+      applyLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      await controller.applyLabelToSubscriber(QIMELA_ID, TARGET_USER_ID, LABEL_ID, MOCK_USER);
+
+      // Assert
+      expect(applyLabel.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        requesterId: MOCK_USER_ID,
+        targetUserId: TARGET_USER_ID,
+        labelId: LABEL_ID,
+      });
+    });
+
+    it('returns { data: { applied: true } }', async () => {
+      // Arrange
+      const mockResponse = { data: { applied: true } };
+      applyLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      const result = await controller.applyLabelToSubscriber(QIMELA_ID, TARGET_USER_ID, LABEL_ID, MOCK_USER);
+
+      // Assert
+      expect(result).toEqual({ data: { applied: true } });
+    });
+  });
+
+  // ─── removeLabelFromSubscriber ────────────────────────────────────────────
+
+  describe('removeLabelFromSubscriber', () => {
+    it('calls removeLabel.execute with qimelaId, requesterId, targetUserId, and labelId', async () => {
+      // Arrange
+      const mockResponse = { data: { removed: true } };
+      removeLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      await controller.removeLabelFromSubscriber(QIMELA_ID, TARGET_USER_ID, LABEL_ID, MOCK_USER);
+
+      // Assert
+      expect(removeLabel.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        requesterId: MOCK_USER_ID,
+        targetUserId: TARGET_USER_ID,
+        labelId: LABEL_ID,
+      });
+    });
+
+    it('returns { data: { removed: true } }', async () => {
+      // Arrange
+      const mockResponse = { data: { removed: true } };
+      removeLabel.execute.mockResolvedValue(mockResponse);
+
+      // Act
+      const result = await controller.removeLabelFromSubscriber(QIMELA_ID, TARGET_USER_ID, LABEL_ID, MOCK_USER);
+
+      // Assert
+      expect(result).toEqual({ data: { removed: true } });
     });
   });
 });

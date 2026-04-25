@@ -16,10 +16,17 @@ export interface GetQimelaSubscribersCommand {
   search?: string;
 }
 
+export interface SubscriberLabelDto {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface SubscriberDto {
   userId: string;
   name: string;
   email: string;
+  labels: SubscriberLabelDto[];
 }
 
 export interface GetQimelaSubscribersResponse {
@@ -64,7 +71,10 @@ export class GetQimelaSubscribersUseCase {
       this.prisma.subscription.count({ where }),
       this.prisma.subscription.findMany({
         where,
-        include: { user: { select: { id: true, name: true, email: true } } },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          labels: { include: { label: { select: { id: true, name: true, color: true } } } },
+        },
         orderBy: { createdAt: 'asc' },
         skip: (command.page - 1) * command.limit,
         take: command.limit,
@@ -77,6 +87,7 @@ export class GetQimelaSubscribersUseCase {
           userId: s.user.id,
           name: s.user.name,
           email: s.user.email,
+          labels: s.labels.map((sl) => ({ id: sl.label.id, name: sl.label.name, color: sl.label.color })),
         })),
         total,
         page: command.page,

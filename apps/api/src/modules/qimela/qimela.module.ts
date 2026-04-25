@@ -20,6 +20,11 @@ import { GetQimelaResultsUseCase } from './application/use-cases/get-qimela-resu
 import { SubscribeToQimelaUseCase } from './application/use-cases/subscribe-to-qimela.use-case';
 import { GetQimelaSubscribersUseCase } from './application/use-cases/get-qimela-subscribers.use-case';
 import { RemoveSubscriptionUseCase } from './application/use-cases/remove-subscription.use-case';
+import { CreateQimelaLabelUseCase } from './application/use-cases/create-qimela-label.use-case';
+import { DeleteQimelaLabelUseCase } from './application/use-cases/delete-qimela-label.use-case';
+import { GetQimelaLabelsUseCase } from './application/use-cases/get-qimela-labels.use-case';
+import { ApplyLabelUseCase } from './application/use-cases/apply-label.use-case';
+import { RemoveLabelUseCase } from './application/use-cases/remove-label.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -46,6 +51,11 @@ import { InviteController } from './presentation/invite.controller';
     SubscribeToQimelaUseCase,
     GetQimelaSubscribersUseCase,
     RemoveSubscriptionUseCase,
+    CreateQimelaLabelUseCase,
+    DeleteQimelaLabelUseCase,
+    GetQimelaLabelsUseCase,
+    ApplyLabelUseCase,
+    RemoveLabelUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

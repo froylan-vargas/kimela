@@ -16,11 +16,17 @@ import { GetQimelaPhasesUseCase, GetQimelaPhasesResponse } from '../application/
 import { GetQimelaResultsUseCase, GetQimelaResultsResponse } from '../application/use-cases/get-qimela-results.use-case';
 import { GetQimelaSubscribersUseCase, GetQimelaSubscribersResponse } from '../application/use-cases/get-qimela-subscribers.use-case';
 import { RemoveSubscriptionUseCase, RemoveSubscriptionResponse } from '../application/use-cases/remove-subscription.use-case';
+import { CreateQimelaLabelUseCase, CreateQimelaLabelResponse } from '../application/use-cases/create-qimela-label.use-case';
+import { DeleteQimelaLabelUseCase, DeleteQimelaLabelResponse } from '../application/use-cases/delete-qimela-label.use-case';
+import { GetQimelaLabelsUseCase, GetQimelaLabelsResponse } from '../application/use-cases/get-qimela-labels.use-case';
+import { ApplyLabelUseCase, ApplyLabelResponse } from '../application/use-cases/apply-label.use-case';
+import { RemoveLabelUseCase, RemoveLabelResponse } from '../application/use-cases/remove-label.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
 import { UpdateQimelaRequestDto } from './dtos/update-qimela-request.dto';
 import { SavePicksRequestDto } from './dtos/save-picks-request.dto';
+import { CreateLabelRequestDto } from './dtos/create-label-request.dto';
 
 @Controller('qimelas')
 export class QimelaController {
@@ -43,6 +49,11 @@ export class QimelaController {
     private readonly subscribeToQimela: SubscribeToQimelaUseCase,
     private readonly getQimelaSubscribers: GetQimelaSubscribersUseCase,
     private readonly removeSubscription: RemoveSubscriptionUseCase,
+    private readonly createQimelaLabel: CreateQimelaLabelUseCase,
+    private readonly deleteQimelaLabel: DeleteQimelaLabelUseCase,
+    private readonly getQimelaLabels: GetQimelaLabelsUseCase,
+    private readonly applyLabel: ApplyLabelUseCase,
+    private readonly removeLabel: RemoveLabelUseCase,
   ) {}
 
   @Get()
@@ -124,6 +135,61 @@ export class QimelaController {
       requesterId: user.id,
       targetUserId: userId,
     });
+  }
+
+  @Get(':id/labels')
+  async listLabels(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<GetQimelaLabelsResponse> {
+    this.logger.log(`GET /qimelas/${id}/labels requested by user ${user.id}`);
+    return this.getQimelaLabels.execute({ qimelaId: id, requesterId: user.id });
+  }
+
+  @Post(':id/labels')
+  @HttpCode(HttpStatus.CREATED)
+  async createLabel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: CreateLabelRequestDto,
+  ): Promise<CreateQimelaLabelResponse> {
+    this.logger.log(`POST /qimelas/${id}/labels requested by user ${user.id}`);
+    return this.createQimelaLabel.execute({ qimelaId: id, requesterId: user.id, name: body.name, color: body.color });
+  }
+
+  @Delete(':id/labels/:labelId')
+  @HttpCode(HttpStatus.OK)
+  async deleteLabel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('labelId', ParseUUIDPipe) labelId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<DeleteQimelaLabelResponse> {
+    this.logger.log(`DELETE /qimelas/${id}/labels/${labelId} requested by user ${user.id}`);
+    return this.deleteQimelaLabel.execute({ qimelaId: id, requesterId: user.id, labelId });
+  }
+
+  @Post(':id/subscribers/:userId/labels/:labelId')
+  @HttpCode(HttpStatus.OK)
+  async applyLabelToSubscriber(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('labelId', ParseUUIDPipe) labelId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<ApplyLabelResponse> {
+    this.logger.log(`POST /qimelas/${id}/subscribers/${userId}/labels/${labelId} by user ${user.id}`);
+    return this.applyLabel.execute({ qimelaId: id, requesterId: user.id, targetUserId: userId, labelId });
+  }
+
+  @Delete(':id/subscribers/:userId/labels/:labelId')
+  @HttpCode(HttpStatus.OK)
+  async removeLabelFromSubscriber(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('labelId', ParseUUIDPipe) labelId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<RemoveLabelResponse> {
+    this.logger.log(`DELETE /qimelas/${id}/subscribers/${userId}/labels/${labelId} by user ${user.id}`);
+    return this.removeLabel.execute({ qimelaId: id, requesterId: user.id, targetUserId: userId, labelId });
   }
 
   @Get(':qimelaId/leaderboard')

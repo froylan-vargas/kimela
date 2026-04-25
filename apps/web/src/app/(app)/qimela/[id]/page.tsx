@@ -263,7 +263,7 @@ export default function QimelaDetailPage() {
           </div>
 
           {activeTab === "subscribers" && (
-            <SubscribersList qimelaId={id} />
+            <SubscribersList qimelaId={id} isCreator={isCreator} />
           )}
 
           {activeTab === "settings" && (

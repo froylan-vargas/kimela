@@ -6,6 +6,12 @@ import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
 import type { Session } from "@/types/session";
 import type { PhaseSessionsGroup, SavePredictionPickInput } from "@/types/prediction";
 
+export interface QimelaLabel {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface LeaderboardEntry {
   userId: string;
   userName: string;
@@ -305,7 +311,7 @@ export const qimelasApi = {
   getSubscribers(
     qimelaId: string,
     params: { page: number; limit: number; search?: string },
-  ): Promise<{ data: { subscribers: { userId: string; name: string; email: string }[]; total: number; page: number; limit: number } }> {
+  ): Promise<{ data: { subscribers: { userId: string; name: string; email: string; labels: QimelaLabel[] }[]; total: number; page: number; limit: number } }> {
     const qs = new URLSearchParams({
       page: String(params.page),
       limit: String(params.limit),
@@ -317,6 +323,38 @@ export const qimelasApi = {
   removeSubscriber(qimelaId: string, userId: string): Promise<{ data: { removed: boolean } }> {
     return apiFetch(
       `/qimelas/${encodeURIComponent(qimelaId)}/subscribers/${encodeURIComponent(userId)}`,
+      { method: "DELETE" },
+    );
+  },
+
+  getLabels(qimelaId: string): Promise<{ data: { labels: QimelaLabel[] } }> {
+    return apiFetch(`/qimelas/${encodeURIComponent(qimelaId)}/labels`);
+  },
+
+  createLabel(qimelaId: string, body: { name: string; color: string }): Promise<{ data: QimelaLabel }> {
+    return apiFetch(`/qimelas/${encodeURIComponent(qimelaId)}/labels`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+
+  deleteLabel(qimelaId: string, labelId: string): Promise<{ data: { deleted: boolean } }> {
+    return apiFetch(
+      `/qimelas/${encodeURIComponent(qimelaId)}/labels/${encodeURIComponent(labelId)}`,
+      { method: "DELETE" },
+    );
+  },
+
+  applyLabel(qimelaId: string, userId: string, labelId: string): Promise<{ data: { applied: boolean } }> {
+    return apiFetch(
+      `/qimelas/${encodeURIComponent(qimelaId)}/subscribers/${encodeURIComponent(userId)}/labels/${encodeURIComponent(labelId)}`,
+      { method: "POST", body: JSON.stringify({}) },
+    );
+  },
+
+  removeLabel(qimelaId: string, userId: string, labelId: string): Promise<{ data: { removed: boolean } }> {
+    return apiFetch(
+      `/qimelas/${encodeURIComponent(qimelaId)}/subscribers/${encodeURIComponent(userId)}/labels/${encodeURIComponent(labelId)}`,
       { method: "DELETE" },
     );
   },

@@ -79,6 +79,7 @@ model Qimela {
   inviteToken   InviteToken?
   sessionPoints UserSessionPoints[]
   qimelaPoints  UserQimelaPoints[]
+  labels        QimelaLabel[]
 
   @@map("qimelas")
 }
@@ -106,8 +107,39 @@ model Subscription {
   qimelaId String @map("qimela_id")
   qimela   Qimela @relation(fields: [qimelaId], references: [id])
 
+  labels SubscriptionLabel[]
+
   @@unique([userId, qimelaId])
   @@map("subscriptions")
+}
+
+model QimelaLabel {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(30)
+  color     String   @db.VarChar(7)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  qimelaId String @map("qimela_id")
+  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+
+  subscriptionLabels SubscriptionLabel[]
+
+  @@map("qimela_labels")
+}
+
+model SubscriptionLabel {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  subscriptionId String       @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  labelId String      @map("label_id")
+  label   QimelaLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, labelId])
+  @@map("subscription_labels")
 }
 
 model EmailVerificationToken {

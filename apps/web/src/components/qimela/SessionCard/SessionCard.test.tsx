@@ -5,6 +5,7 @@ import type { SessionPrediction } from "@/types/prediction";
 
 const mockToast = vi.fn();
 const mockMutateAsync = vi.fn();
+const currentTime = Date.now();
 
 vi.mock("@/context/ToastContext", () => ({
   useToast: () => ({ toast: mockToast }),
@@ -30,10 +31,11 @@ describe("SessionCard", () => {
     render(
       <SessionCard
         qimelaId="q1"
+        currentTime={currentTime}
         session={{
           id: "s1",
           name: "Atlas vs América",
-          scheduledAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+          scheduledAt: new Date(currentTime + 10 * 60_000).toISOString(),
           status: "SCHEDULED",
           phaseId: "p1",
           phaseName: "Jornada 1",
@@ -98,10 +100,11 @@ describe("SessionCard", () => {
     render(
       <SessionCard
         qimelaId="q1"
+        currentTime={currentTime}
         session={{
           id: "s2",
           name: "Tigres vs Monterrey",
-          scheduledAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+          scheduledAt: new Date(currentTime + 10 * 60_000).toISOString(),
           status: "SCHEDULED",
           phaseId: "p1",
           phaseName: "Jornada 2",
@@ -163,7 +166,7 @@ describe("SessionCard", () => {
   });
 
   it("syncs inputs when session picks update from the server", () => {
-    const scheduledAt = new Date(Date.now() + 10 * 60_000).toISOString();
+    const scheduledAt = new Date(currentTime + 10 * 60_000).toISOString();
     const initialSession: SessionPrediction = {
       id: "s3",
       name: "América vs Chivas",
@@ -196,7 +199,11 @@ describe("SessionCard", () => {
     };
 
     const { rerender } = render(
-      <SessionCard qimelaId="q1" session={initialSession} />,
+      <SessionCard
+        qimelaId="q1"
+        currentTime={currentTime}
+        session={initialSession}
+      />,
     );
 
     expect(screen.getByLabelText("Marcador América")).toHaveValue("");
@@ -212,7 +219,13 @@ describe("SessionCard", () => {
       ],
     };
 
-    rerender(<SessionCard qimelaId="q1" session={refreshedSession} />);
+    rerender(
+      <SessionCard
+        qimelaId="q1"
+        currentTime={currentTime}
+        session={refreshedSession}
+      />,
+    );
 
     expect(screen.getByLabelText("Marcador América")).toHaveValue("2");
     expect(screen.getByLabelText("Marcador Chivas")).toHaveValue("1");
@@ -225,11 +238,12 @@ describe("SessionCard", () => {
     render(
       <SessionCard
         qimelaId="q1"
+        currentTime={currentTime}
         showPhaseName={false}
         session={{
           id: "s4",
           name: "México vs Sudáfrica",
-          scheduledAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+          scheduledAt: new Date(currentTime + 10 * 60_000).toISOString(),
           status: "SCHEDULED",
           phaseId: "p1",
           phaseName: "Grupos - Partido 1",

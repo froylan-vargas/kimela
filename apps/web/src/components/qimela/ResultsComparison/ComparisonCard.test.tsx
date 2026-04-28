@@ -32,33 +32,32 @@ const baseSession: ComparisonSession = {
 
 describe("ComparisonCard", () => {
   it("renders real result score", () => {
-    render(<ComparisonCard session={baseSession} currentUserId="me" />);
+    render(<ComparisonCard session={baseSession} currentUserId="me" qimelaId="qimela-1" />);
     expect(screen.getByText("Italia")).toBeInTheDocument();
     expect(screen.getByText("México")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
   });
 
   it("labels the current user as 'Tú' and shows first", () => {
-    render(<ComparisonCard session={baseSession} currentUserId="me" />);
+    render(<ComparisonCard session={baseSession} currentUserId="me" qimelaId="qimela-1" />);
     const rows = screen.getAllByRole("listitem");
     expect(rows[0]).toHaveTextContent("Tú");
     expect(rows[1]).toHaveTextContent("Laura");
   });
 
   it("renders user picks with points", () => {
-    render(<ComparisonCard session={baseSession} currentUserId="me" />);
+    render(<ComparisonCard session={baseSession} currentUserId="me" qimelaId="qimela-1" />);
     expect(screen.getByText("+3 Pts")).toBeInTheDocument();
     expect(screen.getByText("+1 Pts")).toBeInTheDocument();
   });
 
-  it("shows '-' when actual result is missing", () => {
+  it("shows pending copy when actual result is missing", () => {
     const session: ComparisonSession = {
       ...baseSession,
       actualResult: { homeScore: null, awayScore: null },
     };
-    render(<ComparisonCard session={session} currentUserId="me" />);
-    const dashes = screen.getAllByText("-");
-    expect(dashes.length).toBeGreaterThanOrEqual(2);
+    render(<ComparisonCard session={session} currentUserId="me" qimelaId="qimela-1" />);
+    expect(screen.getByText("Aún sin resultado")).toBeInTheDocument();
   });
 
   it("shows '-' when a user has no picks and no points", () => {
@@ -74,7 +73,7 @@ describe("ComparisonCard", () => {
         },
       ],
     };
-    render(<ComparisonCard session={session} currentUserId="me" />);
+    render(<ComparisonCard session={session} currentUserId="me" qimelaId="qimela-1" />);
     expect(screen.getAllByText("-").length).toBeGreaterThanOrEqual(1);
   });
 });

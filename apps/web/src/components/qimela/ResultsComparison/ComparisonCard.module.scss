@@ -82,6 +82,41 @@
   text-align: center;
 }
 
+.scorePending {
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pendingArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.top5Btn {
+  appearance: none;
+  border: 1px solid rgba($color-primary, 0.35);
+  background: rgba($color-primary, 0.08);
+  color: $color-primary-text;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 12px;
+  border-radius: $radius-pill;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: rgba($color-primary, 0.15);
+    border-color: rgba($color-primary, 0.55);
+  }
+}
+
 .separator {
   color: $color-text-secondary;
 }
@@ -160,5 +195,9 @@
   .score {
     padding: 4px 10px;
     font-size: 16px;
+  }
+
+  .scorePending {
+    font-size: 12px;
   }
 }

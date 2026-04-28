@@ -60,6 +60,19 @@ export interface ComparisonSession {
   users: ComparisonUserResult[];
 }
 
+export interface Top5PickEntry {
+  rank: number;
+  userId: string;
+  userName: string;
+  homePick: string | null;
+  awayPick: string | null;
+}
+
+export interface SessionTop5Picks {
+  overall: Top5PickEntry[];
+  phase: Top5PickEntry[] | null;
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 const AUTH_ENDPOINTS = [
@@ -283,6 +296,17 @@ export const qimelasApi = {
     return apiFetch<{ data: PhaseSessionsGroup[] }>(
       `/qimelas/${encodeURIComponent(qimelaId)}/sessions`
     );
+  },
+
+  getSessionTop5Picks(
+    qimelaId: string,
+    sessionId: string,
+    phaseId?: string,
+  ): Promise<SessionTop5Picks> {
+    const url = phaseId
+      ? `/qimelas/${encodeURIComponent(qimelaId)}/sessions/${encodeURIComponent(sessionId)}/top5-picks?phaseId=${encodeURIComponent(phaseId)}`
+      : `/qimelas/${encodeURIComponent(qimelaId)}/sessions/${encodeURIComponent(sessionId)}/top5-picks`;
+    return apiFetch<SessionTop5Picks>(url);
   },
 
   getLeaderboard(qimelaId: string, phaseId?: string): Promise<{ data: LeaderboardEntry[] }> {

@@ -160,8 +160,8 @@ describe("EventManagementPage", () => {
       <QueryClientProvider client={queryClient}>
         <Suspense fallback={null}>
           <EventManagementPage
-            params={{ eventId: "event-1" } as Promise<{ eventId: string }>}
-            searchParams={{ name: "Liga%20MX" } as Promise<{ name?: string }>}
+            params={{ eventId: "event-1" } as unknown as Promise<{ eventId: string }>}
+            searchParams={{ name: "Liga%20MX" } as unknown as Promise<{ name?: string }>}
           />
         </Suspense>
       </QueryClientProvider>,

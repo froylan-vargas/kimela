@@ -126,7 +126,7 @@ export default function QimelaResultsPage() {
         results &&
         results.length === 0 && (
           <div className={styles.state}>
-            No hay partidos completados en esta fase.
+            No hay partidos en esta fase.
           </div>
         )}
 
@@ -152,6 +152,7 @@ export default function QimelaResultsPage() {
                 key={session.id}
                 session={session}
                 currentUserId={user.id}
+                qimelaId={qimelaId!}
               />
             ))}
           </div>

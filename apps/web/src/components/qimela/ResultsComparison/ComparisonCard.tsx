@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import type { ComparisonSession } from "@/lib/apiClient";
+import Top5Modal from "@/components/qimela/Top5Modal/Top5Modal";
 import styles from "./ComparisonCard.module.scss";
 
 interface ComparisonCardProps {
   session: ComparisonSession;
   currentUserId: string;
+  qimelaId: string;
 }
 
 function getInitials(name: string) {
@@ -31,8 +34,12 @@ function formatPoints(points: number | null) {
   return `${points > 0 ? "+" : ""}${points} Pts`;
 }
 
-export default function ComparisonCard({ session, currentUserId }: ComparisonCardProps) {
+export default function ComparisonCard({ session, currentUserId, qimelaId }: ComparisonCardProps) {
   const { home, away, actualResult, users } = session;
+  const [top5Open, setTop5Open] = useState(false);
+
+  const hasOfficialResult =
+    actualResult.homeScore !== null && actualResult.awayScore !== null;
 
   const sortedUsers = [...users].sort((a, b) => {
     if (a.userId === currentUserId) return -1;
@@ -54,13 +61,29 @@ export default function ComparisonCard({ session, currentUserId }: ComparisonCar
           </div>
           <span className={styles.teamName}>{home.name}</span>
         </div>
-        <div className={styles.score}>
-          <span className={styles.scoreValue}>{formatScore(actualResult.homeScore)}</span>
-          <span className={styles.separator} aria-hidden="true">
-            -
-          </span>
-          <span className={styles.scoreValue}>{formatScore(actualResult.awayScore)}</span>
-        </div>
+        {hasOfficialResult ? (
+          <div className={styles.score}>
+            <span className={styles.scoreValue}>{formatScore(actualResult.homeScore)}</span>
+            <span className={styles.separator} aria-hidden="true">
+              -
+            </span>
+            <span className={styles.scoreValue}>{formatScore(actualResult.awayScore)}</span>
+          </div>
+        ) : (
+          <div className={styles.pendingArea}>
+            <div className={`${styles.score} ${styles.scorePending}`}>
+              Aún sin resultado
+            </div>
+            <button
+              type="button"
+              className={styles.top5Btn}
+              onClick={() => setTop5Open(true)}
+              aria-label="Ver pronósticos Top 5"
+            >
+              Top 5
+            </button>
+          </div>
+        )}
         <div className={`${styles.team} ${styles.teamAway}`}>
           <span className={styles.teamName}>{away.name}</span>
           <div className={styles.logo}>
@@ -94,6 +117,18 @@ export default function ComparisonCard({ session, currentUserId }: ComparisonCar
           );
         })}
       </ul>
+
+      {top5Open && (
+        <Top5Modal
+          open={top5Open}
+          onClose={() => setTop5Open(false)}
+          qimelaId={qimelaId}
+          sessionId={session.id}
+          phaseId={session.phaseId}
+          home={home}
+          away={away}
+        />
+      )}
     </article>
   );
 }

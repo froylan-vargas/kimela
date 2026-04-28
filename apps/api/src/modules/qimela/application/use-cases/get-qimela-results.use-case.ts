@@ -119,8 +119,6 @@ export class GetQimelaResultsUseCase {
     const sessions: SessionRecord[] = await this.prisma.session.findMany({
       where: {
         phaseId: query.phaseId,
-        status: 'COMPLETED',
-        results: { some: {} },
       },
       include: {
         phase: { select: { id: true, name: true } },
@@ -205,19 +203,20 @@ export class GetQimelaResultsUseCase {
             ? pickByKey.get(pickKey(uid, session.id, scoreAwayCategoryId)) ?? null
             : null;
           const hasAnyPick = homePick !== null || awayPick !== null;
+          const points = pointsByKey.get(pointsKey(uid, session.id));
 
           return {
             userId: uid,
             userName: userById.get(uid) ?? 'Usuario',
             homePick,
             awayPick,
-            points: hasAnyPick ? pointsByKey.get(pointsKey(uid, session.id)) ?? 0 : null,
+            points: hasAnyPick && points !== undefined ? points : null,
           };
         }),
       };
     });
 
-    this.logger.info(`Returning ${data.length} completed sessions for phase ${query.phaseId}`);
+    this.logger.info(`Returning ${data.length} sessions for phase ${query.phaseId}`);
 
     return { data };
   }

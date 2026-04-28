@@ -46,14 +46,17 @@ export default function QimelaSessionsPage() {
     return data
       .map((group) => ({
         ...group,
-        sessions: group.sessions.filter((session) =>
-          filter === "pending" ? !session.hasUserPicks : session.hasUserPicks,
-        ),
+        sessions: group.sessions.filter((session) => {
+          if (session.status === "COMPLETED") return false;
+          return filter === "pending" ? !session.hasUserPicks : session.hasUserPicks;
+        }),
       }))
       .filter((group) => group.sessions.length > 0);
   }, [data, filter]);
 
-  const hasAnySessions = !!data?.some((group) => group.sessions.length > 0);
+  const hasAnySessions = !!data?.some((group) =>
+    group.sessions.some((s) => s.status !== "COMPLETED"),
+  );
 
   return (
     <main className={styles.page}>

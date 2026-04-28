@@ -1,0 +1,199 @@
+@use "../../../styles/variables" as *;
+
+.dialog {
+  border: none;
+  border-radius: $radius-lg;
+  padding: 0;
+  background: transparent;
+  max-width: min(480px, calc(100vw - 32px));
+  width: 100%;
+  /* Center in viewport */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.14),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+  }
+}
+
+.modal {
+  background: #fff;
+  border-radius: $radius-lg;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1px solid $color-border;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.titleLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: $color-text-secondary;
+}
+
+.matchup {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.contender {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.contenderAway {
+  flex-direction: row-reverse;
+}
+
+.teamLogo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.teamLogoFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba($color-primary, 0.1);
+  color: $color-primary-text;
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.teamName {
+  font-size: 15px;
+  font-weight: 700;
+  color: $color-text-main;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vs {
+  font-size: 12px;
+  font-weight: 700;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.closeBtn {
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: $color-text-secondary;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $color-text-main;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  padding: $spacing-md $spacing-lg;
+
+  & + & {
+    border-top: 1px solid $color-border;
+  }
+}
+
+.sectionTitle {
+  margin: 0 0 $spacing-md;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: $color-text-secondary;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: $color-text-secondary;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-main;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pick {
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-primary-text;
+  flex-shrink: 0;
+  background: rgba($color-primary, 0.08);
+  padding: 3px 10px;
+  border-radius: $radius-pill;
+}
+
+.empty {
+  margin: 0;
+  font-size: 14px;
+  color: $color-text-secondary;
+}

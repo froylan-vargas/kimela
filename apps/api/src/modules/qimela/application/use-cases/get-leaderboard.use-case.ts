@@ -29,7 +29,15 @@ export class GetLeaderboardUseCase {
 
     const qimela = await this.prisma.qimela.findUnique({
       where: { id: qimelaId },
-      select: { id: true },
+      select: {
+        id: true,
+        creator: { select: { id: true, name: true, imageUrl: true } },
+        subscriptions: {
+          select: {
+            user: { select: { id: true, name: true, imageUrl: true } },
+          },
+        },
+      },
     });
 
     if (!qimela) {
@@ -37,7 +45,7 @@ export class GetLeaderboardUseCase {
     }
 
     if (phaseId) {
-      return this.executeForPhase(qimelaId, phaseId);
+      return this.executeForPhase(qimelaId, phaseId, this.getParticipants(qimela));
     }
 
     const rows = await this.prisma.userQimelaPoints.findMany({
@@ -46,20 +54,28 @@ export class GetLeaderboardUseCase {
       include: { user: { select: { id: true, name: true, imageUrl: true } } },
     });
 
-    const data: LeaderboardEntry[] = rows.map((row, index) => ({
-      userId: row.userId,
-      userName: row.user.name,
-      imageUrl: row.user.imageUrl,
-      totalPoints: row.totalPoints,
-      correctPicksCount: row.correctPicksCount,
-      exactResultsCount: row.exactResultsCount,
-      rank: index + 1,
-    }));
+    const pointsByUserId = new Map(rows.map((row) => [row.userId, row]));
+    const data = this.rankParticipants(
+      this.getParticipants(qimela).map((participant) => {
+        const points = pointsByUserId.get(participant.userId);
+        return {
+          ...participant,
+          totalPoints: points?.totalPoints ?? 0,
+          correctPicksCount: points?.correctPicksCount ?? 0,
+          exactResultsCount: points?.exactResultsCount ?? 0,
+          rank: 0,
+        };
+      }),
+    );
 
     return { data };
   }
 
-  private async executeForPhase(qimelaId: string, phaseId: string): Promise<GetLeaderboardResponse> {
+  private async executeForPhase(
+    qimelaId: string,
+    phaseId: string,
+    participants: Omit<LeaderboardEntry, 'totalPoints' | 'correctPicksCount' | 'exactResultsCount' | 'rank'>[],
+  ): Promise<GetLeaderboardResponse> {
     const rows = await this.prisma.userSessionPoints.findMany({
       where: { qimelaId, session: { phaseId } },
       select: {
@@ -91,16 +107,44 @@ export class GetLeaderboardUseCase {
       }
     }
 
-    const sorted = [...aggregated.values()].sort((a, b) => {
-      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
-      return b.exactResultsCount - a.exactResultsCount;
-    });
-
-    const data: LeaderboardEntry[] = sorted.map((entry, index) => ({
-      ...entry,
-      rank: index + 1,
+    const aggregatedWithEmptyParticipants = participants.map((participant) => ({
+      ...participant,
+      totalPoints: aggregated.get(participant.userId)?.totalPoints ?? 0,
+      correctPicksCount: aggregated.get(participant.userId)?.correctPicksCount ?? 0,
+      exactResultsCount: aggregated.get(participant.userId)?.exactResultsCount ?? 0,
+      rank: 0,
     }));
 
-    return { data };
+    return { data: this.rankParticipants(aggregatedWithEmptyParticipants) };
+  }
+
+  private getParticipants(qimela: {
+    creator: { id: string; name: string; imageUrl: string | null };
+    subscriptions: { user: { id: string; name: string; imageUrl: string | null } }[];
+  }): Omit<LeaderboardEntry, 'totalPoints' | 'correctPicksCount' | 'exactResultsCount' | 'rank'>[] {
+    const byUserId = new Map<string, Omit<LeaderboardEntry, 'totalPoints' | 'correctPicksCount' | 'exactResultsCount' | 'rank'>>();
+    byUserId.set(qimela.creator.id, {
+      userId: qimela.creator.id,
+      userName: qimela.creator.name,
+      imageUrl: qimela.creator.imageUrl,
+    });
+    for (const subscription of qimela.subscriptions) {
+      byUserId.set(subscription.user.id, {
+        userId: subscription.user.id,
+        userName: subscription.user.name,
+        imageUrl: subscription.user.imageUrl,
+      });
+    }
+    return [...byUserId.values()];
+  }
+
+  private rankParticipants(entries: LeaderboardEntry[]): LeaderboardEntry[] {
+    return entries
+      .sort((a, b) => {
+        if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+        if (b.exactResultsCount !== a.exactResultsCount) return b.exactResultsCount - a.exactResultsCount;
+        return a.userName.localeCompare(b.userName, 'es');
+      })
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
   }
 }

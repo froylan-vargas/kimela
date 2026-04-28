@@ -25,6 +25,7 @@ import { DeleteQimelaLabelUseCase } from './application/use-cases/delete-qimela-
 import { GetQimelaLabelsUseCase } from './application/use-cases/get-qimela-labels.use-case';
 import { ApplyLabelUseCase } from './application/use-cases/apply-label.use-case';
 import { RemoveLabelUseCase } from './application/use-cases/remove-label.use-case';
+import { GetSessionTop5PicksUseCase } from './application/use-cases/get-session-top5-picks.use-case';
 import { QimelaController } from './presentation/qimela.controller';
 import { InviteController } from './presentation/invite.controller';
 
@@ -56,6 +57,7 @@ import { InviteController } from './presentation/invite.controller';
     GetQimelaLabelsUseCase,
     ApplyLabelUseCase,
     RemoveLabelUseCase,
+    GetSessionTop5PicksUseCase,
   ],
   controllers: [QimelaController, InviteController],
 })

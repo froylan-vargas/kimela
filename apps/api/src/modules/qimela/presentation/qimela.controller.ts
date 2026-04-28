@@ -21,6 +21,7 @@ import { DeleteQimelaLabelUseCase, DeleteQimelaLabelResponse } from '../applicat
 import { GetQimelaLabelsUseCase, GetQimelaLabelsResponse } from '../application/use-cases/get-qimela-labels.use-case';
 import { ApplyLabelUseCase, ApplyLabelResponse } from '../application/use-cases/apply-label.use-case';
 import { RemoveLabelUseCase, RemoveLabelResponse } from '../application/use-cases/remove-label.use-case';
+import { GetSessionTop5PicksUseCase, GetSessionTop5PicksResponse } from '../application/use-cases/get-session-top5-picks.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
@@ -55,6 +56,7 @@ export class QimelaController {
     private readonly getQimelaLabels: GetQimelaLabelsUseCase,
     private readonly applyLabel: ApplyLabelUseCase,
     private readonly removeLabel: RemoveLabelUseCase,
+    private readonly getSessionTop5Picks: GetSessionTop5PicksUseCase,
   ) {}
 
   @Get()
@@ -247,6 +249,17 @@ export class QimelaController {
   ): Promise<GetAllSessionsResponse> {
     this.logger.info(`GET /qimelas/${qimelaId}/sessions requested by user ${user.id}`);
     return this.getAllSessions.execute({ qimelaId, userId: user.id });
+  }
+
+  @Get(':qimelaId/sessions/:sessionId/top5-picks')
+  async getSessionTop5(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Query('phaseId') phaseId?: string,
+  ): Promise<GetSessionTop5PicksResponse> {
+    this.logger.info(`GET /qimelas/${qimelaId}/sessions/${sessionId}/top5-picks requested by user ${user.id}`);
+    return this.getSessionTop5Picks.execute(qimelaId, sessionId, user.id, phaseId);
   }
 
   @Post(':qimelaId/sessions/:sessionId/picks')

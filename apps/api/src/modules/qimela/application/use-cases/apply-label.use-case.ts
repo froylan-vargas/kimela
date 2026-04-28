@@ -1,6 +1,7 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface ApplyLabelCommand {
   qimelaId: string;
@@ -15,15 +16,15 @@ export interface ApplyLabelResponse {
 
 @Injectable()
 export class ApplyLabelUseCase {
-  private readonly logger = new Logger(ApplyLabelUseCase.name);
 
   constructor(
+    @InjectPinoLogger(ApplyLabelUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: ApplyLabelCommand): Promise<ApplyLabelResponse> {
-    this.logger.log(
+    this.logger.info(
       `Applying label ${command.labelId} to user ${command.targetUserId} in qimela ${command.qimelaId}`,
     );
 

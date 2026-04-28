@@ -14,6 +14,23 @@
   overflow: hidden;
 }
 
+.createItem {
+  display: block;
+  width: 100%;
+  padding: 10px $spacing-md;
+  text-align: left;
+  font-family: $font-family-base;
+  font-size: 15px;
+  font-weight: 600;
+  color: $color-primary;
+  text-decoration: none;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: $color-primary-light;
+  }
+}
+
 .sectionTitle {
   padding: 10px $spacing-md 6px;
   font-size: 11px;
@@ -27,6 +44,13 @@
   height: 1px;
   background: $color-border;
   margin: $spacing-sm 0;
+}
+
+.emptySection {
+  padding: 6px $spacing-md 10px;
+  font-size: 13px;
+  color: $color-text-secondary;
+  margin: 0;
 }
 
 .item {

@@ -73,7 +73,9 @@ describe('SubscribeViaInviteTokenUseCase', () => {
       subscription: { create: jest.fn() },
     };
 
-    useCase = new SubscribeViaInviteTokenUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new SubscribeViaInviteTokenUseCase(mockLogger, 
       mockInviteTokenRepo,
       mockQimelaRepo,
       mockPrisma as unknown as PrismaService,

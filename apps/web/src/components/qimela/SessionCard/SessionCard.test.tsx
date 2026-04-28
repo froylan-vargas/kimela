@@ -69,7 +69,11 @@ describe("SessionCard", () => {
     fireEvent.change(screen.getByLabelText("Marcador América"), {
       target: { value: "1" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    const saveButton = screen.getByRole("button", { name: "Guardar" });
+    expect(saveButton.className).toContain("buttonSave");
+    expect(saveButton.className).not.toContain("buttonUpdate");
+
+    fireEvent.click(saveButton);
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({
@@ -130,7 +134,10 @@ describe("SessionCard", () => {
     expect(
       screen.getByText("Guardado, aún puedes editar"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Actualizar" })).toBeInTheDocument();
+    const updateButton = screen.getByRole("button", { name: "Actualizar" });
+    expect(updateButton).toBeInTheDocument();
+    expect(updateButton.className).toContain("buttonUpdate");
+    expect(updateButton.className).not.toContain("buttonSave");
 
     fireEvent.change(screen.getByLabelText("Marcador Tigres"), {
       target: { value: "2" },
@@ -138,7 +145,7 @@ describe("SessionCard", () => {
     fireEvent.change(screen.getByLabelText("Marcador Monterrey"), {
       target: { value: "2" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+    fireEvent.click(updateButton);
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({

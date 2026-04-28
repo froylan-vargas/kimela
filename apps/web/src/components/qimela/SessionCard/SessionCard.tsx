@@ -29,6 +29,8 @@ function getInitials(name: string) {
 function formatScheduledAt(dateString: string) {
   // Sessions are stored as UTC without timezone conversion on CSV upload,
   // so render in UTC to match the hora the admin provided.
+  // Append Z so the browser treats the floating ISO string as UTC instead of local time.
+  const utc = dateString.endsWith("Z") ? dateString : dateString + "Z";
   return new Intl.DateTimeFormat("es-MX", {
     weekday: "short",
     day: "numeric",
@@ -36,18 +38,20 @@ function formatScheduledAt(dateString: string) {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: "UTC",
-  }).format(new Date(dateString));
+  }).format(new Date(utc));
 }
 
 interface SessionCardProps {
   session: SessionPrediction;
   qimelaId: string;
+  currentTime: number;
   showPhaseName?: boolean;
 }
 
 export default function SessionCard({
   session,
   qimelaId,
+  currentTime,
   showPhaseName: _showPhaseName = true,
 }: SessionCardProps) {
   const { toast } = useToast();
@@ -62,7 +66,6 @@ export default function SessionCard({
   );
   const [homeScore, setHomeScore] = useState(homePick?.value ?? "");
   const [awayScore, setAwayScore] = useState(awayPick?.value ?? "");
-  const [currentTime, setCurrentTime] = useState<number | null>(null);
 
   useEffect(() => {
     setHomeScore(homePick?.value ?? "");
@@ -72,18 +75,7 @@ export default function SessionCard({
     setAwayScore(awayPick?.value ?? "");
   }, [awayPick?.value]);
 
-  useEffect(() => {
-    setCurrentTime(Date.now());
-
-    const intervalId = window.setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 30_000);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
-
   const isTooClose =
-    currentTime !== null &&
     new Date(session.scheduledAt).getTime() - currentTime < PICKS_DEADLINE_MS;
   const hasSavedPrediction = session.hasUserPicks;
   const hasRequiredCategories = !!homePick && !!awayPick;
@@ -196,7 +188,7 @@ export default function SessionCard({
         )}
         <button
           type="button"
-          className={`${styles.button} ${hasSavedPrediction ? styles.buttonSaved : ""}`}
+          className={`${styles.button} ${hasSavedPrediction ? styles.buttonUpdate : styles.buttonSave}`}
           disabled={isDisabled}
           onClick={handleSave}
         >

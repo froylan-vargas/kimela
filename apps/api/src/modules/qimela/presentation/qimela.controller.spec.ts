@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getLoggerToken } from 'nestjs-pino';
 import { QimelaController } from './qimela.controller';
 import { GetQimelasForUserUseCase } from '../application/use-cases/get-qimelas-for-user.use-case';
 import { GetQimelaByIdUseCase } from '../application/use-cases/get-qimela-by-id.use-case';
@@ -107,6 +108,7 @@ describe('QimelaController', () => {
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
+        { provide: getLoggerToken(QimelaController.name), useValue: { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() } },
       ],
     }).compile();
 

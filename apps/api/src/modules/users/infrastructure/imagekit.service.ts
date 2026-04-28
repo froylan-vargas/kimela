@@ -1,12 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import ImageKit from 'imagekit';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class ImageKitService {
-  private readonly logger = new Logger(ImageKitService.name);
   private readonly client: ImageKit;
 
-  constructor() {
+  constructor(
+    @InjectPinoLogger(ImageKitService.name) private readonly logger: PinoLogger,
+  ) {
     this.client = new ImageKit({
       publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
       privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,

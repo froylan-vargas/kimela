@@ -47,7 +47,9 @@ describe('GetQimelaLabelsUseCase', () => {
       },
     };
 
-    useCase = new GetQimelaLabelsUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new GetQimelaLabelsUseCase(mockLogger, 
       mockQimelaRepo,
       mockPrisma as unknown as PrismaService,
     );

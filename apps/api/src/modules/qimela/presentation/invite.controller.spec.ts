@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getLoggerToken } from 'nestjs-pino';
 import { InviteController } from './invite.controller';
 import { GenerateInviteTokenUseCase } from '../application/use-cases/generate-invite-token.use-case';
 import { RevokeInviteTokenUseCase } from '../application/use-cases/revoke-invite-token.use-case';
@@ -38,6 +39,7 @@ describe('InviteController', () => {
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: INVITE_TOKEN_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
+        { provide: getLoggerToken(InviteController.name), useValue: { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() } },
       ],
     }).compile();
 

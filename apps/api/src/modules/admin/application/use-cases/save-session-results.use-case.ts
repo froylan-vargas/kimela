@@ -1,6 +1,7 @@
-import { ConflictException, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { PgBossService } from '../../../../shared/queue/pgboss.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export const SESSION_SCORE_PICKS_QUEUE = 'session.score-picks';
 
@@ -14,9 +15,9 @@ export interface SaveSessionResultsCommand {
 
 @Injectable()
 export class SaveSessionResultsUseCase {
-  private readonly logger = new Logger(SaveSessionResultsUseCase.name);
 
   constructor(
+    @InjectPinoLogger(SaveSessionResultsUseCase.name) private readonly logger: PinoLogger,
     private readonly prisma: PrismaService,
     private readonly pgBoss: PgBossService,
   ) {}
@@ -72,7 +73,7 @@ export class SaveSessionResultsUseCase {
       });
     });
 
-    this.logger.log(`Session ${sessionId} marked COMPLETED, enqueueing scoring job`);
+    this.logger.info(`Session ${sessionId} marked COMPLETED, enqueueing scoring job`);
 
     try {
       await this.pgBoss.boss.send(SESSION_SCORE_PICKS_QUEUE, { sessionId }, { retryLimit: 3 });

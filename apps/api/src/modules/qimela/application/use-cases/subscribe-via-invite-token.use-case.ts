@@ -17,6 +17,7 @@ import {
   QimelaRepository,
 } from "../../domain/qimela.repository";
 import { QimelaStatus } from "../../domain/qimela-status.enum";
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface SubscribeViaInviteTokenCommand {
   token: string;
@@ -31,9 +32,9 @@ export interface SubscribeViaInviteTokenResponse {
 
 @Injectable()
 export class SubscribeViaInviteTokenUseCase {
-  private readonly logger = new Logger(SubscribeViaInviteTokenUseCase.name);
 
   constructor(
+    @InjectPinoLogger(SubscribeViaInviteTokenUseCase.name) private readonly logger: PinoLogger,
     @Inject(INVITE_TOKEN_REPOSITORY)
     private readonly inviteTokenRepository: InviteTokenRepository,
     @Inject(QIMELA_REPOSITORY)
@@ -44,7 +45,7 @@ export class SubscribeViaInviteTokenUseCase {
   async execute(
     command: SubscribeViaInviteTokenCommand,
   ): Promise<SubscribeViaInviteTokenResponse> {
-    this.logger.log(`Subscribing user ${command.userId} via invite token`);
+    this.logger.info(`Subscribing user ${command.userId} via invite token`);
 
     const inviteToken = await this.inviteTokenRepository.findByToken(
       command.token,

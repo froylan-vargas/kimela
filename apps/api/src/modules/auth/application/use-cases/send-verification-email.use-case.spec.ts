@@ -41,7 +41,9 @@ describe('SendVerificationEmailUseCase', () => {
       sendPasswordResetEmail: jest.fn(),
     };
 
-    useCase = new SendVerificationEmailUseCase(mockTokenRepo, mockEmailService);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new SendVerificationEmailUseCase(mockLogger, mockTokenRepo, mockEmailService);
   });
 
   describe('execute', () => {

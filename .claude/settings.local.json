@@ -54,7 +54,13 @@
       "Bash(echo \"Exit: $?\")",
       "Bash(xargs cat *)",
       "Bash(xargs perl *)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(read f *)",
+      "Bash(python3 *)",
+      "Bash(sed -n '74,85p' src/modules/qimela/application/use-cases/create-qimela.use-case.spec.ts)",
+      "Bash(sed -n '60,72p' src/modules/qimela/application/use-cases/apply-label.use-case.spec.ts)",
+      "Bash(sed -n '95,140p' src/modules/auth/presentation/auth.controller.spec.ts)",
+      "Bash(sed -n '29,55p' src/modules/qimela/presentation/invite.controller.spec.ts)"
     ]
   }
 }

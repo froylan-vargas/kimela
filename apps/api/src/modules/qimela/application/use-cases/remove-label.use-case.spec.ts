@@ -55,7 +55,9 @@ describe('RemoveLabelUseCase', () => {
       },
     };
 
-    useCase = new RemoveLabelUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new RemoveLabelUseCase(mockLogger, 
       mockQimelaRepo,
       mockPrisma as unknown as PrismaService,
     );

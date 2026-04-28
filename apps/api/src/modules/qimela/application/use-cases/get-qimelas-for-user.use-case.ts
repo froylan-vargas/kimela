@@ -1,22 +1,23 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { GetQimelasQuery } from '../dtos/get-qimelas.query';
 import { QimelaDto, PaginatedQimelaResponse } from '../dtos/qimela.dto';
 import { QimelaMapper } from '../mappers/qimela.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class GetQimelasForUserUseCase {
-  private readonly logger = new Logger(GetQimelasForUserUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetQimelasForUserUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(query: GetQimelasQuery): Promise<PaginatedQimelaResponse> {
-    this.logger.log(`Fetching qimelas for user ${query.userId}`, {
+    this.logger.info(`Fetching qimelas for user ${query.userId}`, {
       status: query.status,
     });
 
@@ -45,7 +46,7 @@ export class GetQimelasForUserUseCase {
       }
     }
 
-    this.logger.log(`Found ${data.length} qimelas for user ${query.userId}`);
+    this.logger.info(`Found ${data.length} qimelas for user ${query.userId}`);
 
     return {
       data,

@@ -1,8 +1,9 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { SESSION_REPOSITORY, SessionRepository, SessionRow } from '../../domain/session.repository';
 import { SessionDto } from '../dtos/session.dto';
 import { SessionMapper } from '../mappers/session.mapper';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const REQUIRED_HEADERS = ['equipo_local', 'equipo_visitante', 'fecha', 'hora'] as const;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -27,16 +28,16 @@ interface CsvRow {
 
 @Injectable()
 export class UploadSessionsUseCase {
-  private readonly logger = new Logger(UploadSessionsUseCase.name);
 
   constructor(
+    @InjectPinoLogger(UploadSessionsUseCase.name) private readonly logger: PinoLogger,
     @Inject(SESSION_REPOSITORY)
     private readonly sessionRepository: SessionRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: UploadSessionsCommand): Promise<UploadSessionsResponse> {
-    this.logger.log(`Uploading sessions for phase ${command.phaseId} of event ${command.eventId}`);
+    this.logger.info(`Uploading sessions for phase ${command.phaseId} of event ${command.eventId}`);
 
     const phase = await this.prisma.phase.findUnique({
       where: { id: command.phaseId },
@@ -90,7 +91,7 @@ export class UploadSessionsUseCase {
       };
     });
 
-    this.logger.log(`Parsed ${rows.length} rows from CSV`);
+    this.logger.info(`Parsed ${rows.length} rows from CSV`);
 
     const sessions = await this.sessionRepository.replaceForPhase({
       phaseId: command.phaseId,
@@ -99,7 +100,7 @@ export class UploadSessionsUseCase {
       rows,
     });
 
-    this.logger.log(`Replaced sessions for phase ${command.phaseId}, created ${sessions.length} sessions`);
+    this.logger.info(`Replaced sessions for phase ${command.phaseId}, created ${sessions.length} sessions`);
 
     return { data: SessionMapper.toDtoList(sessions) };
   }

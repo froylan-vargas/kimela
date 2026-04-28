@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import {
   EMAIL_VERIFICATION_TOKEN_REPOSITORY,
@@ -6,12 +6,13 @@ import {
 } from '../../domain/email-verification-token.repository';
 import { USER_REPOSITORY, UserRepository } from '../../../users/domain/user.repository';
 import { InvalidVerificationTokenError } from '../../domain/errors/invalid-verification-token.error';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class ConfirmEmailUseCase {
-  private readonly logger = new Logger(ConfirmEmailUseCase.name);
 
   constructor(
+    @InjectPinoLogger(ConfirmEmailUseCase.name) private readonly logger: PinoLogger,
     @Inject(EMAIL_VERIFICATION_TOKEN_REPOSITORY)
     private readonly tokenRepo: EmailVerificationTokenRepository,
     @Inject(USER_REPOSITORY)
@@ -19,7 +20,7 @@ export class ConfirmEmailUseCase {
   ) {}
 
   async execute(rawToken: string): Promise<void> {
-    this.logger.log('Processing email confirmation');
+    this.logger.info('Processing email confirmation');
 
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const tokenEntity = await this.tokenRepo.findByHash(tokenHash);

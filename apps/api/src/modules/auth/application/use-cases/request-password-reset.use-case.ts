@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -8,12 +8,13 @@ import {
 } from '../../domain/password-reset-token.repository';
 import { EMAIL_SERVICE, EmailService } from '../services/email.service';
 import { USER_REPOSITORY, UserRepository } from '../../../users/domain/user.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class RequestPasswordResetUseCase {
-  private readonly logger = new Logger(RequestPasswordResetUseCase.name);
 
   constructor(
+    @InjectPinoLogger(RequestPasswordResetUseCase.name) private readonly logger: PinoLogger,
     @Inject(PASSWORD_RESET_TOKEN_REPOSITORY)
     private readonly tokenRepo: PasswordResetTokenRepository,
     @Inject(EMAIL_SERVICE)
@@ -23,7 +24,7 @@ export class RequestPasswordResetUseCase {
   ) {}
 
   async execute(email: string): Promise<void> {
-    this.logger.log(`Processing password reset request for email: ${email}`);
+    this.logger.info(`Processing password reset request for email: ${email}`);
 
     const user = await this.userRepo.findByEmail(email);
     if (!user) {

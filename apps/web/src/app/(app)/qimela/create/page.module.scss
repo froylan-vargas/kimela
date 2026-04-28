@@ -1,6 +1,7 @@
 @use "../../../../styles/variables" as *;
 
 .page {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,6 +9,51 @@
   gap: $spacing-lg;
   min-height: calc(100vh - 65px);
   padding: $spacing-lg 40px;
+}
+
+.back {
+  position: absolute;
+  top: $spacing-lg;
+  left: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba($color-primary, 0.32);
+  cursor: pointer;
+  font-family: $font-family-base;
+  font-size: 15px;
+  background:
+    radial-gradient(circle at top, rgba($color-primary, 0.35), rgba($color-primary, 0) 72%),
+    linear-gradient(180deg, rgba($color-primary-light, 0.98) 0%, rgba($color-primary, 0.12) 100%);
+  color: $color-primary-text;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba($color-primary, 0.18);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    border-color: rgba($color-primary, 0.55);
+    box-shadow: 0 14px 28px rgba($color-primary, 0.22);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba($color-primary, 0.22);
+    outline-offset: 3px;
+  }
+}
+
+@media (max-width: 767px) {
+  .back {
+    left: $spacing-md;
+    top: $spacing-md;
+  }
 }
 
 .title {

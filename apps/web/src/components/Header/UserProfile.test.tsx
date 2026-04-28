@@ -35,14 +35,6 @@ describe("UserProfile", () => {
     expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeInTheDocument();
   });
 
-  it("opens the notifications menu from the bell button", () => {
-    render(<UserProfile name="Froy Landcito" />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Notificaciones" }));
-
-    expect(screen.getByText("No hay notificaciones por ahora.")).toBeInTheDocument();
-  });
-
   it("logs out from the account menu", async () => {
     logout.mockResolvedValue(undefined);
     render(<UserProfile name="Froy Landcito" />);

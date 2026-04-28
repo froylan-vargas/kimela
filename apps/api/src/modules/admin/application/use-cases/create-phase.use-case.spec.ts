@@ -28,7 +28,9 @@ describe('CreatePhaseUseCase', () => {
       findById: jest.fn(),
     };
 
-    useCase = new CreatePhaseUseCase(mockPhaseRepository);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new CreatePhaseUseCase(mockLogger, mockPhaseRepository);
   });
 
   describe('execute', () => {

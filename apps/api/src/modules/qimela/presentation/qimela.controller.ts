@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { GetQimelasForUserUseCase } from '../application/use-cases/get-qimelas-for-user.use-case';
 import { GetQimelaByIdUseCase, GetQimelaByIdResponse } from '../application/use-cases/get-qimela-by-id.use-case';
 import { GetSportsForQimelaUseCase, GetSportsForQimelaResponse } from '../application/use-cases/get-sports-for-qimela.use-case';
@@ -27,12 +27,13 @@ import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
 import { UpdateQimelaRequestDto } from './dtos/update-qimela-request.dto';
 import { SavePicksRequestDto } from './dtos/save-picks-request.dto';
 import { CreateLabelRequestDto } from './dtos/create-label-request.dto';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Controller('qimelas')
 export class QimelaController {
-  private readonly logger = new Logger(QimelaController.name);
 
   constructor(
+    @InjectPinoLogger(QimelaController.name) private readonly logger: PinoLogger,
     private readonly getQimelasForUser: GetQimelasForUserUseCase,
     private readonly getQimelaById: GetQimelaByIdUseCase,
     private readonly getSportsForQimela: GetSportsForQimelaUseCase,
@@ -61,13 +62,13 @@ export class QimelaController {
     @CurrentUser() user: CurrentUserPayload,
     @Query() query: GetQimelasRequestDto,
   ): Promise<PaginatedQimelaResponse> {
-    this.logger.log(`GET /qimelas requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas requested by user ${user.id}`);
     return this.getQimelasForUser.execute({ userId: user.id, status: query.status });
   }
 
   @Get('sports')
   async getSports(): Promise<GetSportsForQimelaResponse> {
-    this.logger.log('GET /qimelas/sports requested');
+    this.logger.info('GET /qimelas/sports requested');
     return this.getSportsForQimela.execute();
   }
 
@@ -75,13 +76,13 @@ export class QimelaController {
   async getEvents(
     @Param('sportId', ParseUUIDPipe) sportId: string,
   ): Promise<GetEventsForQimelaResponse> {
-    this.logger.log(`GET /qimelas/sports/${sportId}/events requested`);
+    this.logger.info(`GET /qimelas/sports/${sportId}/events requested`);
     return this.getEventsForQimela.execute(sportId);
   }
 
   @Get('rules')
   async listRules(): Promise<GetRulesResponse> {
-    this.logger.log('GET /qimelas/rules requested');
+    this.logger.info('GET /qimelas/rules requested');
     return this.getRules.execute();
   }
 
@@ -90,7 +91,7 @@ export class QimelaController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<GetQimelaByIdResponse> {
-    this.logger.log(`GET /qimelas/${id} requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${id} requested by user ${user.id}`);
     return this.getQimelaById.execute(id, user.id);
   }
 
@@ -100,7 +101,7 @@ export class QimelaController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<SubscribeToQimelaResponse> {
-    this.logger.log(`POST /qimelas/${id}/subscribe requested by user ${user.id}`);
+    this.logger.info(`POST /qimelas/${id}/subscribe requested by user ${user.id}`);
     return this.subscribeToQimela.execute({ qimelaId: id, userId: user.id });
   }
 
@@ -112,7 +113,7 @@ export class QimelaController {
     @Query('limit') limit = '10',
     @Query('search') search?: string,
   ): Promise<GetQimelaSubscribersResponse> {
-    this.logger.log(`GET /qimelas/${id}/subscribers requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${id}/subscribers requested by user ${user.id}`);
     return this.getQimelaSubscribers.execute({
       qimelaId: id,
       requesterId: user.id,
@@ -129,7 +130,7 @@ export class QimelaController {
     @Param('userId', ParseUUIDPipe) userId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<RemoveSubscriptionResponse> {
-    this.logger.log(`DELETE /qimelas/${id}/subscribers/${userId} requested by user ${user.id}`);
+    this.logger.info(`DELETE /qimelas/${id}/subscribers/${userId} requested by user ${user.id}`);
     return this.removeSubscription.execute({
       qimelaId: id,
       requesterId: user.id,
@@ -142,7 +143,7 @@ export class QimelaController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<GetQimelaLabelsResponse> {
-    this.logger.log(`GET /qimelas/${id}/labels requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${id}/labels requested by user ${user.id}`);
     return this.getQimelaLabels.execute({ qimelaId: id, requesterId: user.id });
   }
 
@@ -153,7 +154,7 @@ export class QimelaController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: CreateLabelRequestDto,
   ): Promise<CreateQimelaLabelResponse> {
-    this.logger.log(`POST /qimelas/${id}/labels requested by user ${user.id}`);
+    this.logger.info(`POST /qimelas/${id}/labels requested by user ${user.id}`);
     return this.createQimelaLabel.execute({ qimelaId: id, requesterId: user.id, name: body.name, color: body.color });
   }
 
@@ -164,7 +165,7 @@ export class QimelaController {
     @Param('labelId', ParseUUIDPipe) labelId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<DeleteQimelaLabelResponse> {
-    this.logger.log(`DELETE /qimelas/${id}/labels/${labelId} requested by user ${user.id}`);
+    this.logger.info(`DELETE /qimelas/${id}/labels/${labelId} requested by user ${user.id}`);
     return this.deleteQimelaLabel.execute({ qimelaId: id, requesterId: user.id, labelId });
   }
 
@@ -176,7 +177,7 @@ export class QimelaController {
     @Param('labelId', ParseUUIDPipe) labelId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<ApplyLabelResponse> {
-    this.logger.log(`POST /qimelas/${id}/subscribers/${userId}/labels/${labelId} by user ${user.id}`);
+    this.logger.info(`POST /qimelas/${id}/subscribers/${userId}/labels/${labelId} by user ${user.id}`);
     return this.applyLabel.execute({ qimelaId: id, requesterId: user.id, targetUserId: userId, labelId });
   }
 
@@ -188,7 +189,7 @@ export class QimelaController {
     @Param('labelId', ParseUUIDPipe) labelId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<RemoveLabelResponse> {
-    this.logger.log(`DELETE /qimelas/${id}/subscribers/${userId}/labels/${labelId} by user ${user.id}`);
+    this.logger.info(`DELETE /qimelas/${id}/subscribers/${userId}/labels/${labelId} by user ${user.id}`);
     return this.removeLabel.execute({ qimelaId: id, requesterId: user.id, targetUserId: userId, labelId });
   }
 
@@ -197,7 +198,7 @@ export class QimelaController {
     @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
     @Query('phaseId') phaseId?: string,
   ): Promise<GetLeaderboardResponse> {
-    this.logger.log(`GET /qimelas/${qimelaId}/leaderboard requested`);
+    this.logger.info(`GET /qimelas/${qimelaId}/leaderboard requested`);
     return this.getLeaderboard.execute(qimelaId, phaseId);
   }
 
@@ -206,7 +207,7 @@ export class QimelaController {
     @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<GetQimelaPhasesResponse> {
-    this.logger.log(`GET /qimelas/${qimelaId}/phases requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${qimelaId}/phases requested by user ${user.id}`);
     return this.getQimelaPhases.execute({ qimelaId, userId: user.id });
   }
 
@@ -217,7 +218,7 @@ export class QimelaController {
     @Query('phaseId', ParseUUIDPipe) phaseId: string,
     @Query('userIds') userIds?: string,
   ): Promise<GetQimelaResultsResponse> {
-    this.logger.log(`GET /qimelas/${qimelaId}/results requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${qimelaId}/results requested by user ${user.id}`);
     const compareUserIds = (userIds ?? '')
       .split(',')
       .map((id) => id.trim())
@@ -235,7 +236,7 @@ export class QimelaController {
     @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<GetUpcomingSessionsResponse> {
-    this.logger.log(`GET /qimelas/${qimelaId}/sessions/upcoming requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${qimelaId}/sessions/upcoming requested by user ${user.id}`);
     return this.getUpcomingSessions.execute({ qimelaId, userId: user.id });
   }
 
@@ -244,7 +245,7 @@ export class QimelaController {
     @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
     @CurrentUser() user: CurrentUserPayload,
   ): Promise<GetAllSessionsResponse> {
-    this.logger.log(`GET /qimelas/${qimelaId}/sessions requested by user ${user.id}`);
+    this.logger.info(`GET /qimelas/${qimelaId}/sessions requested by user ${user.id}`);
     return this.getAllSessions.execute({ qimelaId, userId: user.id });
   }
 
@@ -256,7 +257,7 @@ export class QimelaController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: SavePicksRequestDto,
   ): Promise<SaveSessionPicksResponse> {
-    this.logger.log(`POST /qimelas/${qimelaId}/sessions/${sessionId}/picks requested by user ${user.id}`);
+    this.logger.info(`POST /qimelas/${qimelaId}/sessions/${sessionId}/picks requested by user ${user.id}`);
     return this.saveSessionPicks.execute({
       qimelaId,
       sessionId,
@@ -276,7 +277,7 @@ export class QimelaController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: UpdateQimelaRequestDto,
   ): Promise<UpdateQimelaResponse> {
-    this.logger.log(`PATCH /qimelas/${id} requested by user ${user.id}`);
+    this.logger.info(`PATCH /qimelas/${id} requested by user ${user.id}`);
     return this.updateQimela.execute({
       id,
       requesterId: user.id,
@@ -293,7 +294,7 @@ export class QimelaController {
     @CurrentUser() user: CurrentUserPayload,
     @Body() body: CreateQimelaRequestDto,
   ): Promise<CreateQimelaResponse> {
-    this.logger.log(`POST /qimelas requested by user ${user.id}`);
+    this.logger.info(`POST /qimelas requested by user ${user.id}`);
     return this.createQimela.execute({
       creatorId: user.id,
       name: body.name,

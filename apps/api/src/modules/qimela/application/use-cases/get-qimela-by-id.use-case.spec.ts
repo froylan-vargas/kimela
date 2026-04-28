@@ -51,7 +51,9 @@ describe('GetQimelaByIdUseCase', () => {
       subscription: { findFirst: jest.fn().mockResolvedValue(null) },
     };
 
-    useCase = new GetQimelaByIdUseCase(mockQimelaRepository, mockPrisma as unknown as PrismaService);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new GetQimelaByIdUseCase(mockLogger, mockQimelaRepository, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

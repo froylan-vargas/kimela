@@ -1,7 +1,8 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { LabelDto } from './create-qimela-label.use-case';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface GetQimelaLabelsCommand {
   qimelaId: string;
@@ -14,15 +15,15 @@ export interface GetQimelaLabelsResponse {
 
 @Injectable()
 export class GetQimelaLabelsUseCase {
-  private readonly logger = new Logger(GetQimelaLabelsUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetQimelaLabelsUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: GetQimelaLabelsCommand): Promise<GetQimelaLabelsResponse> {
-    this.logger.log(`Getting labels for qimela ${command.qimelaId}`);
+    this.logger.info(`Getting labels for qimela ${command.qimelaId}`);
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
     if (!qimela) throw new NotFoundException('Qimela not found');

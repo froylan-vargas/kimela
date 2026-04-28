@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   RefreshTokenEntity,
   RefreshTokenRepository,
@@ -7,9 +8,11 @@ import {
 
 @Injectable()
 export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
-  private readonly logger = new Logger(PrismaRefreshTokenRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaRefreshTokenRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findByHash(tokenHash: string): Promise<RefreshTokenEntity | null> {
     this.logger.debug('Finding refresh token by hash');

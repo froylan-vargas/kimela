@@ -60,7 +60,9 @@ describe('RevokeInviteTokenUseCase', () => {
       revokeByQimelaId: jest.fn(),
     };
 
-    useCase = new RevokeInviteTokenUseCase(mockQimelaRepository, mockInviteTokenRepository);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new RevokeInviteTokenUseCase(mockLogger, mockQimelaRepository, mockInviteTokenRepository);
   });
 
   describe('execute', () => {

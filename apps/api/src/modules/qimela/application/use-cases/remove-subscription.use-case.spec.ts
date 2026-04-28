@@ -49,7 +49,9 @@ describe('RemoveSubscriptionUseCase', () => {
       },
     };
 
-    useCase = new RemoveSubscriptionUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new RemoveSubscriptionUseCase(mockLogger, 
       mockQimelaRepo,
       mockPrisma as unknown as PrismaService,
     );

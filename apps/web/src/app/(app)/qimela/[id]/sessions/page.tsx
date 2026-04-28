@@ -9,6 +9,15 @@ import { useQimelas } from "@/hooks/useQimelas";
 import { useAllQimelaSessions } from "@/hooks/useUpcomingSessions";
 import styles from "./page.module.scss";
 
+function useCurrentTime(intervalMs = 30_000): number {
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setCurrentTime(Date.now()), intervalMs);
+    return () => window.clearInterval(id);
+  }, [intervalMs]);
+  return currentTime;
+}
+
 type PicksFilter = "pending" | "registered";
 
 export default function QimelaSessionsPage() {
@@ -18,6 +27,7 @@ export default function QimelaSessionsPage() {
   const { selectedQimela, selectQimela } = useQimelaContext();
   const { data, isLoading, isError } = useAllQimelaSessions(qimelaId);
   const [filter, setFilter] = useState<PicksFilter>("pending");
+  const currentTime = useCurrentTime();
 
   useEffect(() => {
     if (!qimelaId) return;
@@ -116,6 +126,7 @@ export default function QimelaSessionsPage() {
                     key={session.id}
                     session={session}
                     qimelaId={qimelaId!}
+                    currentTime={currentTime}
                   />
                 ))}
               </div>

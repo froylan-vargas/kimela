@@ -40,7 +40,9 @@ describe('GetQimelasForUserUseCase', () => {
       subscription: { findMany: jest.fn().mockResolvedValue([]) },
     };
 
-    useCase = new GetQimelasForUserUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new GetQimelasForUserUseCase(mockLogger, 
       mockRepository,
       mockPrisma as unknown as PrismaService,
     );

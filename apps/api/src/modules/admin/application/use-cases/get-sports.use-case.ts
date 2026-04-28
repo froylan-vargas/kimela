@@ -1,7 +1,8 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { SPORT_REPOSITORY, SportRepository } from '../../domain/sport.repository';
 import { SportDto } from '../dtos/sport.dto';
 import { SportMapper } from '../mappers/sport.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface GetSportsResponse {
   data: SportDto[];
@@ -9,20 +10,20 @@ export interface GetSportsResponse {
 
 @Injectable()
 export class GetSportsUseCase {
-  private readonly logger = new Logger(GetSportsUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetSportsUseCase.name) private readonly logger: PinoLogger,
     @Inject(SPORT_REPOSITORY)
     private readonly sportRepository: SportRepository,
   ) {}
 
   async execute(): Promise<GetSportsResponse> {
-    this.logger.log('Fetching all sports');
+    this.logger.info('Fetching all sports');
 
     const sports = await this.sportRepository.findAll();
     const data: SportDto[] = SportMapper.toDtoList(sports);
 
-    this.logger.log(`Found ${data.length} sports`);
+    this.logger.info(`Found ${data.length} sports`);
 
     return { data };
   }

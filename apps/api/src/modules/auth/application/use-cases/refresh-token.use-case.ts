@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   REFRESH_TOKEN_REPOSITORY,
   RefreshTokenEntity,
@@ -11,15 +12,15 @@ const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 @Injectable()
 export class RefreshTokenUseCase {
-  private readonly logger = new Logger(RefreshTokenUseCase.name);
 
   constructor(
+    @InjectPinoLogger(RefreshTokenUseCase.name) private readonly logger: PinoLogger,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: RefreshTokenRepository,
   ) {}
 
   async execute(incomingToken: string): Promise<{ userId: string; newRefreshToken: string }> {
-    this.logger.log('Processing refresh token rotation');
+    this.logger.info('Processing refresh token rotation');
 
     const tokenHash = crypto.createHash('sha256').update(incomingToken).digest('hex');
 

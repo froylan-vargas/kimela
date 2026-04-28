@@ -1,12 +1,7 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { INVITE_TOKEN_REPOSITORY, InviteTokenRepository } from '../../domain/invite-token.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface RevokeInviteTokenCommand {
   qimelaId: string;
@@ -15,9 +10,9 @@ export interface RevokeInviteTokenCommand {
 
 @Injectable()
 export class RevokeInviteTokenUseCase {
-  private readonly logger = new Logger(RevokeInviteTokenUseCase.name);
 
   constructor(
+    @InjectPinoLogger(RevokeInviteTokenUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     @Inject(INVITE_TOKEN_REPOSITORY)
@@ -25,7 +20,7 @@ export class RevokeInviteTokenUseCase {
   ) {}
 
   async execute(command: RevokeInviteTokenCommand): Promise<void> {
-    this.logger.log(`Revoking invite token for qimela ${command.qimelaId}`);
+    this.logger.info(`Revoking invite token for qimela ${command.qimelaId}`);
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
     if (!qimela) {

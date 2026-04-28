@@ -84,7 +84,9 @@ describe('UpdateQimelaUseCase', () => {
       $transaction: jest.fn((fn: (tx: typeof mockPrisma) => unknown) => fn(mockPrisma)),
     };
 
-    useCase = new UpdateQimelaUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new UpdateQimelaUseCase(mockLogger, 
       mockQimelaRepository,
       mockRuleRepository,
       mockPrisma as unknown as PrismaService,

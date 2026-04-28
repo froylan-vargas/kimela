@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   EmailVerificationTokenEntity,
   EmailVerificationTokenRepository,
@@ -9,9 +10,11 @@ import {
 export class PrismaEmailVerificationTokenRepository
   implements EmailVerificationTokenRepository
 {
-  private readonly logger = new Logger(PrismaEmailVerificationTokenRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaEmailVerificationTokenRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findByHash(tokenHash: string): Promise<EmailVerificationTokenEntity | null> {
     this.logger.debug('Finding email verification token by hash');

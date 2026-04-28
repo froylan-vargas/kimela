@@ -1,6 +1,7 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export type QimelaPhaseStatus = 'COMPLETED' | 'ACTIVE';
 
@@ -22,16 +23,16 @@ export interface GetQimelaPhasesResponse {
 
 @Injectable()
 export class GetQimelaPhasesUseCase {
-  private readonly logger = new Logger(GetQimelaPhasesUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetQimelaPhasesUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(query: GetQimelaPhasesQuery): Promise<GetQimelaPhasesResponse> {
-    this.logger.log(`Fetching phases for qimela ${query.qimelaId} and user ${query.userId}`);
+    this.logger.info(`Fetching phases for qimela ${query.qimelaId} and user ${query.userId}`);
 
     const qimela = await this.qimelaRepository.findById(query.qimelaId);
     if (!qimela) {

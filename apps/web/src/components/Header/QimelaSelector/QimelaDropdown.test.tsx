@@ -63,16 +63,20 @@ describe("QimelaDropdown", () => {
 
   it("renders a divider when both sections are present", () => {
     const { container } = renderDropdown();
-    // divider is a div with the divider class — check it exists between sections
     const buttons = screen.getAllByRole("button");
-    expect(buttons).toHaveLength(3); // sub1, sub2, cre1
-    // divider element exists in DOM
-    expect(container.querySelector('[class*="divider"]')).toBeInTheDocument();
+    expect(buttons).toHaveLength(3); // sub1, sub2, cre1 (Crear Qimela is a link, not a button)
+    // two dividers: one after Crear Qimela, one between sections
+    expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(2);
   });
 
-  it("does not render Creadas section when creatorQimelas is empty", () => {
+  it("always renders the Creadas section title", () => {
     renderDropdown({ creatorQimelas: [] });
-    expect(screen.queryByText("Creadas")).not.toBeInTheDocument();
+    expect(screen.getByText("Creadas")).toBeInTheDocument();
+  });
+
+  it("shows empty message when creatorQimelas is empty", () => {
+    renderDropdown({ creatorQimelas: [] });
+    expect(screen.getByText("No has creado qimelas")).toBeInTheDocument();
   });
 
   it("does not render Participando section when participatingQimelas is empty", () => {
@@ -80,9 +84,9 @@ describe("QimelaDropdown", () => {
     expect(screen.queryByText("Participando")).not.toBeInTheDocument();
   });
 
-  it("does not render a divider when only one section is present", () => {
-    const { container } = renderDropdown({ creatorQimelas: [] });
-    expect(container.querySelector('[class*="divider"]')).not.toBeInTheDocument();
+  it("renders only the Crear Qimela divider when participatingQimelas is empty", () => {
+    const { container } = renderDropdown({ participatingQimelas: [] });
+    expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(1);
   });
 
   it("calls onSelect and onClose when a subscriber item is clicked", () => {
@@ -129,5 +133,19 @@ describe("QimelaDropdown", () => {
 
     const ligaMXButton = screen.getByText("Liga MX").closest("button")!;
     expect(ligaMXButton.className).not.toMatch(/selected/);
+  });
+
+  it("renders the Crear Qimela link at the top of the dropdown", () => {
+    renderDropdown();
+    const link = screen.getByRole("link", { name: "+ Crea tu qimela" });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "/qimela/create");
+  });
+
+  it("calls onClose when the Crear Qimela link is clicked", () => {
+    const onClose = vi.fn();
+    renderDropdown({ onClose });
+    fireEvent.click(screen.getByRole("link", { name: "+ Crea tu qimela" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

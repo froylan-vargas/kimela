@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { SessionEntity } from '../../domain/session.entity';
 import {
@@ -7,6 +7,7 @@ import {
   SessionRepository,
 } from '../../domain/session.repository';
 import { SessionPersistenceMapper } from './session-persistence.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const SESSION_WITH_CONTENDERS_INCLUDE = {
   contenders: {
@@ -33,9 +34,11 @@ const SESSION_WITH_CONTENDERS_INCLUDE = {
 
 @Injectable()
 export class PrismaSessionRepository implements SessionRepository {
-  private readonly logger = new Logger(PrismaSessionRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaSessionRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findByPhase(options: FindSessionsByPhaseOptions): Promise<SessionEntity[]> {
     const { phaseId } = options;

@@ -12,6 +12,7 @@ import {
   QimelaRepository,
 } from "../../domain/qimela.repository";
 import { QimelaStatus } from "../../domain/qimela-status.enum";
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface SubscribeToQimelaCommand {
   qimelaId: string;
@@ -26,9 +27,9 @@ export interface SubscribeToQimelaResponse {
 
 @Injectable()
 export class SubscribeToQimelaUseCase {
-  private readonly logger = new Logger(SubscribeToQimelaUseCase.name);
 
   constructor(
+    @InjectPinoLogger(SubscribeToQimelaUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
@@ -37,7 +38,7 @@ export class SubscribeToQimelaUseCase {
   async execute(
     command: SubscribeToQimelaCommand,
   ): Promise<SubscribeToQimelaResponse> {
-    this.logger.log(
+    this.logger.info(
       `Subscribing user ${command.userId} to qimela ${command.qimelaId}`,
     );
 

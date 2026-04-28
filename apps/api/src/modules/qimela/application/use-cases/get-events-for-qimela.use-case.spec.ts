@@ -31,7 +31,9 @@ describe('GetEventsForQimelaUseCase', () => {
 
   beforeEach(() => {
     mockPrisma = { event: { findMany: jest.fn() } };
-    useCase = new GetEventsForQimelaUseCase(mockPrisma as unknown as PrismaService);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new GetEventsForQimelaUseCase(mockLogger, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

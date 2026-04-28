@@ -1,14 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { UserEntity } from '../../domain/user.entity';
 import { UserRepository } from '../../domain/user.repository';
 import { UserPersistenceMapper } from './user-persistence.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
-  private readonly logger = new Logger(PrismaUserRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaUserRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findById(id: string): Promise<UserEntity | null> {
     this.logger.debug(`Finding user by id: ${id}`);

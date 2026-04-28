@@ -1,21 +1,22 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../../../users/domain/user.entity';
 import { USER_REPOSITORY, UserRepository } from '../../../users/domain/user.repository';
 import { EmailNotVerifiedError } from '../../domain/errors/email-not-verified.error';
 import { InvalidCredentialsError } from '../../domain/errors/invalid-credentials.error';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class LoginUserUseCase {
-  private readonly logger = new Logger(LoginUserUseCase.name);
 
   constructor(
+    @InjectPinoLogger(LoginUserUseCase.name) private readonly logger: PinoLogger,
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
   ) {}
 
   async execute(email: string, password: string): Promise<UserEntity> {
-    this.logger.log(`Login attempt for email: ${email}`);
+    this.logger.info(`Login attempt for email: ${email}`);
 
     const user = await this.userRepository.findByEmail(email);
     if (!user) {

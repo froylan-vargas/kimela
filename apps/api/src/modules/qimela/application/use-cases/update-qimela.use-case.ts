@@ -1,16 +1,10 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QimelaPatch, QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { RULE_REPOSITORY, RuleRepository } from '../../domain/rule.repository';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface UpdateQimelaCommand {
   id: string;
@@ -34,9 +28,9 @@ export interface UpdateQimelaResponse {
 
 @Injectable()
 export class UpdateQimelaUseCase {
-  private readonly logger = new Logger(UpdateQimelaUseCase.name);
 
   constructor(
+    @InjectPinoLogger(UpdateQimelaUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     @Inject(RULE_REPOSITORY)
@@ -45,7 +39,7 @@ export class UpdateQimelaUseCase {
   ) {}
 
   async execute(command: UpdateQimelaCommand): Promise<UpdateQimelaResponse> {
-    this.logger.log(`Updating qimela ${command.id} requested by user ${command.requesterId}`);
+    this.logger.info(`Updating qimela ${command.id} requested by user ${command.requesterId}`);
 
     const qimela = await this.qimelaRepository.findById(command.id);
     if (!qimela) {

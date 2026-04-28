@@ -35,7 +35,9 @@ describe('GetQimelaByInviteTokenUseCase', () => {
       qimela: { findUnique: jest.fn() },
     };
 
-    useCase = new GetQimelaByInviteTokenUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new GetQimelaByInviteTokenUseCase(mockLogger, 
       mockInviteTokenRepository,
       mockPrismaService as unknown as PrismaService,
     );

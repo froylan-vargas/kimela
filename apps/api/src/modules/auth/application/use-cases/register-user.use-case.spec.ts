@@ -40,7 +40,9 @@ describe('RegisterUserUseCase', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<SendVerificationEmailUseCase>;
 
-    useCase = new RegisterUserUseCase(mockUserRepository, mockSendVerificationEmailUseCase);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new RegisterUserUseCase(mockLogger, mockUserRepository, mockSendVerificationEmailUseCase);
   });
 
   describe('execute', () => {

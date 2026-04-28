@@ -1,6 +1,7 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface RemoveLabelCommand {
   qimelaId: string;
@@ -15,15 +16,15 @@ export interface RemoveLabelResponse {
 
 @Injectable()
 export class RemoveLabelUseCase {
-  private readonly logger = new Logger(RemoveLabelUseCase.name);
 
   constructor(
+    @InjectPinoLogger(RemoveLabelUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: RemoveLabelCommand): Promise<RemoveLabelResponse> {
-    this.logger.log(
+    this.logger.info(
       `Removing label ${command.labelId} from user ${command.targetUserId} in qimela ${command.qimelaId}`,
     );
 

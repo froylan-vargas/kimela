@@ -1,9 +1,10 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { PickDto } from '../dtos/session-with-pick.dto';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { PickInput, SESSION_PICK_REPOSITORY, SessionPickRepository } from '../../domain/session-pick.repository';
 import { getFloatingNow } from '../utils/session-time';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const PICKS_DEADLINE_MS = 3 * 60 * 1000;
 
@@ -32,9 +33,9 @@ export interface SaveSessionPicksResponse {
 
 @Injectable()
 export class SaveSessionPicksUseCase {
-  private readonly logger = new Logger(SaveSessionPicksUseCase.name);
 
   constructor(
+    @InjectPinoLogger(SaveSessionPicksUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     @Inject(SESSION_PICK_REPOSITORY)
@@ -43,7 +44,7 @@ export class SaveSessionPicksUseCase {
   ) {}
 
   async execute(command: SaveSessionPicksCommand): Promise<SaveSessionPicksResponse> {
-    this.logger.log(`Saving session picks for qimela ${command.qimelaId}, session ${command.sessionId}, user ${command.userId}`);
+    this.logger.info(`Saving session picks for qimela ${command.qimelaId}, session ${command.sessionId}, user ${command.userId}`);
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
     if (!qimela) {
@@ -129,7 +130,7 @@ export class SaveSessionPicksUseCase {
       picks: command.picks,
     });
 
-    this.logger.log(`Saved ${picks.length} picks for session ${command.sessionId} and user ${command.userId}`);
+    this.logger.info(`Saved ${picks.length} picks for session ${command.sessionId} and user ${command.userId}`);
 
     return {
       data: {

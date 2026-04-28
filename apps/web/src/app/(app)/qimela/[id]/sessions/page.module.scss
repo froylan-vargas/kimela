@@ -43,12 +43,12 @@
   border-radius: 999px;
   border: 1px solid rgba($color-primary, 0.32);
   background:
-    radial-gradient(circle at top, rgba(255, 232, 154, 0.65), rgba(255, 232, 154, 0) 72%),
-    linear-gradient(180deg, rgba(255, 251, 235, 0.98) 0%, rgba(255, 246, 206, 0.96) 100%);
+    radial-gradient(circle at top, rgba($color-primary, 0.35), rgba($color-primary, 0) 72%),
+    linear-gradient(180deg, rgba($color-primary-light, 0.98) 0%, rgba($color-primary, 0.12) 100%);
   color: $color-primary-text;
   font-weight: 800;
   text-decoration: none;
-  box-shadow: 0 10px 24px rgba(232, 199, 92, 0.18);
+  box-shadow: 0 10px 24px rgba($color-primary, 0.18);
   cursor: pointer;
   flex-shrink: 0;
   transition:
@@ -60,7 +60,7 @@
   &:hover {
     color: $color-primary-text;
     border-color: rgba($color-primary, 0.55);
-    box-shadow: 0 14px 28px rgba(232, 199, 92, 0.22);
+    box-shadow: 0 14px 28px rgba($color-primary, 0.22);
     transform: translateY(-1px);
   }
 

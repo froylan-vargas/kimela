@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventStatus } from '@prisma/client';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface PhaseDto {
   id: string;
@@ -26,12 +27,14 @@ export interface GetEventsForQimelaResponse {
 
 @Injectable()
 export class GetEventsForQimelaUseCase {
-  private readonly logger = new Logger(GetEventsForQimelaUseCase.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(GetEventsForQimelaUseCase.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async execute(sportId: string): Promise<GetEventsForQimelaResponse> {
-    this.logger.log(`Fetching events for sport ${sportId}`);
+    this.logger.info(`Fetching events for sport ${sportId}`);
 
     const records = await this.prisma.event.findMany({
       where: {

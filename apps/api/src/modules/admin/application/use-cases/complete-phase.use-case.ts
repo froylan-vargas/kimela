@@ -1,8 +1,9 @@
-import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { PHASE_REPOSITORY, PhaseRepository } from '../../domain/phase.repository';
 import { PhaseDto } from '../dtos/phase.dto';
 import { PhaseMapper } from '../mappers/phase.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface CompletePhaseCommand {
   phaseId: string;
@@ -14,9 +15,9 @@ export interface CompletePhaseResponse {
 
 @Injectable()
 export class CompletePhaseUseCase {
-  private readonly logger = new Logger(CompletePhaseUseCase.name);
 
   constructor(
+    @InjectPinoLogger(CompletePhaseUseCase.name) private readonly logger: PinoLogger,
     @Inject(PHASE_REPOSITORY)
     private readonly phaseRepository: PhaseRepository,
     private readonly prisma: PrismaService,
@@ -25,7 +26,7 @@ export class CompletePhaseUseCase {
   async execute(command: CompletePhaseCommand): Promise<CompletePhaseResponse> {
     const { phaseId } = command;
 
-    this.logger.log(`Completing phase ${phaseId}`);
+    this.logger.info(`Completing phase ${phaseId}`);
 
     const phase = await this.phaseRepository.findById(phaseId);
 
@@ -54,7 +55,7 @@ export class CompletePhaseUseCase {
       data: { status: 'COMPLETED' },
     });
 
-    this.logger.log(`Phase ${phaseId} completed`);
+    this.logger.info(`Phase ${phaseId} completed`);
 
     return { data: PhaseMapper.toDto(updated) };
   }

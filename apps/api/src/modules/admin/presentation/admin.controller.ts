@@ -1,21 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Post,
-  Put,
-  Query,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../../auth/presentation/decorators/roles.decorator';
 import { UserRole } from '../../users/domain/user-role.enum';
@@ -52,13 +35,14 @@ import { GetEventsRequestDto } from './dtos/get-events-request.dto';
 import { CreatePhaseRequestDto } from './dtos/create-phase-request.dto';
 import { ReorderPhasesRequestDto } from './dtos/reorder-phases-request.dto';
 import { SaveSessionResultsDto } from '../application/dtos/save-session-results.dto';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Controller('admin')
 @Roles(UserRole.ADMIN)
 export class AdminController {
-  private readonly logger = new Logger(AdminController.name);
 
   constructor(
+    @InjectPinoLogger(AdminController.name) private readonly logger: PinoLogger,
     private readonly getSports: GetSportsUseCase,
     private readonly getActiveEventsBySport: GetActiveEventsBySportUseCase,
     private readonly getPhasesByEvent: GetPhasesByEventUseCase,
@@ -74,14 +58,14 @@ export class AdminController {
 
   @Get('sports')
   async listSports(): Promise<GetSportsResponse> {
-    this.logger.log('GET /admin/sports requested');
+    this.logger.info('GET /admin/sports requested');
 
     return this.getSports.execute();
   }
 
   @Get('events')
   async listEvents(@Query() query: GetEventsRequestDto): Promise<GetActiveEventsBySportResponse> {
-    this.logger.log(`GET /admin/events requested for sport ${query.sportId}`);
+    this.logger.info(`GET /admin/events requested for sport ${query.sportId}`);
 
     return this.getActiveEventsBySport.execute({ sportId: query.sportId });
   }
@@ -90,7 +74,7 @@ export class AdminController {
   async listPhases(
     @Param('eventId', ParseUUIDPipe) eventId: string,
   ): Promise<GetPhasesByEventResponse> {
-    this.logger.log(`GET /admin/events/${eventId}/phases requested`);
+    this.logger.info(`GET /admin/events/${eventId}/phases requested`);
 
     return this.getPhasesByEvent.execute({ eventId });
   }
@@ -100,7 +84,7 @@ export class AdminController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() body: CreatePhaseRequestDto,
   ): Promise<CreatePhaseResponse> {
-    this.logger.log(`POST /admin/events/${eventId}/phases requested`);
+    this.logger.info(`POST /admin/events/${eventId}/phases requested`);
 
     return this.createPhase.execute({ eventId, name: body.name, type: body.type });
   }
@@ -110,7 +94,7 @@ export class AdminController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Body() body: ReorderPhasesRequestDto,
   ): Promise<ReorderPhasesResponse> {
-    this.logger.log(`PATCH /admin/events/${eventId}/phases/reorder requested`);
+    this.logger.info(`PATCH /admin/events/${eventId}/phases/reorder requested`);
 
     return this.reorderPhases.execute({ phases: body.phases });
   }
@@ -121,7 +105,7 @@ export class AdminController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Param('phaseId', ParseUUIDPipe) phaseId: string,
   ): Promise<void> {
-    this.logger.log(`DELETE /admin/events/${eventId}/phases/${phaseId} requested`);
+    this.logger.info(`DELETE /admin/events/${eventId}/phases/${phaseId} requested`);
     await this.deletePhase.execute({ id: phaseId });
   }
 
@@ -131,7 +115,7 @@ export class AdminController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Param('phaseId', ParseUUIDPipe) phaseId: string,
   ): Promise<ActivatePhaseResponse> {
-    this.logger.log(`PATCH /admin/events/${eventId}/phases/${phaseId}/activate requested`);
+    this.logger.info(`PATCH /admin/events/${eventId}/phases/${phaseId}/activate requested`);
 
     return this.activatePhaseUseCase.execute({ phaseId });
   }
@@ -142,7 +126,7 @@ export class AdminController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Param('phaseId', ParseUUIDPipe) phaseId: string,
   ): Promise<CompletePhaseResponse> {
-    this.logger.log(`PATCH /admin/events/${eventId}/phases/${phaseId}/complete requested`);
+    this.logger.info(`PATCH /admin/events/${eventId}/phases/${phaseId}/complete requested`);
 
     return this.completePhaseUseCase.execute({ phaseId });
   }
@@ -152,7 +136,7 @@ export class AdminController {
     @Param('eventId', ParseUUIDPipe) eventId: string,
     @Param('phaseId', ParseUUIDPipe) phaseId: string,
   ): Promise<GetSessionsByPhaseResponse> {
-    this.logger.log(`GET /admin/events/${eventId}/phases/${phaseId}/sessions requested`);
+    this.logger.info(`GET /admin/events/${eventId}/phases/${phaseId}/sessions requested`);
 
     return this.getSessionsByPhase.execute({ phaseId });
   }
@@ -164,7 +148,7 @@ export class AdminController {
     @Param('phaseId', ParseUUIDPipe) phaseId: string,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<UploadSessionsResponse> {
-    this.logger.log(`POST /admin/events/${eventId}/phases/${phaseId}/sessions/upload requested`);
+    this.logger.info(`POST /admin/events/${eventId}/phases/${phaseId}/sessions/upload requested`);
 
     if (!file) {
       throw new BadRequestException('A CSV file is required');
@@ -185,7 +169,7 @@ export class AdminController {
     @Param('sessionId', ParseUUIDPipe) sessionId: string,
     @Body() body: SaveSessionResultsDto,
   ): Promise<void> {
-    this.logger.log(`PUT /admin/events/${eventId}/phases/${phaseId}/sessions/${sessionId}/results requested`);
+    this.logger.info(`PUT /admin/events/${eventId}/phases/${phaseId}/sessions/${sessionId}/results requested`);
 
     await this.saveSessionResultsUseCase.execute({ eventId, phaseId, sessionId, homeScore: body.homeScore, awayScore: body.awayScore });
   }

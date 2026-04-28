@@ -30,7 +30,8 @@ describe('PrismaQimelaRepository (integration)', () => {
     const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
     prisma = new PrismaClient({ adapter });
     await prisma.$connect();
-    repository = new PrismaQimelaRepository(makePrismaService(prisma));
+    const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+    repository = new PrismaQimelaRepository(mockLogger, makePrismaService(prisma));
   });
 
   afterAll(async () => {

@@ -1,5 +1,6 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface LeaderboardEntry {
   userId: string;
@@ -17,12 +18,14 @@ export interface GetLeaderboardResponse {
 
 @Injectable()
 export class GetLeaderboardUseCase {
-  private readonly logger = new Logger(GetLeaderboardUseCase.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(GetLeaderboardUseCase.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async execute(qimelaId: string, phaseId?: string): Promise<GetLeaderboardResponse> {
-    this.logger.log(`Getting leaderboard for qimela ${qimelaId}${phaseId ? ` phase ${phaseId}` : ''}`);
+    this.logger.info(`Getting leaderboard for qimela ${qimelaId}${phaseId ? ` phase ${phaseId}` : ''}`);
 
     const qimela = await this.prisma.qimela.findUnique({
       where: { id: qimelaId },

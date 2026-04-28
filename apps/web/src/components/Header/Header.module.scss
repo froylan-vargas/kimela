@@ -24,29 +24,6 @@
   gap: $spacing-md;
 }
 
-.nav {
-  display: flex;
-  align-items: center;
-}
-
-.createLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: $spacing-sm $spacing-md;
-  background: $color-primary;
-  color: $color-primary-contrast;
-  border-radius: $radius-sm;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: $color-primary-hover;
-  }
-}
-
 @media (max-width: 767px) {
   .navbar {
     padding: $spacing-md;
@@ -57,15 +34,5 @@
 
   .centerGroup {
     display: contents;
-  }
-
-  .nav {
-    grid-column: 1 / -1;
-    order: 4;
-    width: 100%;
-  }
-
-  .createLink {
-    width: 100%;
   }
 }

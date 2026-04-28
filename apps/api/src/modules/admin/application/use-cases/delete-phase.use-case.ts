@@ -1,5 +1,6 @@
-import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PHASE_REPOSITORY, PhaseRepository } from '../../domain/phase.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface DeletePhaseCommand {
   id: string;
@@ -7,15 +8,15 @@ export interface DeletePhaseCommand {
 
 @Injectable()
 export class DeletePhaseUseCase {
-  private readonly logger = new Logger(DeletePhaseUseCase.name);
 
   constructor(
+    @InjectPinoLogger(DeletePhaseUseCase.name) private readonly logger: PinoLogger,
     @Inject(PHASE_REPOSITORY)
     private readonly phaseRepository: PhaseRepository,
   ) {}
 
   async execute(command: DeletePhaseCommand): Promise<void> {
-    this.logger.log(`Deleting phase ${command.id}`);
+    this.logger.info(`Deleting phase ${command.id}`);
 
     const phase = await this.phaseRepository.findById(command.id);
 

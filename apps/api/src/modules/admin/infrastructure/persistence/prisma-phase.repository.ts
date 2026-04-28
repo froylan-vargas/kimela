@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { PhaseEntity, PhaseStatus } from '../../domain/phase.entity';
 import {
@@ -8,12 +8,15 @@ import {
   ReorderPhaseItem,
 } from '../../domain/phase.repository';
 import { PhasePersistenceMapper } from './phase-persistence.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class PrismaPhaseRepository implements PhaseRepository {
-  private readonly logger = new Logger(PrismaPhaseRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaPhaseRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findByEvent(options: FindPhasesByEventOptions): Promise<PhaseEntity[]> {
     const { eventId } = options;

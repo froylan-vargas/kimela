@@ -54,7 +54,9 @@ describe('ResetPasswordUseCase', () => {
       revokeAllByUserId: jest.fn(),
     };
 
-    useCase = new ResetPasswordUseCase(mockResetTokenRepo, mockUserRepo, mockRefreshTokenRepo);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new ResetPasswordUseCase(mockLogger, mockResetTokenRepo, mockUserRepo, mockRefreshTokenRepo);
   });
 
   describe('execute', () => {

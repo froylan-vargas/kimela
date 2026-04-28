@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { getLoggerToken } from 'nestjs-pino';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import { AuthController } from './auth.controller';
@@ -107,6 +108,7 @@ describe('AuthController', () => {
         { provide: ResetPasswordUseCase, useValue: mockResetPasswordUseCase },
         { provide: REFRESH_TOKEN_REPOSITORY, useValue: mockRefreshTokenRepository },
         { provide: USER_REPOSITORY, useValue: mockUserRepository },
+        { provide: getLoggerToken(AuthController.name), useValue: { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() } },
       ],
     }).compile();
 

@@ -39,7 +39,9 @@ describe('CompletePhaseUseCase', () => {
       qimela: { updateMany: jest.fn().mockResolvedValue({ count: 0 }) },
     };
 
-    useCase = new CompletePhaseUseCase(mockPhaseRepository, mockPrisma as unknown as PrismaService);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new CompletePhaseUseCase(mockLogger, mockPhaseRepository, mockPrisma as unknown as PrismaService);
   });
 
   describe('execute', () => {

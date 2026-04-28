@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   PasswordResetTokenEntity,
   PasswordResetTokenRepository,
@@ -7,9 +8,11 @@ import {
 
 @Injectable()
 export class PrismaPasswordResetTokenRepository implements PasswordResetTokenRepository {
-  private readonly logger = new Logger(PrismaPasswordResetTokenRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaPasswordResetTokenRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findByHash(tokenHash: string): Promise<PasswordResetTokenEntity | null> {
     this.logger.debug('Finding password reset token by hash');

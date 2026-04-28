@@ -20,7 +20,9 @@ describe('GetSportsUseCase', () => {
       findAll: jest.fn(),
     };
 
-    useCase = new GetSportsUseCase(mockSportRepository);
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new GetSportsUseCase(mockLogger, mockSportRepository);
   });
 
   describe('execute', () => {

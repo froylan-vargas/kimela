@@ -1,21 +1,11 @@
-import {
-  Controller,
-  Patch,
-  Post,
-  Body,
-  UploadedFile,
-  UseInterceptors,
-  HttpCode,
-  HttpStatus,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Patch, Post, Body, UploadedFile, UseInterceptors, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { UploadAvatarUseCase } from '../application/use-cases/upload-avatar.use-case';
 import { UpdateProfileUseCase } from '../application/use-cases/update-profile.use-case';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 class UpdateProfileDto {
   @IsString()
@@ -26,9 +16,9 @@ class UpdateProfileDto {
 
 @Controller('users')
 export class UsersController {
-  private readonly logger = new Logger(UsersController.name);
 
   constructor(
+    @InjectPinoLogger(UsersController.name) private readonly logger: PinoLogger,
     private readonly uploadAvatarUseCase: UploadAvatarUseCase,
     private readonly updateProfileUseCase: UpdateProfileUseCase,
   ) {}
@@ -45,7 +35,7 @@ export class UsersController {
     @CurrentUser() payload: CurrentUserPayload,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    this.logger.log(`POST /users/me/avatar - user: ${payload.id}`);
+    this.logger.info(`POST /users/me/avatar - user: ${payload.id}`);
     if (!file) throw new BadRequestException('No file provided');
 
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
@@ -70,7 +60,7 @@ export class UsersController {
     @CurrentUser() payload: CurrentUserPayload,
     @Body() dto: UpdateProfileDto,
   ) {
-    this.logger.log(`PATCH /users/me/profile - user: ${payload.id}`);
+    this.logger.info(`PATCH /users/me/profile - user: ${payload.id}`);
     const user = await this.updateProfileUseCase.execute(payload.id, dto.name);
     return {
       id: user.id,

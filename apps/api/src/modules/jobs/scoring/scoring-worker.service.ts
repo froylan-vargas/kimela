@@ -1,17 +1,18 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../../shared/prisma/prisma.service';
 import { PgBossService } from '../../../shared/queue/pgboss.service';
 import { PickScoringService } from './pick-scoring.service';
 import { SESSION_SCORE_PICKS_QUEUE } from '../../admin/application/use-cases/save-session-results.use-case';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const RETRY_LIMIT = 3;
 const DELETE_AFTER_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 @Injectable()
 export class ScoringWorkerService implements OnModuleInit {
-  private readonly logger = new Logger(ScoringWorkerService.name);
 
   constructor(
+    @InjectPinoLogger(ScoringWorkerService.name) private readonly logger: PinoLogger,
     private readonly prisma: PrismaService,
     private readonly pgBoss: PgBossService,
     private readonly pickScoring: PickScoringService,
@@ -32,11 +33,11 @@ export class ScoringWorkerService implements OnModuleInit {
       }
     });
 
-    this.logger.log('Scoring worker registered');
+    this.logger.info('Scoring worker registered');
   }
 
   private async processJob(sessionId: string): Promise<void> {
-    this.logger.log(`Scoring picks for session ${sessionId}`);
+    this.logger.info(`Scoring picks for session ${sessionId}`);
 
     try {
       const session = await this.prisma.session.findUnique({
@@ -83,7 +84,7 @@ export class ScoringWorkerService implements OnModuleInit {
         await this.scoreQimela({ qimela, sessionId, categories, results });
       }
 
-      this.logger.log(`Scoring complete for session ${sessionId}`);
+      this.logger.info(`Scoring complete for session ${sessionId}`);
     } catch (err) {
       this.logger.error(`Scoring failed for session ${sessionId}`, err);
       throw err;
@@ -184,6 +185,6 @@ export class ScoringWorkerService implements OnModuleInit {
       }
     });
 
-    this.logger.log(`Scored ${userIds.length} users for qimela ${qimela.id}, session ${sessionId}`);
+    this.logger.info(`Scored ${userIds.length} users for qimela ${qimela.id}, session ${sessionId}`);
   }
 }

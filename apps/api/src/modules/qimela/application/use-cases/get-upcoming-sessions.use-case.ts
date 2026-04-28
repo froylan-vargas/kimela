@@ -1,8 +1,9 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { PhaseSessionsGroupDto, PickDto, SessionWithPickDto } from '../dtos/session-with-pick.dto';
 import { formatFloatingIso, getFloatingNow } from '../utils/session-time';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const PICKS_DEADLINE_MS = 3 * 60 * 1000;
 
@@ -33,16 +34,16 @@ export interface GetUpcomingSessionsResponse {
 
 @Injectable()
 export class GetUpcomingSessionsUseCase {
-  private readonly logger = new Logger(GetUpcomingSessionsUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetUpcomingSessionsUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(query: GetUpcomingSessionsQuery): Promise<GetUpcomingSessionsResponse> {
-    this.logger.log(`Fetching upcoming sessions for qimela ${query.qimelaId} and user ${query.userId}`);
+    this.logger.info(`Fetching upcoming sessions for qimela ${query.qimelaId} and user ${query.userId}`);
 
     const qimela = await this.qimelaRepository.findById(query.qimelaId);
     if (!qimela) {
@@ -128,7 +129,7 @@ export class GetUpcomingSessionsUseCase {
       }))
       .filter((group) => group.sessions.length > 0);
 
-    this.logger.log(`Returning ${sessions.length} upcoming sessions across ${data.length} phases for qimela ${query.qimelaId}`);
+    this.logger.info(`Returning ${sessions.length} upcoming sessions across ${data.length} phases for qimela ${query.qimelaId}`);
 
     return { data };
   }

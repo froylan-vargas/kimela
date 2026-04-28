@@ -59,7 +59,9 @@ describe('SaveSessionPicksUseCase', () => {
       session: { findUnique: jest.fn() },
     };
 
-    useCase = new SaveSessionPicksUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new SaveSessionPicksUseCase(mockLogger, 
       mockQimelaRepository,
       mockSessionPickRepository,
       mockPrisma as unknown as PrismaService,

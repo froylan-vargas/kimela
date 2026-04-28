@@ -73,7 +73,9 @@ describe('CreateQimelaUseCase', () => {
     mockRuleRepository = { findAll: jest.fn(), findByIds: jest.fn() };
     mockPrisma = { phase: { findUnique: jest.fn() } };
 
-    useCase = new CreateQimelaUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new CreateQimelaUseCase(mockLogger, 
       mockQimelaRepository,
       mockRuleRepository,
       mockPrisma as unknown as PrismaService,

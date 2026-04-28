@@ -1,8 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PHASE_REPOSITORY, PhaseRepository } from '../../domain/phase.repository';
 import { PhaseType } from '../../domain/phase.entity';
 import { PhaseDto } from '../dtos/phase.dto';
 import { PhaseMapper } from '../mappers/phase.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface CreatePhaseCommand {
   eventId: string;
@@ -16,15 +17,15 @@ export interface CreatePhaseResponse {
 
 @Injectable()
 export class CreatePhaseUseCase {
-  private readonly logger = new Logger(CreatePhaseUseCase.name);
 
   constructor(
+    @InjectPinoLogger(CreatePhaseUseCase.name) private readonly logger: PinoLogger,
     @Inject(PHASE_REPOSITORY)
     private readonly phaseRepository: PhaseRepository,
   ) {}
 
   async execute(command: CreatePhaseCommand): Promise<CreatePhaseResponse> {
-    this.logger.log(`Creating phase "${command.name}" for event ${command.eventId}`);
+    this.logger.info(`Creating phase "${command.name}" for event ${command.eventId}`);
 
     const maxOrder = await this.phaseRepository.getMaxOrderForEvent(command.eventId);
     const nextOrder = maxOrder + 1;
@@ -35,7 +36,7 @@ export class CreatePhaseUseCase {
       type: command.type,
     });
 
-    this.logger.log(`Phase created with id ${phase.id} at order ${nextOrder}`);
+    this.logger.info(`Phase created with id ${phase.id} at order ${nextOrder}`);
 
     return { data: PhaseMapper.toDto(phase) };
   }

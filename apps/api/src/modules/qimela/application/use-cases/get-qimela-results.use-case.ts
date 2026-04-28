@@ -1,7 +1,8 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { formatFloatingIso } from '../utils/session-time';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const MAX_COMPARE_USERS = 3;
 
@@ -58,16 +59,16 @@ type SessionRecord = {
 
 @Injectable()
 export class GetQimelaResultsUseCase {
-  private readonly logger = new Logger(GetQimelaResultsUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetQimelaResultsUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(query: GetQimelaResultsQuery): Promise<GetQimelaResultsResponse> {
-    this.logger.log(
+    this.logger.info(
       `Fetching results for qimela ${query.qimelaId}, phase ${query.phaseId}, user ${query.userId}`,
     );
 
@@ -216,7 +217,7 @@ export class GetQimelaResultsUseCase {
       };
     });
 
-    this.logger.log(`Returning ${data.length} completed sessions for phase ${query.phaseId}`);
+    this.logger.info(`Returning ${data.length} completed sessions for phase ${query.phaseId}`);
 
     return { data };
   }

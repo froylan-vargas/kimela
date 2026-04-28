@@ -1,17 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-  Req,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
@@ -45,15 +32,16 @@ import { EmailAlreadyExistsError } from '../domain/errors/email-already-exists.e
 import { ConflictException } from '@nestjs/common';
 import { InvalidVerificationTokenError } from '../domain/errors/invalid-verification-token.error';
 import { InvalidResetTokenError } from '../domain/errors/invalid-reset-token.error';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name);
 
   constructor(
+    @InjectPinoLogger(AuthController.name) private readonly logger: PinoLogger,
     private readonly jwtService: JwtService,
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
@@ -76,7 +64,7 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: false }) res: Response,
   ): Promise<void> {
-    this.logger.log(`POST /auth/register - email: ${dto.email}`);
+    this.logger.info(`POST /auth/register - email: ${dto.email}`);
 
     let user: UserEntity;
     try {
@@ -110,7 +98,7 @@ export class AuthController {
     @Res({ passthrough: false }) res: Response,
   ): Promise<void> {
     const user = req.user;
-    this.logger.log(`POST /auth/login - user: ${user.id}`);
+    this.logger.info(`POST /auth/login - user: ${user.id}`);
 
     await this.setAuthCookies(res, user);
 
@@ -130,7 +118,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Req() req: Request, @Res({ passthrough: false }) res: Response): Promise<void> {
-    this.logger.log('POST /auth/refresh');
+    this.logger.info('POST /auth/refresh');
 
     const incomingToken: string | undefined = req.cookies?.refresh_token;
     if (!incomingToken) {
@@ -163,7 +151,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request, @Res({ passthrough: false }) res: Response): Promise<void> {
-    this.logger.log('POST /auth/logout');
+    this.logger.info('POST /auth/logout');
 
     const incomingToken: string | undefined = req.cookies?.refresh_token;
     if (incomingToken) {
@@ -176,7 +164,7 @@ export class AuthController {
 
   @Get('me')
   async me(@CurrentUser() payload: CurrentUserPayload): Promise<AuthUserDto> {
-    this.logger.log(`GET /auth/me - user: ${payload.id}`);
+    this.logger.info(`GET /auth/me - user: ${payload.id}`);
     const user = await this.userRepository.findById(payload.id);
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -196,7 +184,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async confirmEmail(@Body() dto: ConfirmEmailDto): Promise<{ message: string }> {
-    this.logger.log('POST /auth/confirm-email');
+    this.logger.info('POST /auth/confirm-email');
     try {
       await this.confirmEmailUseCase.execute(dto.token);
     } catch (error) {
@@ -215,7 +203,7 @@ export class AuthController {
   async resendVerification(
     @Body() dto: ResendVerificationDto,
   ): Promise<{ message: string }> {
-    this.logger.log(`POST /auth/resend-verification - email: ${dto.email}`);
+    this.logger.info(`POST /auth/resend-verification - email: ${dto.email}`);
     const user = await this.userRepository.findByEmail(dto.email);
 
     if (user && !user.emailVerifiedAt) {
@@ -232,7 +220,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
-    this.logger.log(`POST /auth/forgot-password`);
+    this.logger.info(`POST /auth/forgot-password`);
     await this.requestPasswordResetUseCase.execute(dto.email);
     return { message: 'Si existe una cuenta con ese correo, recibirás un enlace.' };
   }
@@ -242,7 +230,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<{ message: string }> {
-    this.logger.log('POST /auth/reset-password');
+    this.logger.info('POST /auth/reset-password');
     try {
       await this.resetPasswordUseCase.execute(dto.token, dto.password);
     } catch (error) {
@@ -299,17 +287,12 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      path: '/auth/refresh',
       maxAge: REFRESH_TOKEN_TTL_MS,
     });
   }
 
   private clearAuthCookies(res: Response): void {
     res.clearCookie('access_token', { httpOnly: true, sameSite: 'strict' });
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      sameSite: 'strict',
-      path: '/auth/refresh',
-    });
+    res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'strict' });
   }
 }

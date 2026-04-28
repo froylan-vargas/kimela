@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface GetQimelaByIdPhase {
   id: string;
@@ -38,16 +39,16 @@ export interface GetQimelaByIdResponse {
 
 @Injectable()
 export class GetQimelaByIdUseCase {
-  private readonly logger = new Logger(GetQimelaByIdUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetQimelaByIdUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(id: string, userId: string): Promise<GetQimelaByIdResponse> {
-    this.logger.log(`Getting qimela by id ${id}`);
+    this.logger.info(`Getting qimela by id ${id}`);
 
     const qimela = await this.qimelaRepository.findById(id);
     if (!qimela) {

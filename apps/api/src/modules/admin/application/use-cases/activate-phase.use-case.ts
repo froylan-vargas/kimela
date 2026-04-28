@@ -1,8 +1,9 @@
-import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { PHASE_REPOSITORY, PhaseRepository } from '../../domain/phase.repository';
 import { PhaseDto } from '../dtos/phase.dto';
 import { PhaseMapper } from '../mappers/phase.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface ActivatePhaseCommand {
   phaseId: string;
@@ -14,9 +15,9 @@ export interface ActivatePhaseResponse {
 
 @Injectable()
 export class ActivatePhaseUseCase {
-  private readonly logger = new Logger(ActivatePhaseUseCase.name);
 
   constructor(
+    @InjectPinoLogger(ActivatePhaseUseCase.name) private readonly logger: PinoLogger,
     @Inject(PHASE_REPOSITORY)
     private readonly phaseRepository: PhaseRepository,
     private readonly prisma: PrismaService,
@@ -25,7 +26,7 @@ export class ActivatePhaseUseCase {
   async execute(command: ActivatePhaseCommand): Promise<ActivatePhaseResponse> {
     const { phaseId } = command;
 
-    this.logger.log(`Activating phase ${phaseId}`);
+    this.logger.info(`Activating phase ${phaseId}`);
 
     const phase = await this.phaseRepository.findById(phaseId);
 
@@ -55,7 +56,7 @@ export class ActivatePhaseUseCase {
       data: { status: 'ACTIVE' },
     });
 
-    this.logger.log(`Phase ${phaseId} activated`);
+    this.logger.info(`Phase ${phaseId} activated`);
 
     return { data: PhaseMapper.toDto(updated) };
   }

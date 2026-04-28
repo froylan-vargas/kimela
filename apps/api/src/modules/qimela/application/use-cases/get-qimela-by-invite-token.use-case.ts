@@ -1,6 +1,7 @@
-import { GoneException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { GoneException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { INVITE_TOKEN_REPOSITORY, InviteTokenRepository } from '../../domain/invite-token.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface GetQimelaByInviteTokenResponse {
   data: {
@@ -14,16 +15,16 @@ export interface GetQimelaByInviteTokenResponse {
 
 @Injectable()
 export class GetQimelaByInviteTokenUseCase {
-  private readonly logger = new Logger(GetQimelaByInviteTokenUseCase.name);
 
   constructor(
+    @InjectPinoLogger(GetQimelaByInviteTokenUseCase.name) private readonly logger: PinoLogger,
     @Inject(INVITE_TOKEN_REPOSITORY)
     private readonly inviteTokenRepository: InviteTokenRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(token: string): Promise<GetQimelaByInviteTokenResponse> {
-    this.logger.log(`Looking up qimela by invite token`);
+    this.logger.info(`Looking up qimela by invite token`);
 
     const inviteToken = await this.inviteTokenRepository.findByToken(token);
     if (!inviteToken) {

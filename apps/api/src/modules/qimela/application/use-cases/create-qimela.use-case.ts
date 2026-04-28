@@ -1,9 +1,10 @@
-import { Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { RULE_REPOSITORY, RuleRepository } from '../../domain/rule.repository';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface CreateQimelaCommand {
   creatorId: string;
@@ -32,9 +33,9 @@ export interface CreateQimelaResponse {
 
 @Injectable()
 export class CreateQimelaUseCase {
-  private readonly logger = new Logger(CreateQimelaUseCase.name);
 
   constructor(
+    @InjectPinoLogger(CreateQimelaUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     @Inject(RULE_REPOSITORY)
@@ -43,7 +44,7 @@ export class CreateQimelaUseCase {
   ) {}
 
   async execute(command: CreateQimelaCommand): Promise<CreateQimelaResponse> {
-    this.logger.log(`Creating qimela "${command.name}" for user ${command.creatorId}`);
+    this.logger.info(`Creating qimela "${command.name}" for user ${command.creatorId}`);
 
     const submittedRuleIds = command.rules.map((r) => r.ruleId);
     const foundRules = await this.ruleRepository.findByIds(submittedRuleIds);

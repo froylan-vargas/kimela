@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useUpcomingSessions } from "@/hooks/useUpcomingSessions";
 import SessionCard from "@/components/qimela/SessionCard/SessionCard";
 import styles from "./UpcomingSessions.module.scss";
@@ -11,6 +12,11 @@ interface UpcomingSessionsProps {
 
 export default function UpcomingSessions({ qimelaId }: UpcomingSessionsProps) {
   const { data, isLoading, isError } = useUpcomingSessions(qimelaId);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setCurrentTime(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const hasAnySessions = !!data?.some((group) => group.sessions.length > 0);
 
@@ -50,6 +56,7 @@ export default function UpcomingSessions({ qimelaId }: UpcomingSessionsProps) {
                     key={session.id}
                     session={session}
                     qimelaId={qimelaId}
+                    currentTime={currentTime}
                     showPhaseName={false}
                   />
                 ))}

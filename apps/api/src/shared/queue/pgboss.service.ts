@@ -1,12 +1,14 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PgBoss } from 'pg-boss';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class PgBossService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(PgBossService.name);
   readonly boss: PgBoss;
 
-  constructor() {
+  constructor(
+    @InjectPinoLogger(PgBossService.name) private readonly logger: PinoLogger,
+  ) {
     const isProduction = process.env.NODE_ENV === 'production';
     this.boss = new PgBoss({
       connectionString: process.env.DATABASE_URL,
@@ -17,11 +19,11 @@ export class PgBossService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     await this.boss.start();
-    this.logger.log('PgBoss started');
+    this.logger.info('PgBoss started');
   }
 
   async onModuleDestroy(): Promise<void> {
     await this.boss.stop();
-    this.logger.log('PgBoss stopped');
+    this.logger.info('PgBoss stopped');
   }
 }

@@ -105,7 +105,29 @@ async function parseError(res: Response): Promise<{ message: string; code?: stri
   }
 }
 
-let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
+function ensureRefreshed(): Promise<void> {
+  // Coalesce concurrent refresh attempts onto a single in-flight request,
+  // so token rotation can't race itself across parallel queries.
+  if (!refreshPromise) {
+    refreshPromise = authApi.refresh().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+async function tryRefreshOrRedirect(): Promise<void> {
+  try {
+    await ensureRefreshed();
+  } catch {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new ApiError(401, "Session expired");
+  }
+}
 
 export async function apiFetch<T>(
   path: string,
@@ -127,20 +149,9 @@ export async function apiFetch<T>(
     return res.json() as Promise<T>;
   }
 
-  if (res.status === 401 && !isAuthEndpoint && !isRefreshing) {
-    isRefreshing = true;
-    try {
-      await authApi.refresh();
-      isRefreshing = false;
-    } catch {
-      isRefreshing = false;
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-      throw new ApiError(401, "Session expired");
-    }
+  if (res.status === 401 && !isAuthEndpoint) {
+    await tryRefreshOrRedirect();
 
-    // Retry the original request once after refresh
     const retryRes = await fetch(`${API_URL}${path}`, {
       ...init,
       credentials: "include",
@@ -423,12 +434,7 @@ export const usersApi = {
     if (res.ok) return res.json() as Promise<AuthUser>;
 
     if (res.status === 401) {
-      try {
-        await authApi.refresh();
-      } catch {
-        if (typeof window !== "undefined") window.location.href = "/login";
-        throw new ApiError(401, "Session expired");
-      }
+      await tryRefreshOrRedirect();
       const retry = await fetch(url, { method: "POST", credentials: "include", body: formData });
       if (retry.ok) return retry.json() as Promise<AuthUser>;
       const retryErr = await parseError(retry);
@@ -530,14 +536,7 @@ export const adminApi = {
     }
 
     if (res.status === 401) {
-      try {
-        await authApi.refresh();
-      } catch {
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        throw new ApiError(401, "Session expired");
-      }
+      await tryRefreshOrRedirect();
 
       const retryRes = await fetch(url, {
         method: "POST",

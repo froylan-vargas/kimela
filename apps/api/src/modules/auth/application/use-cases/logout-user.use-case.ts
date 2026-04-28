@@ -1,5 +1,6 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import {
   REFRESH_TOKEN_REPOSITORY,
   RefreshTokenRepository,
@@ -7,15 +8,15 @@ import {
 
 @Injectable()
 export class LogoutUserUseCase {
-  private readonly logger = new Logger(LogoutUserUseCase.name);
 
   constructor(
+    @InjectPinoLogger(LogoutUserUseCase.name) private readonly logger: PinoLogger,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: RefreshTokenRepository,
   ) {}
 
   async execute(incomingToken: string): Promise<void> {
-    this.logger.log('Processing logout');
+    this.logger.info('Processing logout');
 
     const tokenHash = crypto.createHash('sha256').update(incomingToken).digest('hex');
     const storedToken = await this.refreshTokenRepository.findByHash(tokenHash);

@@ -27,20 +27,17 @@ export default function UserProfile({ name, imageUrl }: UserProfileProps) {
   const router = useRouter();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   useEffect(() => {
     function handleOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsAccountMenuOpen(false);
-        setIsNotificationsOpen(false);
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setIsAccountMenuOpen(false);
-        setIsNotificationsOpen(false);
       }
     }
 
@@ -63,34 +60,8 @@ export default function UserProfile({ name, imageUrl }: UserProfileProps) {
       <div className={styles.menuWrapper}>
         <button
           type="button"
-          className={`${styles.iconButton} ${styles.notificationsButton}`}
-          onClick={() => {
-            setIsNotificationsOpen((prev) => !prev);
-            setIsAccountMenuOpen(false);
-          }}
-          aria-label="Notificaciones"
-          aria-expanded={isNotificationsOpen}
-          aria-haspopup="menu"
-        >
-          <Icon name="bell" className={styles.bellIcon} />
-        </button>
-
-        {isNotificationsOpen && (
-          <div className={styles.dropdownMenu} role="menu" aria-label="Notificaciones">
-            <p className={styles.menuTitle}>Notificaciones</p>
-            <p className={styles.emptyState}>No hay notificaciones por ahora.</p>
-          </div>
-        )}
-      </div>
-
-      <div className={styles.menuWrapper}>
-        <button
-          type="button"
           className={styles.avatarButton}
-          onClick={() => {
-            setIsAccountMenuOpen((prev) => !prev);
-            setIsNotificationsOpen(false);
-          }}
+          onClick={() => setIsAccountMenuOpen((prev) => !prev)}
           aria-label={`Cuenta de ${name}`}
           aria-expanded={isAccountMenuOpen}
           aria-haspopup="menu"
@@ -107,17 +78,6 @@ export default function UserProfile({ name, imageUrl }: UserProfileProps) {
 
         {isAccountMenuOpen && (
           <div className={`${styles.dropdownMenu} ${styles.accountMenu}`} role="menu" aria-label="Cuenta">
-            <button
-              type="button"
-              className={`${styles.menuItem} ${styles.mobileOnly}`}
-              onClick={() => {
-                setIsNotificationsOpen(true);
-                setIsAccountMenuOpen(false);
-              }}
-            >
-              <Icon name="bell" className={styles.menuIcon} />
-              Notificaciones
-            </button>
             <Link
               href="/perfil"
               className={styles.menuItem}
@@ -125,6 +85,14 @@ export default function UserProfile({ name, imageUrl }: UserProfileProps) {
             >
               <Icon name="user" className={styles.menuIcon} />
               Mi perfil
+            </Link>
+            <Link
+              href="/qimela/create"
+              className={styles.menuItem}
+              onClick={() => setIsAccountMenuOpen(false)}
+            >
+              <Icon name="plus" className={styles.menuIcon} />
+              Crea tu qimela
             </Link>
             <button
               type="button"

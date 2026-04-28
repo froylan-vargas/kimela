@@ -1,13 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { InviteTokenEntity } from '../../domain/invite-token.entity';
 import { InviteTokenRepository } from '../../domain/invite-token.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class PrismaInviteTokenRepository implements InviteTokenRepository {
-  private readonly logger = new Logger(PrismaInviteTokenRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaInviteTokenRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findByToken(token: string): Promise<InviteTokenEntity | null> {
     this.logger.debug(`Finding invite token by token`);

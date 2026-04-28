@@ -7,6 +7,7 @@ type IconName =
   | "caret-down"
   | "caret-up"
   | "check-circle"
+  | "plus"
   | "sign-out"
   | "trophy"
   | "user"
@@ -98,6 +99,14 @@ function UserIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+function PlusIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+      <path d="M12 5v14m-7-7h14" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function XIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
@@ -111,6 +120,7 @@ const icons: Record<IconName, (props: SVGProps<SVGSVGElement>) => ReactElement> 
   "caret-down": CaretDownIcon,
   "caret-up": CaretUpIcon,
   "check-circle": CheckCircleIcon,
+  plus: PlusIcon,
   "sign-out": SignOutIcon,
   trophy: TrophyIcon,
   user: UserIcon,

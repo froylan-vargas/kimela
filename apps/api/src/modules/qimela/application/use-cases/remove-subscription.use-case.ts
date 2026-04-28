@@ -1,12 +1,7 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface RemoveSubscriptionCommand {
   qimelaId: string;
@@ -20,15 +15,15 @@ export interface RemoveSubscriptionResponse {
 
 @Injectable()
 export class RemoveSubscriptionUseCase {
-  private readonly logger = new Logger(RemoveSubscriptionUseCase.name);
 
   constructor(
+    @InjectPinoLogger(RemoveSubscriptionUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: RemoveSubscriptionCommand): Promise<RemoveSubscriptionResponse> {
-    this.logger.log(
+    this.logger.info(
       `Removing subscription of user ${command.targetUserId} from qimela ${command.qimelaId}`,
     );
 

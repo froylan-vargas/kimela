@@ -1,15 +1,18 @@
 import { randomUUID } from 'crypto';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QimelaEntity } from '../../domain/qimela.entity';
 import { FindForUserOptions, QimelaPatch, QimelaRepository } from '../../domain/qimela.repository';
 import { QimelaPersistenceMapper } from './qimela-persistence.mapper';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class PrismaQimelaRepository implements QimelaRepository {
-  private readonly logger = new Logger(PrismaQimelaRepository.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(PrismaQimelaRepository.name) private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findById(id: string): Promise<QimelaEntity | null> {
     this.logger.debug(`Finding qimela by id ${id}`);

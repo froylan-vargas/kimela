@@ -1,6 +1,7 @@
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 export interface DeleteQimelaLabelCommand {
   qimelaId: string;
@@ -14,15 +15,15 @@ export interface DeleteQimelaLabelResponse {
 
 @Injectable()
 export class DeleteQimelaLabelUseCase {
-  private readonly logger = new Logger(DeleteQimelaLabelUseCase.name);
 
   constructor(
+    @InjectPinoLogger(DeleteQimelaLabelUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: DeleteQimelaLabelCommand): Promise<DeleteQimelaLabelResponse> {
-    this.logger.log(`Deleting label ${command.labelId} from qimela ${command.qimelaId}`);
+    this.logger.info(`Deleting label ${command.labelId} from qimela ${command.qimelaId}`);
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
     if (!qimela) throw new NotFoundException('Qimela not found');

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Qimela, QimelaRole } from "@/types/qimela";
 import styles from "./QimelaDropdown.module.scss";
@@ -35,6 +36,10 @@ export default function QimelaDropdown({
 
   return (
     <div className={styles.dropdown}>
+      <Link href="/qimela/create" className={styles.createItem} onClick={onClose}>
+        + Crea tu qimela
+      </Link>
+      <div className={styles.divider} />
       {participatingQimelas.length > 0 && (
         <div>
           <p className={styles.sectionTitle}>Participando</p>
@@ -55,14 +60,16 @@ export default function QimelaDropdown({
         </div>
       )}
 
-      {participatingQimelas.length > 0 && creatorQimelas.length > 0 && (
+      {participatingQimelas.length > 0 && (
         <div className={styles.divider} />
       )}
 
-      {creatorQimelas.length > 0 && (
-        <div>
-          <p className={styles.sectionTitle}>Creadas</p>
-          {creatorQimelas.map((qimela) => {
+      <div>
+        <p className={styles.sectionTitle}>Creadas</p>
+        {creatorQimelas.length === 0 ? (
+          <p className={styles.emptySection}>No has creado qimelas</p>
+        ) : (
+          creatorQimelas.map((qimela) => {
             const isSelected =
               qimela.id === selectedId && selectedViewAs === "CREATOR";
             return (
@@ -75,9 +82,9 @@ export default function QimelaDropdown({
                 {qimela.name}
               </button>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </div>
   );
 }

@@ -59,7 +59,9 @@ describe('ApplyLabelUseCase', () => {
       },
     };
 
-    useCase = new ApplyLabelUseCase(
+const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+
+        useCase = new ApplyLabelUseCase(mockLogger, 
       mockQimelaRepo,
       mockPrisma as unknown as PrismaService,
     );

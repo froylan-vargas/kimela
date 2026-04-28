@@ -1,13 +1,7 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 const MAX_LABELS = 3;
 
@@ -30,15 +24,15 @@ export interface CreateQimelaLabelResponse {
 
 @Injectable()
 export class CreateQimelaLabelUseCase {
-  private readonly logger = new Logger(CreateQimelaLabelUseCase.name);
 
   constructor(
+    @InjectPinoLogger(CreateQimelaLabelUseCase.name) private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
   async execute(command: CreateQimelaLabelCommand): Promise<CreateQimelaLabelResponse> {
-    this.logger.log(`Creating label for qimela ${command.qimelaId}`);
+    this.logger.info(`Creating label for qimela ${command.qimelaId}`);
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
     if (!qimela) throw new NotFoundException('Qimela not found');

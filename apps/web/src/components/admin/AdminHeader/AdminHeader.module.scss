@@ -1,10 +1,10 @@
 @use "../../../styles/variables" as *;
 
 .navbar {
-  background: $color-navbar-bg;
+  background: rgba($color-navy-deep, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid $color-border;
+  border-bottom: 1px solid rgba($color-primary, 0.2);
   padding: $spacing-md 40px;
   display: flex;
   justify-content: space-between;
@@ -23,19 +23,19 @@
 .navLink {
   font-size: $font-size-base;
   font-weight: 500;
-  color: $color-text-secondary;
+  color: rgba($color-text-inverse, 0.76);
   text-decoration: none;
   padding: $spacing-xs $spacing-sm;
   border-radius: $radius-sm;
   transition: color 0.15s ease, background 0.15s ease;
 
   &:hover {
-    color: $color-text-main;
-    background: rgba(0, 0, 0, 0.04);
+    color: $color-text-inverse;
+    background: rgba($color-primary, 0.12);
   }
 
   &[aria-current="page"] {
-    color: $color-text-main;
+    color: $color-text-inverse;
     font-weight: 600;
   }
 }

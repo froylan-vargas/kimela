@@ -20,33 +20,33 @@
   gap: 0.625rem;
   padding: 0.75rem 1rem;
   background:
-    radial-gradient(circle at top, rgba(120, 196, 186, 0.12), transparent 48%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(222, 226, 232, 0.92);
+    radial-gradient(circle at top, rgba($color-primary, 0.16), transparent 48%),
+    linear-gradient(180deg, rgba($color-off-white, 0.98) 0%, rgba($color-primary-light, 0.45) 100%);
+  border: 1px solid rgba($color-navy, 0.16);
   border-radius: 24px;
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 32px rgba($color-navy-deep, 0.08);
 }
 
 .cardCompleted {
   background:
-    radial-gradient(circle at top, rgba(184, 62, 62, 0.1), transparent 46%),
-    linear-gradient(180deg, rgba(255, 250, 250, 0.98) 0%, rgba(250, 243, 243, 0.98) 100%);
-  border-color: rgba(214, 176, 176, 0.92);
-  box-shadow: 0 18px 42px rgba(91, 24, 24, 0.1);
+    radial-gradient(circle at top, rgba($color-navy, 0.12), transparent 46%),
+    linear-gradient(180deg, rgba($color-off-white, 0.98) 0%, rgba($color-navy, 0.08) 100%);
+  border-color: rgba($color-navy, 0.24);
+  box-shadow: 0 18px 42px rgba($color-navy-deep, 0.1);
 
   .completedNotice {
-    color: #8d3a3a;
+    color: $color-navy;
   }
 
   .input {
-    border-color: rgba(189, 118, 118, 0.9);
-    background: rgba(255, 252, 252, 0.96);
-    color: #5f1f1f;
+    border-color: rgba($color-navy, 0.38);
+    background: rgba($color-off-white, 0.96);
+    color: $color-navy-deep;
   }
 
   .saveButton {
-    background: linear-gradient(180deg, #ecdede 0%, #e1cdcd 100%);
-    color: #8a6161;
+    background: linear-gradient(180deg, rgba($color-navy, 0.14) 0%, rgba($color-navy, 0.22) 100%);
+    color: $color-navy;
   }
 }
 
@@ -67,7 +67,7 @@
 .completedNotice {
   margin: -4px 0 0;
   text-align: center;
-  color: #2f6d66;
+  color: $color-primary-text;
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -119,7 +119,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #dfe6ec 0%, #cfd8e3 100%);
+  background: linear-gradient(135deg, rgba($color-navy, 0.12) 0%, rgba($color-navy, 0.22) 100%);
 }
 
 .contenderName {
@@ -142,14 +142,14 @@
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
-  border: 1.5px solid rgba(208, 187, 125, 0.9);
+  border: 1.5px solid rgba($color-primary, 0.45);
   border-radius: 10px;
   font-size: 1.1rem;
   font-weight: 800;
   color: $color-text-main;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba($color-off-white, 0.96);
   text-align: center;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 rgba($color-off-white, 0.85);
   appearance: textfield;
 
   &::-webkit-outer-spin-button,
@@ -160,8 +160,8 @@
 
   &:focus {
     outline: none;
-    border-color: #6dc9bc;
-    box-shadow: 0 0 0 4px rgba(109, 201, 188, 0.2);
+    border-color: $color-primary;
+    box-shadow: 0 0 0 4px rgba($color-primary, 0.2);
   }
 }
 
@@ -186,14 +186,14 @@
   font-size: 0.875rem;
   font-weight: 800;
   letter-spacing: -0.01em;
-  background: linear-gradient(180deg, #e5e7eb 0%, #d6dae2 100%);
-  color: #697180;
+  background: linear-gradient(180deg, rgba($color-navy, 0.12) 0%, rgba($color-navy, 0.22) 100%);
+  color: $color-text-secondary;
   cursor: not-allowed;
   box-shadow: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 
   &:not(:disabled) {
-    background: linear-gradient(180deg, #67cabc 0%, $color-primary 100%);
+    background: linear-gradient(180deg, $color-primary 0%, $color-primary 100%);
     color: $color-primary-contrast;
     cursor: pointer;
     box-shadow: 0 18px 32px rgba($color-primary, 0.28);
@@ -213,7 +213,7 @@
 .skeletonItem {
   height: 110px;
   border-radius: 24px;
-  background: linear-gradient(180deg, #eef2f6 0%, #dfe7ef 100%);
+  background: linear-gradient(180deg, rgba($color-navy, 0.08) 0%, rgba($color-navy, 0.16) 100%);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -237,7 +237,7 @@
 
 .error {
   font-size: 14px;
-  color: #dc2626;
+  color: $color-navy-deep;
   margin: 0;
 }
 

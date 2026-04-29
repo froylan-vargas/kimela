@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 export interface LeaderboardEntry {
   userId: string;
@@ -18,14 +18,19 @@ export interface GetLeaderboardResponse {
 
 @Injectable()
 export class GetLeaderboardUseCase {
-
   constructor(
-    @InjectPinoLogger(GetLeaderboardUseCase.name) private readonly logger: PinoLogger,
+    @InjectPinoLogger(GetLeaderboardUseCase.name)
+    private readonly logger: PinoLogger,
     private readonly prisma: PrismaService,
   ) {}
 
-  async execute(qimelaId: string, phaseId?: string): Promise<GetLeaderboardResponse> {
-    this.logger.info(`Getting leaderboard for qimela ${qimelaId}${phaseId ? ` phase ${phaseId}` : ''}`);
+  async execute(
+    qimelaId: string,
+    phaseId?: string,
+  ): Promise<GetLeaderboardResponse> {
+    this.logger.info(
+      `Getting leaderboard for qimela ${qimelaId}${phaseId ? ` phase ${phaseId}` : ""}`,
+    );
 
     const qimela = await this.prisma.qimela.findUnique({
       where: { id: qimelaId },
@@ -41,16 +46,20 @@ export class GetLeaderboardUseCase {
     });
 
     if (!qimela) {
-      throw new NotFoundException(`Qimela ${qimelaId} not found`);
+      throw new NotFoundException(`qimela ${qimelaId} not found`);
     }
 
     if (phaseId) {
-      return this.executeForPhase(qimelaId, phaseId, this.getParticipants(qimela));
+      return this.executeForPhase(
+        qimelaId,
+        phaseId,
+        this.getParticipants(qimela),
+      );
     }
 
     const rows = await this.prisma.userQimelaPoints.findMany({
       where: { qimelaId },
-      orderBy: [{ totalPoints: 'desc' }, { exactResultsCount: 'desc' }],
+      orderBy: [{ totalPoints: "desc" }, { exactResultsCount: "desc" }],
       include: { user: { select: { id: true, name: true, imageUrl: true } } },
     });
 
@@ -74,7 +83,10 @@ export class GetLeaderboardUseCase {
   private async executeForPhase(
     qimelaId: string,
     phaseId: string,
-    participants: Omit<LeaderboardEntry, 'totalPoints' | 'correctPicksCount' | 'exactResultsCount' | 'rank'>[],
+    participants: Omit<
+      LeaderboardEntry,
+      "totalPoints" | "correctPicksCount" | "exactResultsCount" | "rank"
+    >[],
   ): Promise<GetLeaderboardResponse> {
     const rows = await this.prisma.userSessionPoints.findMany({
       where: { qimelaId, session: { phaseId } },
@@ -110,8 +122,10 @@ export class GetLeaderboardUseCase {
     const aggregatedWithEmptyParticipants = participants.map((participant) => ({
       ...participant,
       totalPoints: aggregated.get(participant.userId)?.totalPoints ?? 0,
-      correctPicksCount: aggregated.get(participant.userId)?.correctPicksCount ?? 0,
-      exactResultsCount: aggregated.get(participant.userId)?.exactResultsCount ?? 0,
+      correctPicksCount:
+        aggregated.get(participant.userId)?.correctPicksCount ?? 0,
+      exactResultsCount:
+        aggregated.get(participant.userId)?.exactResultsCount ?? 0,
       rank: 0,
     }));
 
@@ -120,9 +134,20 @@ export class GetLeaderboardUseCase {
 
   private getParticipants(qimela: {
     creator: { id: string; name: string; imageUrl: string | null };
-    subscriptions: { user: { id: string; name: string; imageUrl: string | null } }[];
-  }): Omit<LeaderboardEntry, 'totalPoints' | 'correctPicksCount' | 'exactResultsCount' | 'rank'>[] {
-    const byUserId = new Map<string, Omit<LeaderboardEntry, 'totalPoints' | 'correctPicksCount' | 'exactResultsCount' | 'rank'>>();
+    subscriptions: {
+      user: { id: string; name: string; imageUrl: string | null };
+    }[];
+  }): Omit<
+    LeaderboardEntry,
+    "totalPoints" | "correctPicksCount" | "exactResultsCount" | "rank"
+  >[] {
+    const byUserId = new Map<
+      string,
+      Omit<
+        LeaderboardEntry,
+        "totalPoints" | "correctPicksCount" | "exactResultsCount" | "rank"
+      >
+    >();
     byUserId.set(qimela.creator.id, {
       userId: qimela.creator.id,
       userName: qimela.creator.name,
@@ -141,9 +166,11 @@ export class GetLeaderboardUseCase {
   private rankParticipants(entries: LeaderboardEntry[]): LeaderboardEntry[] {
     return entries
       .sort((a, b) => {
-        if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
-        if (b.exactResultsCount !== a.exactResultsCount) return b.exactResultsCount - a.exactResultsCount;
-        return a.userName.localeCompare(b.userName, 'es');
+        if (b.totalPoints !== a.totalPoints)
+          return b.totalPoints - a.totalPoints;
+        if (b.exactResultsCount !== a.exactResultsCount)
+          return b.exactResultsCount - a.exactResultsCount;
+        return a.userName.localeCompare(b.userName, "es");
       })
       .map((entry, index) => ({ ...entry, rank: index + 1 }));
   }

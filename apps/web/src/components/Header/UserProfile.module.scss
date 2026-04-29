@@ -25,12 +25,12 @@
 .iconButton {
   width: 40px;
   height: 40px;
-  color: $color-text-secondary;
+  color: rgba($color-text-inverse, 0.78);
   transition: color 0.15s ease, background 0.15s ease;
 
   &:hover {
-    color: $color-text-main;
-    background: rgba(0, 0, 0, 0.05);
+    color: $color-text-inverse;
+    background: rgba($color-primary, 0.12);
   }
 }
 
@@ -49,8 +49,8 @@
   font-weight: 600;
   font-size: 14px;
   color: $color-primary-contrast;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba($color-off-white, 0.96);
+  box-shadow: 0 2px 8px rgba($color-navy-deep, 0.1);
   overflow: hidden;
 }
 
@@ -66,10 +66,10 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
-  background: #fff;
+  background: $color-surface-solid;
   border: 1px solid $color-border;
   border-radius: $radius-md;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba($color-navy-deep, 0.08);
   padding: $spacing-sm;
   z-index: $z-dropdown;
 }

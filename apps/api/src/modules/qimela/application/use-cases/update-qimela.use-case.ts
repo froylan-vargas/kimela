@@ -1,10 +1,20 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { QimelaPatch, QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { RULE_REPOSITORY, RuleRepository } from '../../domain/rule.repository';
-import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
+import { randomUUID } from "crypto";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  QimelaPatch,
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import { RULE_REPOSITORY, RuleRepository } from "../../domain/rule.repository";
+import { QimelaStatus } from "../../domain/qimela-status.enum";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 export interface UpdateQimelaCommand {
   id: string;
@@ -28,9 +38,9 @@ export interface UpdateQimelaResponse {
 
 @Injectable()
 export class UpdateQimelaUseCase {
-
   constructor(
-    @InjectPinoLogger(UpdateQimelaUseCase.name) private readonly logger: PinoLogger,
+    @InjectPinoLogger(UpdateQimelaUseCase.name)
+    private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     @Inject(RULE_REPOSITORY)
@@ -39,21 +49,23 @@ export class UpdateQimelaUseCase {
   ) {}
 
   async execute(command: UpdateQimelaCommand): Promise<UpdateQimelaResponse> {
-    this.logger.info(`Updating qimela ${command.id} requested by user ${command.requesterId}`);
+    this.logger.info(
+      `Updating qimela ${command.id} requested by user ${command.requesterId}`,
+    );
 
     const qimela = await this.qimelaRepository.findById(command.id);
     if (!qimela) {
-      throw new NotFoundException(`Qimela ${command.id} not found`);
+      throw new NotFoundException(`qimela ${command.id} not found`);
     }
 
     if (!qimela.isCreatedBy(command.requesterId)) {
-      throw new ForbiddenException('Only the creator can edit this qimela');
+      throw new ForbiddenException("Only the creator can edit this qimela");
     }
 
     if (qimela.status === QimelaStatus.COMPLETED) {
       throw new UnprocessableEntityException({
-        code: 'QIMELA_COMPLETED_UNEDITABLE',
-        message: 'Cannot edit a completed qimela',
+        code: "QIMELA_COMPLETED_UNEDITABLE",
+        message: "Cannot edit a completed qimela",
       });
     }
 
@@ -61,12 +73,12 @@ export class UpdateQimelaUseCase {
     if (qimela.status === QimelaStatus.ACTIVE) {
       if (command.name !== undefined) {
         throw new UnprocessableEntityException(
-          'No se puede cambiar el nombre de una qimela activa.',
+          "No se puede cambiar el nombre de una qimela activa.",
         );
       }
       if (command.rules !== undefined) {
         throw new UnprocessableEntityException(
-          'No se pueden cambiar las reglas de una qimela activa.',
+          "No se pueden cambiar las reglas de una qimela activa.",
         );
       }
     }
@@ -83,7 +95,7 @@ export class UpdateQimelaUseCase {
     if (hasInitialPhase || hasFinalPhase) {
       if (qimela.status === QimelaStatus.ACTIVE && hasInitialPhase) {
         throw new UnprocessableEntityException(
-          'No se puede cambiar la fase inicial de una qimela activa.',
+          "No se puede cambiar la fase inicial de una qimela activa.",
         );
       }
 
@@ -105,19 +117,19 @@ export class UpdateQimelaUseCase {
 
       if (!newInitialPhase || newInitialPhase.eventId !== eventId) {
         throw new UnprocessableEntityException(
-          'La fase inicial no pertenece al evento de esta qimela.',
+          "La fase inicial no pertenece al evento de esta qimela.",
         );
       }
 
       if (!newFinalPhase || newFinalPhase.eventId !== eventId) {
         throw new UnprocessableEntityException(
-          'La fase final no pertenece al evento de esta qimela.',
+          "La fase final no pertenece al evento de esta qimela.",
         );
       }
 
       if (newInitialPhase.order > newFinalPhase.order) {
         throw new UnprocessableEntityException(
-          'La fase inicial debe tener un orden menor o igual a la fase final.',
+          "La fase inicial debe tener un orden menor o igual a la fase final.",
         );
       }
 
@@ -129,7 +141,7 @@ export class UpdateQimelaUseCase {
 
         if (currentEndPhase && newFinalPhase.order < currentEndPhase.order) {
           throw new UnprocessableEntityException(
-            'Solo se puede extender la fase final en una qimela activa.',
+            "Solo se puede extender la fase final en una qimela activa.",
           );
         }
       }
@@ -143,13 +155,17 @@ export class UpdateQimelaUseCase {
     }
 
     // Validate and apply rule updates
-    let updatedRules: { id: string; ruleId: string; points: number }[] | undefined;
+    let updatedRules:
+      | { id: string; ruleId: string; points: number }[]
+      | undefined;
 
     if (command.rules !== undefined) {
       const submittedRuleIds = command.rules.map((r) => r.ruleId);
       const foundRules = await this.ruleRepository.findByIds(submittedRuleIds);
 
-      const missingId = submittedRuleIds.find((id) => !foundRules.some((r) => r.id === id));
+      const missingId = submittedRuleIds.find(
+        (id) => !foundRules.some((r) => r.id === id),
+      );
       if (missingId) {
         throw new NotFoundException(`Rule ${missingId} not found`);
       }
@@ -158,13 +174,13 @@ export class UpdateQimelaUseCase {
         const rule = foundRules.find((r) => r.id === submitted.ruleId)!;
         if (submitted.points < rule.minPoints) {
           throw new UnprocessableEntityException({
-            code: 'RULE_BELOW_MIN_POINTS',
+            code: "RULE_BELOW_MIN_POINTS",
             message: `Rule "${rule.slug}" requires at least ${rule.minPoints} point(s).`,
           });
         }
         if (submitted.points > rule.maxPoints) {
           throw new UnprocessableEntityException({
-            code: 'RULE_ABOVE_MAX_POINTS',
+            code: "RULE_ABOVE_MAX_POINTS",
             message: `Rule "${rule.slug}" allows at most ${rule.maxPoints} point(s).`,
           });
         }
@@ -183,7 +199,11 @@ export class UpdateQimelaUseCase {
         await tx.qimelaRule.createMany({ data: newRules });
       });
 
-      updatedRules = newRules.map((r) => ({ id: r.id, ruleId: r.ruleId, points: r.points }));
+      updatedRules = newRules.map((r) => ({
+        id: r.id,
+        ruleId: r.ruleId,
+        points: r.points,
+      }));
     }
 
     const hasPatch = Object.keys(patch).length > 0;

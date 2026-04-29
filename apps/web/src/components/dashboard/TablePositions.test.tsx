@@ -65,7 +65,7 @@ describe("TablePositions", () => {
 
   it("renders a link to the results page", () => {
     render(<TablePositions qimelaId="qimela-1" currentUserId="2" />);
-    const link = screen.getByRole("link", { name: "Resultados" });
+    const link = screen.getByRole("link", { name: "Ver resultados" });
     expect(link).toHaveAttribute("href", "/qimela/qimela-1/results");
   });
 

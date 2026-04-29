@@ -1,19 +1,21 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { GetQimelaSubscribersUseCase } from './get-qimela-subscribers.use-case';
-import { QimelaRepository } from '../../domain/qimela.repository';
-import { QimelaEntity } from '../../domain/qimela.entity';
-import { QimelaStatus } from '../../domain/qimela-status.enum';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
+import { GetQimelaSubscribersUseCase } from "./get-qimela-subscribers.use-case";
+import { QimelaRepository } from "../../domain/qimela.repository";
+import { QimelaEntity } from "../../domain/qimela.entity";
+import { QimelaStatus } from "../../domain/qimela-status.enum";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
 
-const QIMELA_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-const CREATOR_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-const OTHER_ID = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
-const SPORT_ID = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+const QIMELA_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+const CREATOR_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+const OTHER_ID = "cccccccc-cccc-cccc-cccc-cccccccccccc";
+const SPORT_ID = "dddddddd-dddd-dddd-dddd-dddddddddddd";
 
-const makeQimela = (overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {}): QimelaEntity =>
+const makeQimela = (
+  overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {},
+): QimelaEntity =>
   new QimelaEntity({
     id: QIMELA_ID,
-    name: 'Test Qimela',
+    name: "Test qimela",
     status: QimelaStatus.UPCOMING,
     sportId: SPORT_ID,
     eventId: null,
@@ -37,7 +39,7 @@ const makeSubscription = (
   labels,
 });
 
-describe('GetQimelaSubscribersUseCase', () => {
+describe("GetQimelaSubscribersUseCase", () => {
   let useCase: GetQimelaSubscribersUseCase;
   let mockQimelaRepo: jest.Mocked<QimelaRepository>;
   let mockPrisma: { subscription: { count: jest.Mock; findMany: jest.Mock } };
@@ -57,36 +59,54 @@ describe('GetQimelaSubscribersUseCase', () => {
       },
     };
 
-const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+    const mockLogger: any = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    };
 
-        useCase = new GetQimelaSubscribersUseCase(mockLogger, 
+    useCase = new GetQimelaSubscribersUseCase(
+      mockLogger,
       mockQimelaRepo,
       mockPrisma as unknown as PrismaService,
     );
   });
 
-  describe('execute', () => {
-    it('throws NotFoundException when qimela does not exist', async () => {
+  describe("execute", () => {
+    it("throws NotFoundException when qimela does not exist", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(null);
 
       // Act + Assert
       await expect(
-        useCase.execute({ qimelaId: QIMELA_ID, requesterId: CREATOR_ID, page: 1, limit: 10 }),
+        useCase.execute({
+          qimelaId: QIMELA_ID,
+          requesterId: CREATOR_ID,
+          page: 1,
+          limit: 10,
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('throws ForbiddenException when requester is not the creator', async () => {
+    it("throws ForbiddenException when requester is not the creator", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
 
       // Act + Assert
       await expect(
-        useCase.execute({ qimelaId: QIMELA_ID, requesterId: OTHER_ID, page: 1, limit: 10 }),
+        useCase.execute({
+          qimelaId: QIMELA_ID,
+          requesterId: OTHER_ID,
+          page: 1,
+          limit: 10,
+        }),
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('returns an empty list when there are no subscribers', async () => {
+    it("returns an empty list when there are no subscribers", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(0);
@@ -105,13 +125,13 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       expect(result.data.total).toBe(0);
     });
 
-    it('maps subscriber rows to userId, name and email', async () => {
+    it("maps subscriber rows to userId, name and email", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(2);
       mockPrisma.subscription.findMany.mockResolvedValue([
-        makeSubscription('u1', 'Ana Torres', 'ana@example.com'),
-        makeSubscription('u2', 'Luis Ramos', 'luis@example.com'),
+        makeSubscription("u1", "Ana Torres", "ana@example.com"),
+        makeSubscription("u2", "Luis Ramos", "luis@example.com"),
       ]);
 
       // Act
@@ -124,12 +144,22 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
 
       // Assert
       expect(result.data.subscribers).toEqual([
-        { userId: 'u1', name: 'Ana Torres', email: 'ana@example.com', labels: [] },
-        { userId: 'u2', name: 'Luis Ramos', email: 'luis@example.com', labels: [] },
+        {
+          userId: "u1",
+          name: "Ana Torres",
+          email: "ana@example.com",
+          labels: [],
+        },
+        {
+          userId: "u2",
+          name: "Luis Ramos",
+          email: "luis@example.com",
+          labels: [],
+        },
       ]);
     });
 
-    it('returns correct pagination metadata', async () => {
+    it("returns correct pagination metadata", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(25);
@@ -149,14 +179,19 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       expect(result.data.limit).toBe(10);
     });
 
-    it('passes skip and take for the requested page', async () => {
+    it("passes skip and take for the requested page", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(30);
       mockPrisma.subscription.findMany.mockResolvedValue([]);
 
       // Act
-      await useCase.execute({ qimelaId: QIMELA_ID, requesterId: CREATOR_ID, page: 3, limit: 10 });
+      await useCase.execute({
+        qimelaId: QIMELA_ID,
+        requesterId: CREATOR_ID,
+        page: 3,
+        limit: 10,
+      });
 
       // Assert
       expect(mockPrisma.subscription.findMany).toHaveBeenCalledWith(
@@ -164,7 +199,7 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       );
     });
 
-    it('applies search filter by name and email via OR clause', async () => {
+    it("applies search filter by name and email via OR clause", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(0);
@@ -176,31 +211,38 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
         requesterId: CREATOR_ID,
         page: 1,
         limit: 10,
-        search: 'ana',
+        search: "ana",
       });
 
       // Assert
       const expectedWhere = {
         qimelaId: QIMELA_ID,
         OR: [
-          { user: { name: { contains: 'ana', mode: 'insensitive' } } },
-          { user: { email: { contains: 'ana', mode: 'insensitive' } } },
+          { user: { name: { contains: "ana", mode: "insensitive" } } },
+          { user: { email: { contains: "ana", mode: "insensitive" } } },
         ],
       };
-      expect(mockPrisma.subscription.count).toHaveBeenCalledWith({ where: expectedWhere });
+      expect(mockPrisma.subscription.count).toHaveBeenCalledWith({
+        where: expectedWhere,
+      });
       expect(mockPrisma.subscription.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: expectedWhere }),
       );
     });
 
-    it('omits the search filter when no search term is provided', async () => {
+    it("omits the search filter when no search term is provided", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(0);
       mockPrisma.subscription.findMany.mockResolvedValue([]);
 
       // Act
-      await useCase.execute({ qimelaId: QIMELA_ID, requesterId: CREATOR_ID, page: 1, limit: 10 });
+      await useCase.execute({
+        qimelaId: QIMELA_ID,
+        requesterId: CREATOR_ID,
+        page: 1,
+        limit: 10,
+      });
 
       // Assert
       expect(mockPrisma.subscription.count).toHaveBeenCalledWith({
@@ -208,14 +250,14 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       });
     });
 
-    it('maps subscriber labels into id, name and color', async () => {
+    it("maps subscriber labels into id, name and color", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(1);
       mockPrisma.subscription.findMany.mockResolvedValue([
-        makeSubscription('u1', 'Ana Torres', 'ana@example.com', [
-          { label: { id: 'l1', name: 'VIP', color: '#ff0000' } },
-          { label: { id: 'l2', name: 'Casual', color: '#3b82f6' } },
+        makeSubscription("u1", "Ana Torres", "ana@example.com", [
+          { label: { id: "l1", name: "VIP", color: "#ff0000" } },
+          { label: { id: "l2", name: "Casual", color: "#3b82f6" } },
         ]),
       ]);
 
@@ -229,17 +271,17 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
 
       // Assert
       expect(result.data.subscribers[0].labels).toEqual([
-        { id: 'l1', name: 'VIP', color: '#ff0000' },
-        { id: 'l2', name: 'Casual', color: '#3b82f6' },
+        { id: "l1", name: "VIP", color: "#ff0000" },
+        { id: "l2", name: "Casual", color: "#3b82f6" },
       ]);
     });
 
-    it('returns an empty labels array when a subscriber has no labels', async () => {
+    it("returns an empty labels array when a subscriber has no labels", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
       mockPrisma.subscription.count.mockResolvedValue(1);
       mockPrisma.subscription.findMany.mockResolvedValue([
-        makeSubscription('u1', 'Ana Torres', 'ana@example.com'),
+        makeSubscription("u1", "Ana Torres", "ana@example.com"),
       ]);
 
       // Act

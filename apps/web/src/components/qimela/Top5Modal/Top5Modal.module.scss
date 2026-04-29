@@ -14,17 +14,17 @@
   transform: translate(-50%, -50%);
   margin: 0;
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.14),
-    0 4px 16px rgba(0, 0, 0, 0.08);
+    0 24px 64px rgba($color-navy-deep, 0.14),
+    0 4px 16px rgba($color-navy-deep, 0.08);
 
   &::backdrop {
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba($color-navy-deep, 0.35);
     backdrop-filter: blur(3px);
   }
 }
 
 .modal {
-  background: #fff;
+  background: $color-surface-solid;
   border-radius: $radius-lg;
   overflow: hidden;
 }

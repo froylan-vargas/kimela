@@ -18,7 +18,7 @@
   background: linear-gradient(
     90deg,
     $color-border 25%,
-    rgba(228, 228, 231, 0.4) 50%,
+    rgba($color-navy, 0.4) 50%,
     $color-border 75%
   );
   background-size: 200% 100%;
@@ -38,6 +38,6 @@
 
 .error {
   font-size: 14px;
-  color: #dc2626;
+  color: $color-navy-deep;
   padding: $spacing-md 0;
 }

@@ -2,17 +2,21 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import Home from "./(app)/dashboard/page";
 import { useQimelaContext } from "@/context/QimelaContext";
-import type { Qimela } from "@/types/qimela";
+import type { qimela } from "@/types/qimela";
 
 vi.mock("@/context/QimelaContext");
 vi.mock("@/components/dashboard/ParticipantDashboard", () => ({
-  default: ({ qimela }: { qimela: Qimela }) => <div>{qimela.name} - Participant</div>,
+  default: ({ qimela }: { qimela: qimela }) => (
+    <div>{qimela.name} - Participant</div>
+  ),
 }));
 vi.mock("@/components/dashboard/CreatorDashboard", () => ({
-  default: ({ qimela }: { qimela: Qimela }) => <div>{qimela.name} - Creator</div>,
+  default: ({ qimela }: { qimela: qimela }) => (
+    <div>{qimela.name} - Creator</div>
+  ),
 }));
 
-const subscriberQimela: Qimela = {
+const subscriberQimela: qimela = {
   id: "s1",
   name: "Liga MX",
   sportId: "sport-uuid-1",
@@ -21,7 +25,7 @@ const subscriberQimela: Qimela = {
   creatorId: "u1",
 };
 
-const creatorQimela: Qimela = {
+const creatorQimela: qimela = {
   id: "c1",
   name: "NBA Pool",
   sportId: "sport-uuid-2",

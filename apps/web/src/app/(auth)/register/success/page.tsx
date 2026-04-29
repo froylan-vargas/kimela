@@ -14,7 +14,7 @@ function RegisterSuccessContent() {
       <div className={styles.card}>
         <div className={styles.badge}>Cuenta creada</div>
         <div className={styles.hero}>
-          <h1>¡Bienvenido a Qimela!</h1>
+          <h1>¡Bienvenido a qimela!</h1>
           <p>
             Usuario creado con éxito. Te enviamos un correo de confirmación
             {email ? ` a ${email}` : ""} para que actives tu cuenta antes de
@@ -27,7 +27,7 @@ function RegisterSuccessContent() {
           <h2>Siguiente paso</h2>
           <p>
             Abre el enlace de confirmación desde tu correo. Cuando completes la
-            verificación, ya podrás iniciar sesión en Qimela.
+            verificación, ya podrás iniciar sesión en qimela.
           </p>
         </div>
 

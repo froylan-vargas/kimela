@@ -1,6 +1,6 @@
 ---
-name: Qimela project overview
-description: Core architecture decisions, stack details, and key patterns established in the Qimela backend
+name: qimela project overview
+description: Core architecture decisions, stack details, and key patterns established in the qimela backend
 type: project
 ---
 
@@ -9,27 +9,32 @@ Sports pool management system (qimela = sports pool).
 **Why:** System to create, manage and participate in sports pools.
 
 **Stack:**
+
 - NestJS + TypeScript (API, port 3000)
 - Prisma v7 + PostgreSQL (uses driver adapters — `@prisma/adapter-pg`, NOT the old query engine)
 - pnpm workspaces (`apps/api`, `apps/web`)
 
 **Critical: Prisma v7 driver adapters**
 PrismaClient requires an `adapter` option (not `datasourceUrl`):
+
 ```ts
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 ```
+
 `DATABASE_URL` is read from `apps/api/.env` (loaded via `dotenv` or `prisma.config.ts`).
 The api `.env` has `DATABASE_URL=postgresql://qimela:qimela_secret@postgres:5432/qimela_db?schema=public` (Docker hostname).
 For local migration runs, override: `DATABASE_URL="postgresql://qimela:qimela_secret@localhost:5432/qimela_db?schema=public" ./node_modules/.bin/prisma migrate dev`.
 
 **Architecture pattern (DDD):**
+
 - `domain/` — entities, enums, abstract repository interfaces, errors
 - `application/` — use cases, DTOs, mappers
 - `infrastructure/` — Prisma repository implementations, persistence mappers
 - `presentation/` — controllers, request DTOs, decorators
 
 **Auth (KIM-8 — COMPLETE):** JWT RS256 with httpOnly cookies + refresh token rotation + email verification + password reset.
+
 - `apps/api/src/modules/users/` — UserEntity, UserRepository, UsersModule
 - `apps/api/src/modules/auth/` — full auth module: register/login/refresh/logout/me/confirm-email/resend-verification/forgot-password/reset-password endpoints
 - `@CurrentUser()` decorator returns `{ id, email, role, emailVerifiedAt }` — JWT payload has `emailVerifiedAt: null`, `/auth/me` fetches fresh from DB

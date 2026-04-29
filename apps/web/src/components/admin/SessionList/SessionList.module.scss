@@ -14,13 +14,13 @@
   flex-direction: column;
   gap: $spacing-xs;
   padding: $spacing-md;
-  background: #fff;
+  background: $color-surface-solid;
   border: 1px solid $color-border;
   border-radius: $radius-sm;
   transition: box-shadow 0.15s ease;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba($color-navy-deep, 0.06);
   }
 }
 
@@ -123,6 +123,6 @@
 
 .error {
   font-size: 14px;
-  color: #dc2626;
+  color: $color-navy-deep;
   margin: 0;
 }

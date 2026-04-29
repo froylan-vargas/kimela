@@ -1,9 +1,9 @@
 "use client";
 
-import type { Qimela } from "@/types/qimela";
+import type { qimela } from "@/types/qimela";
 
 interface CreatorDashboardProps {
-  qimela: Qimela;
+  qimela: qimela;
 }
 
 export default function CreatorDashboard({ qimela }: CreatorDashboardProps) {

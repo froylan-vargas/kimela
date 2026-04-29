@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { Qimela } from "@/types/qimela";
+import type { qimela } from "@/types/qimela";
 import TablePositions from "@/components/dashboard/TablePositions";
 import UpcomingSessions from "@/components/qimela/UpcomingSessions/UpcomingSessions";
 import { useAuth } from "@/hooks/useAuth";
-import { useLeaderboard } from "@/hooks/useLeaderboard";
 import styles from "./ParticipantDashboard.module.scss";
 
 interface ParticipantDashboardProps {
-  qimela: Qimela;
+  qimela: qimela;
 }
 
 export default function ParticipantDashboard({
@@ -19,8 +18,6 @@ export default function ParticipantDashboard({
     "sessions" | "positions"
   >("sessions");
   const { user } = useAuth();
-  const { data: leaderboard } = useLeaderboard(qimela.id, user?.id);
-  const currentEntry = leaderboard?.find((entry) => entry.isCurrentUser);
 
   return (
     <section className={styles.layout}>
@@ -28,28 +25,8 @@ export default function ParticipantDashboard({
         <div className={styles.summaryPrimary}>
           <h1>{qimela.name}</h1>
         </div>
-        <div className={styles.summaryDivider} aria-hidden="true" />
-        <div className={styles.summaryStats}>
-          <div className={styles.summaryUser}>
-            <span className={styles.summaryLabel}>Usuario</span>
-            <span className={styles.summaryValue}>
-              {currentEntry?.userName ?? user?.name ?? "Sin registro"}
-            </span>
-          </div>
-          <div className={styles.summaryMetric}>
-            <span className={styles.summaryLabel}>Pos</span>
-            <span className={styles.summaryRank}>
-              {currentEntry?.rank ?? "-"}
-            </span>
-          </div>
-          <div className={styles.summaryMetric}>
-            <span className={styles.summaryLabel}>Puntos</span>
-            <span className={styles.summaryPoints}>
-              {currentEntry?.totalPoints ?? 0}
-            </span>
-          </div>
-        </div>
       </div>
+      <div className={styles.headerDivider} aria-hidden="true" />
       <div
         className={styles.mobileSwitch}
         role="tablist"

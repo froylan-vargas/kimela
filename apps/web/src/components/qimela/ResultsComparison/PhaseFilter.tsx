@@ -9,6 +9,7 @@ interface PhaseFilterProps {
   onChange: (phaseId: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
+  className?: string;
 }
 
 export default function PhaseFilter({
@@ -17,9 +18,10 @@ export default function PhaseFilter({
   onChange,
   placeholder = "Seleccionar fase...",
   disabled,
+  className,
 }: PhaseFilterProps) {
   return (
-    <div className={styles.field}>
+    <div className={`${styles.field} ${className ?? ""}`}>
       <select
         className={styles.select}
         aria-label="Fase"

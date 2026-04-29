@@ -4,7 +4,7 @@
 
 **Architecture** — DDD layered structure per module: `domain → application → infrastructure → presentation`. `QimelaInfrastructureModule` re-exports `AdminInfrastructureModule`, so `SESSION_REPOSITORY` is already available in the qimela module context. Global `ValidationPipe` (whitelist, transform), global `AllExceptionsFilter` (handles `code` field), `@CurrentUser()` decorator provides `{ id, email, role, emailVerifiedAt }`.
 
-**Existing relevant models:** `Session` (id, name, scheduledAt, status, phaseId, sportId), `Phase` (id, name, order, status, eventId), `Qimela` (eventId, startPhaseId, endPhaseId), `Subscription` (userId, qimelaId), `UserPick` (userId, sessionId, pickCategoryId, value?, pickedContenderId?), `PickCategory` (id, name, label, valueType CONTENDER|SCALAR, points, isDefault).
+**Existing relevant models:** `Session` (id, name, scheduledAt, status, phaseId, sportId), `Phase` (id, name, order, status, eventId), `qimela` (eventId, startPhaseId, endPhaseId), `Subscription` (userId, qimelaId), `UserPick` (userId, sessionId, pickCategoryId, value?, pickedContenderId?), `PickCategory` (id, name, label, valueType CONTENDER|SCALAR, points, isDefault).
 
 **No Prisma migration needed.** All required tables exist.
 
@@ -12,11 +12,11 @@
 
 ## 2. New Endpoints (all under `QimelaController` at `/qimelas`)
 
-| # | Method | Path | Purpose |
-|---|--------|------|---------|
-| 1 | GET | `/qimelas/:qimelaId/sessions/upcoming` | Next 3 sessions, cutoff = now + 3 min |
-| 2 | GET | `/qimelas/:qimelaId/sessions` | All sessions grouped by phase |
-| 3 | POST | `/qimelas/:qimelaId/sessions/:sessionId/picks` | Upsert picks for one session |
+| #   | Method | Path                                           | Purpose                               |
+| --- | ------ | ---------------------------------------------- | ------------------------------------- |
+| 1   | GET    | `/qimelas/:qimelaId/sessions/upcoming`         | Next 3 sessions, cutoff = now + 3 min |
+| 2   | GET    | `/qimelas/:qimelaId/sessions`                  | All sessions grouped by phase         |
+| 3   | POST   | `/qimelas/:qimelaId/sessions/:sessionId/picks` | Upsert picks for one session          |
 
 ---
 
@@ -62,7 +62,7 @@ export class PickCategoryNotInSessionError extends Error { ... }
 ### New repository interface — `session-pick.repository.ts`
 
 ```typescript
-export const SESSION_PICK_REPOSITORY = Symbol('SESSION_PICK_REPOSITORY');
+export const SESSION_PICK_REPOSITORY = Symbol("SESSION_PICK_REPOSITORY");
 
 export interface PickInput {
   pickCategoryId: string;
@@ -79,14 +79,17 @@ export interface SavePicksOptions {
 export interface PickRow {
   pickCategoryId: string;
   label: string;
-  valueType: 'CONTENDER' | 'SCALAR';
+  valueType: "CONTENDER" | "SCALAR";
   value: string | null;
   pickedContenderId: string | null;
 }
 
 export interface SessionPickRepository {
   savePicksForSession(options: SavePicksOptions): Promise<PickRow[]>;
-  findPicksForUserAndSession(userId: string, sessionId: string): Promise<PickRow[]>;
+  findPicksForUserAndSession(
+    userId: string,
+    sessionId: string,
+  ): Promise<PickRow[]>;
 }
 ```
 
@@ -109,6 +112,7 @@ export interface SessionPickRepository {
 ### `get-all-sessions.use-case.ts` — Logic
 
 Same access guards (steps 1–3 above), then:
+
 - Load all phases in range ordered by `order ASC`
 - Load all sessions with contenders for those phases ordered `scheduledAt ASC`
 - Fetch all user picks for the session set
@@ -138,6 +142,7 @@ Same access guards (steps 1–3 above), then:
 ### Module wiring
 
 `QimelaInfrastructureModule` — add:
+
 ```typescript
 { provide: SESSION_PICK_REPOSITORY, useClass: PrismaSessionPickRepository }
 // and export SESSION_PICK_REPOSITORY
@@ -151,13 +156,16 @@ Same access guards (steps 1–3 above), then:
 
 ```typescript
 class PickInputDto {
-  @IsUUID()  pickCategoryId!: string;
-  @IsOptional() @IsString()  value?: string;
-  @IsOptional() @IsUUID()    pickedContenderId?: string;
+  @IsUUID() pickCategoryId!: string;
+  @IsOptional() @IsString() value?: string;
+  @IsOptional() @IsUUID() pickedContenderId?: string;
 }
 
 class SavePicksRequestDto {
-  @IsArray() @ArrayNotEmpty() @ValidateNested({ each: true }) @Type(() => PickInputDto)
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => PickInputDto)
   picks!: PickInputDto[];
 }
 ```
@@ -195,16 +203,16 @@ async saveSessionPicks(
 
 ## 8. Error Table
 
-| Condition | HTTP | Code | Spanish message |
-|-----------|------|------|-----------------|
-| Qimela not found | 404 | — | `"La qimela no existe"` |
-| Not creator/subscriber | 403 | — | `"No tienes acceso a esta qimela"` |
-| Qimela has no event | 422 | `QIMELA_NO_EVENT` | `"Esta qimela no tiene un evento asociado"` |
-| Session not found | 404 | — | `"La sesión no existe"` |
-| Deadline passed (< 3 min) | 422 | `PICKS_DEADLINE_PASSED` | `"No puedes registrar pronósticos para partidos que comienzan en menos de 3 minutos"` |
-| Session not SCHEDULED | 422 | `PICKS_SESSION_NOT_OPEN` | `"Solo puedes registrar pronósticos en sesiones programadas"` |
-| Score out of range | 400 | — | `"El marcador debe ser un número entero entre 0 y 99"` |
-| Category not in session | 422 | `PICK_CATEGORY_NOT_IN_SESSION` | `"La categoría de pronóstico no pertenece a esta sesión"` |
+| Condition                 | HTTP | Code                           | Spanish message                                                                       |
+| ------------------------- | ---- | ------------------------------ | ------------------------------------------------------------------------------------- |
+| qimela not found          | 404  | —                              | `"La qimela no existe"`                                                               |
+| Not creator/subscriber    | 403  | —                              | `"No tienes acceso a esta qimela"`                                                    |
+| qimela has no event       | 422  | `QIMELA_NO_EVENT`              | `"Esta qimela no tiene un evento asociado"`                                           |
+| Session not found         | 404  | —                              | `"La sesión no existe"`                                                               |
+| Deadline passed (< 3 min) | 422  | `PICKS_DEADLINE_PASSED`        | `"No puedes registrar pronósticos para partidos que comienzan en menos de 3 minutos"` |
+| Session not SCHEDULED     | 422  | `PICKS_SESSION_NOT_OPEN`       | `"Solo puedes registrar pronósticos en sesiones programadas"`                         |
+| Score out of range        | 400  | —                              | `"El marcador debe ser un número entero entre 0 y 99"`                                |
+| Category not in session   | 422  | `PICK_CATEGORY_NOT_IN_SESSION` | `"La categoría de pronóstico no pertenece a esta sesión"`                             |
 
 ---
 
@@ -213,6 +221,7 @@ async saveSessionPicks(
 ### Unit tests (Jest, no DB)
 
 **`get-upcoming-sessions.use-case.spec.ts`**
+
 - throws 404 when qimela not found
 - throws 403 when user is neither creator nor subscriber
 - throws 422 when qimela has no eventId
@@ -223,6 +232,7 @@ async saveSessionPicks(
 - asserts `scheduledAt.gt` passed to Prisma equals cutoff
 
 **`get-all-sessions.use-case.spec.ts`**
+
 - throws 404/403/422 (same guards)
 - groups sessions by phase correctly (2 phases → 2 groups)
 - phases returned in `order ASC`
@@ -231,6 +241,7 @@ async saveSessionPicks(
 - returns empty array when event has no sessions
 
 **`save-session-picks.use-case.spec.ts`**
+
 - throws 404/403/422 (same guards)
 - throws 404 when session not found
 - throws 422 `PICKS_DEADLINE_PASSED` when session starts in 2 minutes
@@ -242,6 +253,7 @@ async saveSessionPicks(
 - returns picks from repository
 
 **`qimela.controller.spec.ts` additions**
+
 - `getUpcomingSessions` delegates to use case with correct args and returns result
 - `getAllSessions` delegates to use case with correct args and returns result
 - `saveSessionPicks` delegates to use case with all params and returns 200

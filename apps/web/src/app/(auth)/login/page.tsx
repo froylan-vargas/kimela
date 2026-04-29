@@ -39,12 +39,12 @@ function LoginForm() {
       ) {
         setNeedsVerification(true);
         setError(
-          "Tu correo todavía no ha sido verificado. Revisa tu bandeja de entrada o vuelve a solicitar el mensaje de confirmación."
+          "Tu correo todavía no ha sido verificado. Revisa tu bandeja de entrada o vuelve a solicitar el mensaje de confirmación.",
         );
       } else if (err instanceof ApiError && err.status === 401) {
         setError("Correo o contraseña incorrectos");
       } else {
-        console.error('[LoginPage] Unexpected login error', err);
+        console.error("[LoginPage] Unexpected login error", err);
         setError("Algo salió mal, intenta de nuevo");
       }
     } finally {
@@ -64,7 +64,7 @@ function LoginForm() {
     try {
       await authApi.resendVerification(email);
       setResendMessage(
-        "Si tu cuenta sigue pendiente de verificación, te enviamos un nuevo correo. Revisa también spam o correo no deseado."
+        "Si tu cuenta sigue pendiente de verificación, te enviamos un nuevo correo. Revisa también spam o correo no deseado.",
       );
     } catch {
       setResendMessage("No se pudo procesar la solicitud. Inténtalo de nuevo.");
@@ -104,11 +104,7 @@ function LoginForm() {
         />
       </div>
 
-      <button
-        type="submit"
-        className={styles.submit}
-        disabled={isSubmitting}
-      >
+      <button type="submit" className={styles.submit} disabled={isSubmitting}>
         {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
       </button>
 
@@ -143,7 +139,7 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <h1>Qimela</h1>
+          <h1>qimela</h1>
           <p>Inicia sesión en tu cuenta</p>
         </div>
 
@@ -152,8 +148,7 @@ export default function LoginPage() {
         </Suspense>
 
         <p className={styles.footer}>
-          ¿No tienes cuenta?{" "}
-          <Link href="/register">Crea una</Link>
+          ¿No tienes cuenta? <Link href="/register">Crea una</Link>
         </p>
       </div>
     </div>

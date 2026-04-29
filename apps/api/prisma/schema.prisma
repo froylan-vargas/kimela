@@ -25,7 +25,7 @@ model User {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  qimelas                 Qimela[]                 @relation("QimelaCreator")
+  qimelas                 qimela[]                 @relation("QimelaCreator")
   subscriptions           Subscription[]
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
@@ -49,7 +49,7 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model Qimela {
+model qimela {
   id        String       @id @default(uuid())
   name      String       @db.VarChar(50)
   status    QimelaStatus @default(ACTIVE)
@@ -91,7 +91,7 @@ model InviteToken {
   createdAt DateTime @default(now()) @map("created_at")
 
   qimelaId String @unique @map("qimela_id")
-  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+  qimela   qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
 
   @@map("invite_tokens")
 }
@@ -105,7 +105,7 @@ model Subscription {
   user   User   @relation(fields: [userId], references: [id])
 
   qimelaId String @map("qimela_id")
-  qimela   Qimela @relation(fields: [qimelaId], references: [id])
+  qimela   qimela @relation(fields: [qimelaId], references: [id])
 
   labels SubscriptionLabel[]
 
@@ -121,7 +121,7 @@ model QimelaLabel {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   qimelaId String @map("qimela_id")
-  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+  qimela   qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
 
   subscriptionLabels SubscriptionLabel[]
 
@@ -191,7 +191,7 @@ model Sport {
   leagues        League[]
   pickCategories PickCategory[]
   sessions       Session[]
-  qimelas        Qimela[]
+  qimelas        qimela[]
 
   @@map("sports")
 }
@@ -208,7 +208,7 @@ model League {
   sport      Sport             @relation(fields: [sportId], references: [id])
   contenders ContenderLeague[]
   events     Event[]
-  qimelas    Qimela[]
+  qimelas    qimela[]
 
   @@unique([slug, sportId])
   @@unique([name, sportId])
@@ -285,7 +285,7 @@ model Event {
   league   League @relation(fields: [leagueId], references: [id])
 
   phases  Phase[]
-  qimelas Qimela[]
+  qimelas qimela[]
 
   @@map("events")
 }
@@ -304,8 +304,8 @@ model Phase {
 
   sessions Session[]
 
-  qimelaStarts Qimela[] @relation("QimelaStartPhase")
-  qimelaEnds   Qimela[] @relation("QimelaEndPhase")
+  qimelaStarts qimela[] @relation("QimelaStartPhase")
+  qimelaEnds   qimela[] @relation("QimelaEndPhase")
 
   @@unique([eventId, order])
   @@map("phases")
@@ -464,7 +464,7 @@ model QimelaRule {
   rule   Rule   @relation(fields: [ruleId], references: [id])
 
   qimelaId String @map("qimela_id")
-  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+  qimela   qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
 
   @@unique([qimelaId, ruleId])
   @@map("qimela_rules")
@@ -487,7 +487,7 @@ model UserSessionPoints {
   session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   qimelaId String @map("qimela_id")
-  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+  qimela   qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
 
   @@unique([userId, sessionId, qimelaId])
   @@index([qimelaId, userId])
@@ -506,7 +506,7 @@ model UserQimelaPoints {
   user   User   @relation(fields: [userId], references: [id])
 
   qimelaId String @map("qimela_id")
-  qimela   Qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+  qimela   qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
 
   @@unique([userId, qimelaId])
   @@index([qimelaId, totalPoints(sort: Desc), exactResultsCount(sort: Desc)])

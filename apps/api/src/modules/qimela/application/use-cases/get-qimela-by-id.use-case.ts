@@ -1,7 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 export interface GetQimelaByIdPhase {
   id: string;
@@ -39,9 +42,9 @@ export interface GetQimelaByIdResponse {
 
 @Injectable()
 export class GetQimelaByIdUseCase {
-
   constructor(
-    @InjectPinoLogger(GetQimelaByIdUseCase.name) private readonly logger: PinoLogger,
+    @InjectPinoLogger(GetQimelaByIdUseCase.name)
+    private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
@@ -52,7 +55,7 @@ export class GetQimelaByIdUseCase {
 
     const qimela = await this.qimelaRepository.findById(id);
     if (!qimela) {
-      throw new NotFoundException(`Qimela ${id} not found`);
+      throw new NotFoundException(`qimela ${id} not found`);
     }
 
     // Fetch event phases, qimela rules, and subscription status in parallel
@@ -61,7 +64,7 @@ export class GetQimelaByIdUseCase {
         ? this.prisma.phase.findMany({
             where: { eventId: qimela.eventId },
             select: { id: true, name: true, order: true, status: true },
-            orderBy: { order: 'asc' },
+            orderBy: { order: "asc" },
           })
         : Promise.resolve([]),
       this.prisma.qimelaRule.findMany({

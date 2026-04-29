@@ -22,21 +22,21 @@
   color: $color-text-main;
   background: $color-surface;
   border: 1px solid $color-border;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 4px 16px rgba($color-navy-deep, 0.10);
   max-width: 360px;
   pointer-events: all;
   border-left: 3px solid transparent;
 
-  &--success { border-left-color: #22c55e; }
-  &--error   { border-left-color: #ef4444; }
+  &--success { border-left-color: $color-primary; }
+  &--error   { border-left-color: $color-navy; }
 }
 
 .icon {
   flex-shrink: 0;
   font-size: 18px;
 
-  .toast--success & { color: #22c55e; }
-  .toast--error   & { color: #ef4444; }
+  .toast--success & { color: $color-primary; }
+  .toast--error   & { color: $color-navy; }
 }
 
 .message {

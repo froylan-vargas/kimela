@@ -1,20 +1,22 @@
 ---
-name: Qimela Codebase Architecture Snapshot
-description: Key structural facts about the Qimela monorepo — module boundaries, layering style, Prisma schema entities, and auth/domain state
+name: qimela Codebase Architecture Snapshot
+description: Key structural facts about the qimela monorepo — module boundaries, layering style, Prisma schema entities, and auth/domain state
 type: project
 ---
 
-The Qimela repo is a pnpm monorepo with two apps: `apps/api` (Nest.js, port 3000) and `apps/web` (Next.js).
+The qimela repo is a pnpm monorepo with two apps: `apps/api` (Nest.js, port 3000) and `apps/web` (Next.js).
 
 **Backend module structure** follows a strict four-layer hexagonal pattern per module:
+
 - `presentation/` — controllers, DTOs, decorators
 - `application/` — use-cases, application DTOs, mappers
 - `domain/` — entities, repository interfaces, enums
 - `infrastructure/` — Prisma persistence, infrastructure module binding
 
 **Prisma schema entities (as of 2026-04-09):**
+
 - `User` — id (uuid), email (unique), name, role (UserRole enum: USER/ADMIN), passwordHash, emailVerifiedAt, createdAt, updatedAt
-- `Qimela` — id, name, description, sport (String, to be deprecated), status (QimelaStatus enum), creatorId (FK to User). sport field should eventually be replaced by Event → League → Sport traversal.
+- `qimela` — id, name, description, sport (String, to be deprecated), status (QimelaStatus enum), creatorId (FK to User). sport field should eventually be replaced by Event → League → Sport traversal.
 - `Subscription` — userId + qimelaId composite unique join table
 - `RefreshToken`, `EmailVerificationToken`, `PasswordResetToken` — auth token tables with tokenHash, expiresAt, usedAt/revokedAt
 - `Sport` — id, name (unique), imgUrl
@@ -24,10 +26,11 @@ The Qimela repo is a pnpm monorepo with two apps: `apps/api` (Nest.js, port 3000
 
 **Domain schema design decisions (2026-04-09):**
 See `docs/features/schema/entity-persistance-logic.md` for the full implementation plan including Event, Phase, Session, PickCategory, SessionResult, UserPick models. Key decisions:
+
 - Sport-agnostic via PickCategory (named slots per sport) + EAV-style result/pick rows
 - PickCategory defined at Sport level, overridable per session via SessionPickCategory
 - SessionResult and UserPick each have both `contenderId` (nullable FK) and `value` (nullable String) to handle contender-slot vs scalar categories
-- Qimela links to Event (nullable FK) rather than raw sport string
+- qimela links to Event (nullable FK) rather than raw sport string
 
 **Frontend stack:** Next.js 15, React 19, TanStack Query v5. SCSS + CSS Modules. Vitest + React Testing Library.
 

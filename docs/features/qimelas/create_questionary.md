@@ -67,7 +67,7 @@
 
 | #   | Acción                                                            | Resultado esperado                                |
 | --- | ----------------------------------------------------------------- | ------------------------------------------------- |
-| 5.1 | Enviar formulario correctamente completado                        | Qimela creada; usuario redirigido a `/qimela/:id` |
+| 5.1 | Enviar formulario correctamente completado                        | qimela creada; usuario redirigido a `/qimela/:id` |
 | 5.2 | Página de detalle muestra el nombre de la qimela recién creada    | Nombre correcto visible como título               |
 | 5.3 | Página de detalle muestra badge de estado "Próxima"               | Badge visible si la startPhase está en UPCOMING   |
 | 5.4 | Crear qimela cuya startPhase ya está ACTIVE                       | Badge de estado muestra "En curso" directamente   |
@@ -90,14 +90,14 @@
 
 | #   | Acción                                                        | Resultado esperado                                                              |
 | --- | ------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 7.1 | Qimela en UPCOMING — campo nombre                             | Editable                                                                        |
-| 7.2 | Qimela en UPCOMING — select de etapas                         | Las 3 opciones disponibles                                                      |
-| 7.3 | Qimela en ACTIVE — campo nombre                               | Editable                                                                        |
-| 7.4 | Qimela en ACTIVE con etapas = REGULAR_SEASON                  | Select muestra "Temporada regular" y "Temporada completa"; puede cambiar a FULL |
-| 7.5 | Qimela en ACTIVE con etapas = PLAYOFFS o FULL                 | Select deshabilitado; no puede cambiar                                          |
-| 7.6 | Qimela en COMPLETED — campo nombre                            | Deshabilitado                                                                   |
-| 7.7 | Qimela en COMPLETED — select de etapas                        | Deshabilitado                                                                   |
-| 7.8 | Qimela en COMPLETED — botón "Guardar cambios"                 | Deshabilitado                                                                   |
+| 7.1 | qimela en UPCOMING — campo nombre                             | Editable                                                                        |
+| 7.2 | qimela en UPCOMING — select de etapas                         | Las 3 opciones disponibles                                                      |
+| 7.3 | qimela en ACTIVE — campo nombre                               | Editable                                                                        |
+| 7.4 | qimela en ACTIVE con etapas = REGULAR_SEASON                  | Select muestra "Temporada regular" y "Temporada completa"; puede cambiar a FULL |
+| 7.5 | qimela en ACTIVE con etapas = PLAYOFFS o FULL                 | Select deshabilitado; no puede cambiar                                          |
+| 7.6 | qimela en COMPLETED — campo nombre                            | Deshabilitado                                                                   |
+| 7.7 | qimela en COMPLETED — select de etapas                        | Deshabilitado                                                                   |
+| 7.8 | qimela en COMPLETED — botón "Guardar cambios"                 | Deshabilitado                                                                   |
 | 7.9 | Intentar hacer PATCH /qimelas/:id en qimela COMPLETED vía API | 422 Unprocessable Entity                                                        |
 
 ---
@@ -119,9 +119,9 @@
 
 | #   | Acción                                                | Resultado esperado                           |
 | --- | ----------------------------------------------------- | -------------------------------------------- |
-| 9.1 | Admin activa la fase de inicio de una qimela UPCOMING | Qimela cambia a ACTIVE automáticamente       |
-| 9.2 | Admin completa la fase de fin de una qimela ACTIVE    | Qimela cambia a COMPLETED automáticamente    |
-| 9.3 | Creator crea qimela cuya startPhase ya está ACTIVE    | Qimela se crea en estado ACTIVE directamente |
+| 9.1 | Admin activa la fase de inicio de una qimela UPCOMING | qimela cambia a ACTIVE automáticamente       |
+| 9.2 | Admin completa la fase de fin de una qimela ACTIVE    | qimela cambia a COMPLETED automáticamente    |
+| 9.3 | Creator crea qimela cuya startPhase ya está ACTIVE    | qimela se crea en estado ACTIVE directamente |
 
 ---
 
@@ -177,7 +177,7 @@
 | 13.2 | Usuario tiene qimelas en estado ACTIVE      | Aparecen en el dropdown                     |
 | 13.3 | Usuario tiene qimelas en estado COMPLETED   | NO aparecen en el dropdown                  |
 | 13.4 | Usuario no tiene qimelas UPCOMING ni ACTIVE | Dropdown vacío                              |
-| 13.5 | Qimela pasa de ACTIVE a COMPLETED           | Desaparece del dropdown en la próxima carga |
+| 13.5 | qimela pasa de ACTIVE a COMPLETED           | Desaparece del dropdown en la próxima carga |
 
 ---
 
@@ -204,8 +204,8 @@
 | 15.6  | Crear qimela con evento sin fases del tipo solicitado                                             | 422 Unprocessable Entity                                                                |
 | 15.7  | Crear qimela sin campo `coveredStages`                                                            | 400 Bad Request                                                                         |
 | 15.8  | Crear qimela con `coveredStages` inválido                                                         | 400 Bad Request                                                                         |
-| 15.9  | Crear qimela con startPhase ACTIVE                                                                | Qimela creada con status ACTIVE                                                         |
-| 15.10 | Crear qimela con startPhase UPCOMING                                                              | Qimela creada con status UPCOMING                                                       |
+| 15.9  | Crear qimela con startPhase ACTIVE                                                                | qimela creada con status ACTIVE                                                         |
+| 15.10 | Crear qimela con startPhase UPCOMING                                                              | qimela creada con status UPCOMING                                                       |
 
 ---
 

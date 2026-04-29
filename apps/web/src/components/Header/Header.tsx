@@ -11,7 +11,7 @@ export default function Header() {
 
   return (
     <header className={styles.navbar}>
-      <Logo href="/dashboard" />
+      <Logo href="/dashboard" variant="inverse" />
       <div className={styles.centerGroup}>
         <QimelaSelector />
       </div>

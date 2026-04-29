@@ -10,7 +10,7 @@ export interface QimelaEventPhase {
   status: string;
 }
 
-export interface Qimela {
+export interface qimela {
   id: string;
   name: string;
   sportId: string;
@@ -26,7 +26,7 @@ export interface QimelasMeta {
 }
 
 export interface QimelasResponse {
-  data: Qimela[];
+  data: qimela[];
   meta: QimelasMeta;
 }
 

@@ -38,7 +38,7 @@
   padding: $spacing-xl $spacing-lg;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba($color-navy-deep, 0.06);
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
@@ -98,17 +98,17 @@
   white-space: nowrap;
 
   &--upcoming {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: rgba($color-navy, 0.1);
+    color: $color-navy;
   }
 
   &--active {
-    background: #dcfce7;
-    color: #15803d;
+    background: rgba($color-primary, 0.16);
+    color: $color-primary-text;
   }
 
   &--completed {
-    background: #f4f4f5;
+    background: rgba($color-navy, 0.08);
     color: $color-text-secondary;
   }
 }

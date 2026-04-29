@@ -33,9 +33,11 @@ function ResetPasswordContent() {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logo}>
-            <h1>Qimela</h1>
+            <h1>qimela</h1>
           </div>
-          <div className={styles.error}>El enlace ha expirado o no es válido.</div>
+          <div className={styles.error}>
+            El enlace ha expirado o no es válido.
+          </div>
         </div>
       </div>
     );
@@ -82,10 +84,11 @@ function ResetPasswordContent() {
       <div className={styles.container}>
         <div className={styles.card}>
           <div className={styles.logo}>
-            <h1>Qimela</h1>
+            <h1>qimela</h1>
           </div>
           <div className={styles.successBox}>
-            ¡Contraseña restablecida correctamente. Redirigiendo al inicio de sesión...
+            ¡Contraseña restablecida correctamente. Redirigiendo al inicio de
+            sesión...
           </div>
         </div>
       </div>
@@ -96,7 +99,7 @@ function ResetPasswordContent() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <h1>Qimela</h1>
+          <h1>qimela</h1>
           <p>Establece tu nueva contraseña</p>
         </div>
 

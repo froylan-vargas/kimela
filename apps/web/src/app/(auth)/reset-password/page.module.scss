@@ -16,7 +16,7 @@
   padding: $spacing-xl $spacing-lg;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba($color-navy-deep, 0.06);
 }
 
 .logo {
@@ -60,7 +60,7 @@
     border-radius: $radius-sm;
     font-size: $font-size-base;
     font-family: $font-family-base;
-    background: #fff;
+    background: $color-surface-solid;
     color: $color-text-main;
     transition: border-color 0.15s ease;
 
@@ -76,12 +76,12 @@
 }
 
 .error {
-  background: #fff1f0;
-  border: 1px solid #ffa39e;
+  background: rgba($color-navy, 0.08);
+  border: 1px solid rgba($color-navy, 0.28);
   border-radius: $radius-sm;
   padding: $spacing-sm $spacing-md;
   font-size: 14px;
-  color: #cf1322;
+  color: $color-navy-deep;
 }
 
 .submit {
@@ -109,12 +109,12 @@
 }
 
 .successBox {
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  background: rgba($color-primary, 0.12);
+  border: 1px solid rgba($color-primary, 0.34);
   border-radius: $radius-sm;
   padding: $spacing-md;
   font-size: 14px;
-  color: #389e0d;
+  color: $color-primary-text;
   text-align: center;
   line-height: 1.5;
 }

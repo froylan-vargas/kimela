@@ -1,7 +1,16 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 const MAX_LABELS = 3;
 
@@ -24,29 +33,40 @@ export interface CreateQimelaLabelResponse {
 
 @Injectable()
 export class CreateQimelaLabelUseCase {
-
   constructor(
-    @InjectPinoLogger(CreateQimelaLabelUseCase.name) private readonly logger: PinoLogger,
-    @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
+    @InjectPinoLogger(CreateQimelaLabelUseCase.name)
+    private readonly logger: PinoLogger,
+    @Inject(QIMELA_REPOSITORY)
+    private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
-  async execute(command: CreateQimelaLabelCommand): Promise<CreateQimelaLabelResponse> {
+  async execute(
+    command: CreateQimelaLabelCommand,
+  ): Promise<CreateQimelaLabelResponse> {
     this.logger.info(`Creating label for qimela ${command.qimelaId}`);
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
-    if (!qimela) throw new NotFoundException('Qimela not found');
+    if (!qimela) throw new NotFoundException("qimela not found");
     if (qimela.creatorId !== command.requesterId) {
-      throw new ForbiddenException('Only the creator can manage labels');
+      throw new ForbiddenException("Only the creator can manage labels");
     }
 
-    const count = await this.prisma.qimelaLabel.count({ where: { qimelaId: command.qimelaId } });
+    const count = await this.prisma.qimelaLabel.count({
+      where: { qimelaId: command.qimelaId },
+    });
     if (count >= MAX_LABELS) {
-      throw new BadRequestException(`Maximum of ${MAX_LABELS} labels per qimela`);
+      throw new BadRequestException(
+        `Maximum of ${MAX_LABELS} labels per qimela`,
+      );
     }
 
     const label = await this.prisma.qimelaLabel.create({
-      data: { name: command.name.trim(), color: command.color, qimelaId: command.qimelaId },
+      data: {
+        name: command.name.trim(),
+        color: command.color,
+        qimelaId: command.qimelaId,
+      },
     });
 
     return { data: { id: label.id, name: label.name, color: label.color } };

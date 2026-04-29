@@ -136,8 +136,8 @@
   transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
 
   &:hover {
-    color: #dc2626;
-    background: #fee2e2;
+    color: $color-navy-deep;
+    background: rgba($color-navy, 0.1);
   }
 }
 
@@ -164,18 +164,18 @@
 }
 
 .statusBadge_UPCOMING {
-  background: #e5e7eb;
-  color: #6b7280;
+  background: rgba($color-navy, 0.12);
+  color: $color-text-secondary;
 }
 
 .statusBadge_ACTIVE {
-  background: #d1fae5;
-  color: #065f46;
+  background: rgba($color-primary, 0.18);
+  color: $color-primary-text;
 }
 
 .statusBadge_COMPLETED {
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: rgba($color-navy, 0.08);
+  color: rgba($color-navy-deep, 0.48);
 }
 
 // ── Phase action buttons ──────────────────────────────────────────────────────
@@ -207,37 +207,37 @@
 
 .activateBtn {
   background: transparent;
-  border: 1px solid #0ea5e9;
-  color: #0369a1;
+  border: 1px solid $color-navy;
+  color: $color-navy;
 
   &:hover {
-    background: #e0f2fe;
-    border-color: #0369a1;
+    background: rgba($color-navy, 0.1);
+    border-color: $color-navy;
   }
 
   &:disabled {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    color: #64748b;
+    background: $color-surface-solid;
+    border-color: $color-border-strong;
+    color: $color-text-secondary;
     cursor: not-allowed;
     opacity: 1;
 
     &:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-      color: #64748b;
+      background: $color-surface-solid;
+      border-color: $color-border-strong;
+      color: $color-text-secondary;
     }
   }
 }
 
 .completeBtn {
   background: transparent;
-  border: 1px solid #10b981;
-  color: #065f46;
+  border: 1px solid $color-primary;
+  color: $color-primary-text;
 
   &:hover {
-    background: #d1fae5;
-    border-color: #065f46;
+    background: rgba($color-primary, 0.18);
+    border-color: $color-primary-text;
   }
 
   &:disabled {

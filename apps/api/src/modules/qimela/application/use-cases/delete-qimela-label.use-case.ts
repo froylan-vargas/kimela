@@ -1,7 +1,15 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 export interface DeleteQimelaLabelCommand {
   qimelaId: string;
@@ -15,26 +23,31 @@ export interface DeleteQimelaLabelResponse {
 
 @Injectable()
 export class DeleteQimelaLabelUseCase {
-
   constructor(
-    @InjectPinoLogger(DeleteQimelaLabelUseCase.name) private readonly logger: PinoLogger,
-    @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
+    @InjectPinoLogger(DeleteQimelaLabelUseCase.name)
+    private readonly logger: PinoLogger,
+    @Inject(QIMELA_REPOSITORY)
+    private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
-  async execute(command: DeleteQimelaLabelCommand): Promise<DeleteQimelaLabelResponse> {
-    this.logger.info(`Deleting label ${command.labelId} from qimela ${command.qimelaId}`);
+  async execute(
+    command: DeleteQimelaLabelCommand,
+  ): Promise<DeleteQimelaLabelResponse> {
+    this.logger.info(
+      `Deleting label ${command.labelId} from qimela ${command.qimelaId}`,
+    );
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
-    if (!qimela) throw new NotFoundException('Qimela not found');
+    if (!qimela) throw new NotFoundException("qimela not found");
     if (qimela.creatorId !== command.requesterId) {
-      throw new ForbiddenException('Only the creator can manage labels');
+      throw new ForbiddenException("Only the creator can manage labels");
     }
 
     const label = await this.prisma.qimelaLabel.findFirst({
       where: { id: command.labelId, qimelaId: command.qimelaId },
     });
-    if (!label) throw new NotFoundException('Label not found');
+    if (!label) throw new NotFoundException("Label not found");
 
     await this.prisma.qimelaLabel.delete({ where: { id: command.labelId } });
 

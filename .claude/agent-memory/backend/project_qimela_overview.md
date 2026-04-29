@@ -1,6 +1,6 @@
 ---
-name: Qimela project overview
-description: Core architecture, key patterns, and important domain facts for the Qimela backend
+name: qimela project overview
+description: Core architecture, key patterns, and important domain facts for the qimela backend
 type: project
 ---
 

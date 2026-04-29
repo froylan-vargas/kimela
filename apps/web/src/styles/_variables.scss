@@ -1,21 +1,32 @@
+@use "sass:color";
+
 // ─── Brand colors ────────────────────────────────────────────────────────────
-$color-primary: #48b7a9;
-$color-primary-hover: #379a8d;
-$color-primary-light: #e7f6f3;
-$color-primary-contrast: #ffffff;
-$color-primary-text: #1f6f68;
+$color-navy-deep: #0f1f3d;
+$color-navy: #1a3460;
+$color-mint: #3ecbb5;
+$color-off-white: #f4faff;
+
+$color-primary: $color-mint;
+$color-primary-hover: color.mix($color-mint, $color-navy, 88%);
+$color-primary-light: color.mix($color-off-white, $color-mint, 82%);
+$color-primary-contrast: $color-navy-deep;
+$color-primary-text: $color-navy;
 
 // ─── Surface / background ────────────────────────────────────────────────────
-$color-bg: #fafafb;
-$color-surface: rgba(255, 255, 255, 0.75);
-$color-navbar-bg: rgba(255, 255, 255, 0.85);
+$color-bg: $color-off-white;
+$color-surface: rgba($color-off-white, 0.86);
+$color-surface-solid: $color-off-white;
+$color-surface-strong: $color-navy;
+$color-navbar-bg: rgba($color-navy-deep, 0.96);
 
 // ─── Text ────────────────────────────────────────────────────────────────────
-$color-text-main: #1a1a1a;
-$color-text-secondary: #71717a;
+$color-text-main: $color-navy-deep;
+$color-text-secondary: rgba($color-navy-deep, 0.66);
+$color-text-inverse: $color-off-white;
 
 // ─── Borders ─────────────────────────────────────────────────────────────────
-$color-border: rgba(228, 228, 231, 0.8);
+$color-border: rgba($color-navy, 0.18);
+$color-border-strong: rgba($color-navy, 0.34);
 
 // ─── Border radius ───────────────────────────────────────────────────────────
 $radius-lg: 24px;

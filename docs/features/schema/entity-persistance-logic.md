@@ -84,7 +84,7 @@ Scoring logic is then: for each pick, find the matching result row on `(sessionI
 - `Phase` groups sessions within an event with an explicit `order` integer for sequencing (Group Stage = 1, Knockout = 2, etc.).
 - `Session` belongs to a `Phase` and holds the scheduled time (`scheduledAt`) plus a `status` for lifecycle management.
 
-The `Qimela` model (the pool itself) links to an `Event` — a pool is played against a specific event instance, not the permanent league.
+The `qimela` model (the pool itself) links to an `Event` — a pool is played against a specific event instance, not the permanent league.
 
 ---
 
@@ -128,7 +128,7 @@ model Event {
   league      League      @relation(fields: [leagueId], references: [id])
 
   phases      Phase[]
-  qimelas     Qimela[]
+  qimelas     qimela[]
 
   @@map("events")
 }
@@ -291,7 +291,7 @@ pickedInPicks          UserPick[]         @relation("PickedContender")
 // Add to model User:
 picks  UserPick[]
 
-// Add to model Qimela:
+// Add to model qimela:
 eventId  String?  @map("event_id")
 event    Event?   @relation(fields: [eventId], references: [id])
 ```
@@ -301,6 +301,6 @@ event    Event?   @relation(fields: [eventId], references: [id])
 ### 4. Scope notes
 
 - Don't do any api change yet, just schema and migartions.
-- The `Qimela.sport` string field already in the schema should be deprecated in favor of the `Qimela → Event → League → Sport` traversal once event data is backfilled.
-- Point weighting per category (the `points` field on `PickCategory`) is a base weight. A scoring engine can multiply or modify it based on Qimela-specific rules — that configuration layer is not part of this schema design.
+- The `qimela.sport` string field already in the schema should be deprecated in favor of the `qimela → Event → League → Sport` traversal once event data is backfilled.
+- Point weighting per category (the `points` field on `PickCategory`) is a base weight. A scoring engine can multiply or modify it based on qimela-specific rules — that configuration layer is not part of this schema design.
 - Deadlines for pick submission (lock time before a session starts) are enforced at the application layer using `Session.scheduledAt`, not as a separate schema field.

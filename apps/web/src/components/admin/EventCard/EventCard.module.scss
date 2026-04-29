@@ -5,14 +5,14 @@
   flex-direction: column;
   gap: $spacing-sm;
   padding: $spacing-md;
-  background: #fff;
+  background: $color-surface-solid;
   border: 1px solid $color-border;
   border-radius: $radius-md;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 
   &:hover {
-    border-color: #cbcbd0;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border-color: $color-border-strong;
+    box-shadow: 0 4px 16px rgba($color-navy-deep, 0.06);
   }
 }
 
@@ -35,8 +35,8 @@
 }
 
 .badgeMatchup {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: rgba($color-navy, 0.1);
+  color: $color-navy;
 }
 
 .badgeRace {

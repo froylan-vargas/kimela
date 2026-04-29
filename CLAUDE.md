@@ -1,4 +1,4 @@
-# Qimela
+# qimela
 
 system to create, manage and participate in sports pools
 
@@ -30,8 +30,8 @@ system to create, manage and participate in sports pools
 
 ## Definitions
 
-- Qimela: A qimela is the representation of a single sport pool, a qimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.
-- Sports: Qimela pools can be of multiple events e.g. soccer, f1, tennis, etc.
+- qimela: A qimela is the representation of a single sport pool, a qimela represents all the sessions(matches) and phases that are part of a sport event and the interaction of the users subscribed to it.
+- Sports: qimela pools can be of multiple events e.g. soccer, f1, tennis, etc.
 - Leagues: Leagues are not events, they are a group of contenders that will compete in an event e.g. Premier League, La Liga, Liga MX, Champions League, the World Cup will have its own league of international contenders, F1 has its own league of drivers.
 - Contenders: Contenders are the participants of an event, they are previously registered in a league and can be piolots, teams, players, etc.
 - Event: An event is a single sport event that happens in an specific point of time, for instance the league 'Liga MX' will exist forever but the Event 'Liga MX Clausura 2026' will only last 6 months.

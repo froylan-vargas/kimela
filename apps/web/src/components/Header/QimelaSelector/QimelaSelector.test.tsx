@@ -6,7 +6,7 @@ import QimelaSelector from "./QimelaSelector";
 import { QimelaProvider } from "@/context/QimelaContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { useQimelas } from "@/hooks/useQimelas";
-import type { Qimela, QimelasResponse } from "@/types/qimela";
+import type { qimela, QimelasResponse } from "@/types/qimela";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 vi.mock("next/navigation", () => ({
@@ -15,15 +15,22 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/hooks/useQimelas");
 vi.mock("@/lib/apiClient", () => ({
-  authApi: { me: vi.fn().mockRejectedValue(new Error("no user")), login: vi.fn(), logout: vi.fn() },
+  authApi: {
+    me: vi.fn().mockRejectedValue(new Error("no user")),
+    login: vi.fn(),
+    logout: vi.fn(),
+  },
   ApiError: class ApiError extends Error {
-    constructor(public status: number, message: string) {
+    constructor(
+      public status: number,
+      message: string,
+    ) {
       super(message);
     }
   },
 }));
 
-const sub1: Qimela = {
+const sub1: qimela = {
   id: "s1",
   name: "Liga MX",
   sportId: "sport-uuid-1",
@@ -32,7 +39,7 @@ const sub1: Qimela = {
   creatorId: "u1",
 };
 
-const sub2: Qimela = {
+const sub2: qimela = {
   id: "s2",
   name: "Premier League",
   sportId: "sport-uuid-1",
@@ -41,7 +48,7 @@ const sub2: Qimela = {
   creatorId: "u1",
 };
 
-const cre1: Qimela = {
+const cre1: qimela = {
   id: "c1",
   name: "NBA Pool",
   sportId: "sport-uuid-2",
@@ -83,7 +90,9 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe("QimelaSelector", () => {
   beforeEach(() => {
-    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
     mockUseQimelas();
   });
 
@@ -92,7 +101,12 @@ describe("QimelaSelector", () => {
   });
 
   it("shows 'Loading...' while fetching", () => {
-    mockUseQimelas({ data: undefined, isLoading: true, isPending: true, isSuccess: false });
+    mockUseQimelas({
+      data: undefined,
+      isLoading: true,
+      isPending: true,
+      isSuccess: false,
+    });
     render(<QimelaSelector />, { wrapper });
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });

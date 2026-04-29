@@ -1,6 +1,9 @@
-import { Qimela as PrismaQimela, QimelaStatus as PrismaQimelaStatus } from '@prisma/client';
-import { QimelaEntity } from '../../domain/qimela.entity';
-import { QimelaStatus } from '../../domain/qimela-status.enum';
+import {
+  Qimela as PrismaQimela,
+  QimelaStatus as PrismaQimelaStatus,
+} from "@prisma/client";
+import { QimelaEntity } from "../../domain/qimela.entity";
+import { QimelaStatus } from "../../domain/qimela-status.enum";
 
 export class QimelaPersistenceMapper {
   static toDomain(raw: PrismaQimela): QimelaEntity {

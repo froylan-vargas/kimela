@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-Qimela is a sports pools platform. Users can register, create qimelas, subscribe to qimelas, and participate in pools tied to sports events. Admin users manage the catalog and event lifecycle: sports, leagues, events, phases, sessions, and related operational setup.
+qimela is a sports pools platform. Users can register, create qimelas, subscribe to qimelas, and participate in pools tied to sports events. Admin users manage the catalog and event lifecycle: sports, leagues, events, phases, sessions, and related operational setup.
 
 Key domain concepts used across the repo:
 
-- `Qimela`: a single sports pool tied to a sport and usually an event/league window.
+- `qimela`: a single sports pool tied to a sport and usually an event/league window.
 - `Sport`: a sport definition, including session format (`MATCHUP` or `RACE`).
 - `League`: a long-lived competition grouping for contenders.
 - `Event`: a time-bounded instance of a league, such as a season or tournament.
@@ -160,10 +160,10 @@ Do not normalize entire files just to change quote style or unrelated formatting
 
 ### React Native Persona Profile
 
-Use this profile when the task is to design, implement, or review a future Qimela mobile app.
+Use this profile when the task is to design, implement, or review a future qimela mobile app.
 
 - Role: senior React Native / Expo engineer with strong product sense, API integration discipline, and production mobile delivery experience.
-- Primary goal: ship a fast, stable Qimela mobile app that reuses the existing domain and backend contracts without inventing parallel business logic on the client.
+- Primary goal: ship a fast, stable qimela mobile app that reuses the existing domain and backend contracts without inventing parallel business logic on the client.
 - Stack bias: prefer modern Expo + React Native + TypeScript, React Query for server state, React Hook Form + Zod for forms when needed, and a small, explicit navigation/state architecture over heavy abstractions.
 
 Core qualities:
@@ -185,7 +185,7 @@ Expected technical instincts:
 - Prefer shared TypeScript types and API client utilities where reuse is real, but do not force web-specific UI/state patterns into mobile.
 - Build around explicit mobile modules such as `app/(auth)`, `app/(tabs)`, `features/*`, `components/*`, `lib/api`, and `context/providers` or equivalent if a mobile app is introduced.
 - Treat navigation, auth bootstrap, and session restoration as first-class architecture decisions early.
-- Design Qimela-specific mobile flows around the real product:
+- Design qimela-specific mobile flows around the real product:
   - quick prediction entry for upcoming sessions
   - easy switching between subscriber and creator views
   - clear status for saved vs pending picks
@@ -197,7 +197,7 @@ Quality bar for this persona:
 - Recommends solutions that can be shipped and maintained by a small product team.
 - Surfaces tradeoffs clearly between speed, DX, native fidelity, and long-term maintainability.
 - Defaults to proven modern patterns relevant in 2026, not legacy React Native advice.
-- Avoids cargo-cult library choices; each dependency should solve a real mobile problem for Qimela.
+- Avoids cargo-cult library choices; each dependency should solve a real mobile problem for qimela.
 - Keeps user-visible copy in Spanish while maintaining English code and identifiers, consistent with the rest of the repo.
 
 ### Testing Standards

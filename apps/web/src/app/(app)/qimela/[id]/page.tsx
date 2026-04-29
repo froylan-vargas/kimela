@@ -34,12 +34,16 @@ export default function QimelaDetailPage() {
   const [editName, setEditName] = useState("");
   const [editStartPhaseId, setEditStartPhaseId] = useState<string | null>(null);
   const [editEndPhaseId, setEditEndPhaseId] = useState<string | null>(null);
-  const [editRuleValues, setEditRuleValues] = useState<Record<string, number | "">>({});
+  const [editRuleValues, setEditRuleValues] = useState<
+    Record<string, number | "">
+  >({});
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"subscribers" | "settings">("settings");
+  const [activeTab, setActiveTab] = useState<"subscribers" | "settings">(
+    "settings",
+  );
 
   useEffect(() => {
     qimelasApi
@@ -70,7 +74,7 @@ export default function QimelaDetailPage() {
   if (error || !qimela) {
     return (
       <main className={styles.page}>
-        <p className={styles.error}>{error ?? "Qimela no encontrada."}</p>
+        <p className={styles.error}>{error ?? "qimela no encontrada."}</p>
       </main>
     );
   }
@@ -87,13 +91,16 @@ export default function QimelaDetailPage() {
   const rulesChanged = qimela.rules.some(
     (r) => editRuleValues[r.ruleId] !== r.points,
   );
-  const hasChanged = nameChanged || startPhaseChanged || endPhaseChanged || rulesChanged;
+  const hasChanged =
+    nameChanged || startPhaseChanged || endPhaseChanged || rulesChanged;
 
   // Phase helpers
   const sortedPhases = [...(qimela.phases ?? [])].sort(
     (a, b) => a.order - b.order,
   );
-  const selectedStartPhase = sortedPhases.find((p) => p.id === editStartPhaseId);
+  const selectedStartPhase = sortedPhases.find(
+    (p) => p.id === editStartPhaseId,
+  );
   const endPhaseOptions = editStartPhaseId
     ? sortedPhases.filter((p) => {
         return !selectedStartPhase || p.order >= selectedStartPhase.order;
@@ -147,7 +154,7 @@ export default function QimelaDetailPage() {
     setSubscribing(true);
     try {
       await qimelasApi.subscribe(id);
-      setQimela((prev) => prev ? { ...prev, isSubscribed: true } : prev);
+      setQimela((prev) => (prev ? { ...prev, isSubscribed: true } : prev));
       await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
       toast("Te has suscrito a la qimela.", "success");
     } catch (err) {
@@ -271,8 +278,8 @@ export default function QimelaDetailPage() {
               <section className={styles.shareSection}>
                 <h2 className={styles.editHeading}>Enlace de invitación</h2>
                 <p className={styles.shareDescription}>
-                  Comparte este enlace para que otros usuarios puedan suscribirse a tu
-                  qimela.
+                  Comparte este enlace para que otros usuarios puedan
+                  suscribirse a tu qimela.
                 </p>
                 <div className={styles.shareActions}>
                   <button
@@ -316,14 +323,19 @@ export default function QimelaDetailPage() {
 
                       {sortedPhases.length > 0 && (
                         <div className={styles.field}>
-                          <label htmlFor="edit-start-phase" className={styles.label}>
+                          <label
+                            htmlFor="edit-start-phase"
+                            className={styles.label}
+                          >
                             Fase inicial
                           </label>
                           <select
                             id="edit-start-phase"
                             className={styles.select}
                             value={editStartPhaseId ?? ""}
-                            onChange={(e) => handleStartPhaseChange(e.target.value)}
+                            onChange={(e) =>
+                              handleStartPhaseChange(e.target.value)
+                            }
                             disabled={isActive}
                           >
                             <option value="">Selecciona la fase inicial</option>
@@ -338,7 +350,10 @@ export default function QimelaDetailPage() {
 
                       {sortedPhases.length > 0 && (
                         <div className={styles.field}>
-                          <label htmlFor="edit-end-phase" className={styles.label}>
+                          <label
+                            htmlFor="edit-end-phase"
+                            className={styles.label}
+                          >
                             Fase final
                           </label>
                           <select
@@ -388,7 +403,8 @@ export default function QimelaDetailPage() {
                                   const raw = e.target.value;
                                   setEditRuleValues((prev) => ({
                                     ...prev,
-                                    [rule.ruleId]: raw === "" ? "" : Number(raw),
+                                    [rule.ruleId]:
+                                      raw === "" ? "" : Number(raw),
                                   }));
                                 }}
                                 disabled={isActive}
@@ -399,7 +415,9 @@ export default function QimelaDetailPage() {
                       </div>
                     )}
 
-                    {saveError && <p className={styles.saveError}>{saveError}</p>}
+                    {saveError && (
+                      <p className={styles.saveError}>{saveError}</p>
+                    )}
 
                     <button
                       type="submit"

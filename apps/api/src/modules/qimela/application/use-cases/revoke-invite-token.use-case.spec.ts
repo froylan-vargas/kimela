@@ -1,21 +1,23 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { RevokeInviteTokenUseCase } from './revoke-invite-token.use-case';
-import { QimelaRepository } from '../../domain/qimela.repository';
-import { InviteTokenRepository } from '../../domain/invite-token.repository';
-import { QimelaEntity } from '../../domain/qimela.entity';
-import { InviteTokenEntity } from '../../domain/invite-token.entity';
-import { QimelaStatus } from '../../domain/qimela-status.enum';
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
+import { RevokeInviteTokenUseCase } from "./revoke-invite-token.use-case";
+import { QimelaRepository } from "../../domain/qimela.repository";
+import { InviteTokenRepository } from "../../domain/invite-token.repository";
+import { QimelaEntity } from "../../domain/qimela.entity";
+import { InviteTokenEntity } from "../../domain/invite-token.entity";
+import { QimelaStatus } from "../../domain/qimela-status.enum";
 
-const QIMELA_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-const CREATOR_ID = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-const OTHER_USER_ID = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
-const SPORT_ID = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
-const TOKEN_ID = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
+const QIMELA_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+const CREATOR_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+const OTHER_USER_ID = "cccccccc-cccc-cccc-cccc-cccccccccccc";
+const SPORT_ID = "dddddddd-dddd-dddd-dddd-dddddddddddd";
+const TOKEN_ID = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
 
-const makeQimela = (overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {}): QimelaEntity =>
+const makeQimela = (
+  overrides: Partial<ConstructorParameters<typeof QimelaEntity>[0]> = {},
+): QimelaEntity =>
   new QimelaEntity({
     id: QIMELA_ID,
-    name: 'Test Qimela',
+    name: "Test qimela",
     status: QimelaStatus.UPCOMING,
     sportId: SPORT_ID,
     eventId: null,
@@ -29,17 +31,19 @@ const makeQimela = (overrides: Partial<ConstructorParameters<typeof QimelaEntity
     ...overrides,
   });
 
-const makeInviteToken = (overrides: Partial<ConstructorParameters<typeof InviteTokenEntity>[0]> = {}): InviteTokenEntity =>
+const makeInviteToken = (
+  overrides: Partial<ConstructorParameters<typeof InviteTokenEntity>[0]> = {},
+): InviteTokenEntity =>
   new InviteTokenEntity({
     id: TOKEN_ID,
-    token: 'a'.repeat(64),
+    token: "a".repeat(64),
     qimelaId: QIMELA_ID,
     revoked: false,
     createdAt: new Date(),
     ...overrides,
   });
 
-describe('RevokeInviteTokenUseCase', () => {
+describe("RevokeInviteTokenUseCase", () => {
   let useCase: RevokeInviteTokenUseCase;
   let mockQimelaRepository: jest.Mocked<QimelaRepository>;
   let mockInviteTokenRepository: jest.Mocked<InviteTokenRepository>;
@@ -60,13 +64,24 @@ describe('RevokeInviteTokenUseCase', () => {
       revokeByQimelaId: jest.fn(),
     };
 
-const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), fatal: jest.fn() };
+    const mockLogger: any = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    };
 
-        useCase = new RevokeInviteTokenUseCase(mockLogger, mockQimelaRepository, mockInviteTokenRepository);
+    useCase = new RevokeInviteTokenUseCase(
+      mockLogger,
+      mockQimelaRepository,
+      mockInviteTokenRepository,
+    );
   });
 
-  describe('execute', () => {
-    it('throws NotFoundException when qimela not found', async () => {
+  describe("execute", () => {
+    it("throws NotFoundException when qimela not found", async () => {
       // Arrange
       mockQimelaRepository.findById.mockResolvedValue(null);
 
@@ -76,7 +91,7 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('throws ForbiddenException when requester is not the creator', async () => {
+    it("throws ForbiddenException when requester is not the creator", async () => {
       // Arrange
       mockQimelaRepository.findById.mockResolvedValue(makeQimela());
 
@@ -86,7 +101,7 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('throws NotFoundException when no invite token exists for the qimela', async () => {
+    it("throws NotFoundException when no invite token exists for the qimela", async () => {
       // Arrange
       mockQimelaRepository.findById.mockResolvedValue(makeQimela());
       mockInviteTokenRepository.findByQimelaId.mockResolvedValue(null);
@@ -97,10 +112,12 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('throws NotFoundException when invite token is already revoked', async () => {
+    it("throws NotFoundException when invite token is already revoked", async () => {
       // Arrange
       mockQimelaRepository.findById.mockResolvedValue(makeQimela());
-      mockInviteTokenRepository.findByQimelaId.mockResolvedValue(makeInviteToken({ revoked: true }));
+      mockInviteTokenRepository.findByQimelaId.mockResolvedValue(
+        makeInviteToken({ revoked: true }),
+      );
 
       // Act + Assert
       await expect(
@@ -108,10 +125,12 @@ const mockLogger: any = { trace: jest.fn(), debug: jest.fn(), info: jest.fn(), w
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('calls revoke with the token id on success', async () => {
+    it("calls revoke with the token id on success", async () => {
       // Arrange
       mockQimelaRepository.findById.mockResolvedValue(makeQimela());
-      mockInviteTokenRepository.findByQimelaId.mockResolvedValue(makeInviteToken());
+      mockInviteTokenRepository.findByQimelaId.mockResolvedValue(
+        makeInviteToken(),
+      );
       mockInviteTokenRepository.revoke.mockResolvedValue();
 
       // Act

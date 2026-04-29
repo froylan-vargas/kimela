@@ -51,12 +51,13 @@ export default function TablePositions({ qimelaId, currentUserId }: TablePositio
           className={styles.resultsLink}
           href={`/qimela/${qimelaId}/results`}
         >
-          Resultados
+          Ver resultados
         </Link>
       </div>
 
       {phases && phases.length > 0 && (
         <PhaseFilter
+          className={styles.phaseFilter}
           phases={phases}
           selectedPhaseId={selectedPhaseId}
           onChange={setSelectedPhaseId}

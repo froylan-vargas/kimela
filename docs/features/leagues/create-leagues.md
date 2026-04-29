@@ -2,7 +2,7 @@
 
 ## Definitions
 
-- Sports: Qimela pools can be of multiple events e.g. soccer, f1, tennis, etc.
+- Sports: qimela pools can be of multiple events e.g. soccer, f1, tennis, etc.
 - Leagues: Leagues are not events, they are a group of contenders that will compete in an event e.g. Premier League, La Liga, Liga MX, Champions League, the World Cup will have its own league of international contenders, F1 has its own league of drivers.
 - Contenders: Contenders are the participants of an event, they are previously registered in a league and can be piolots, teams, players, etc.
 
@@ -18,7 +18,7 @@
 
 The original schema used a plain `leagueId` FK on `Contender`, which would break the multi-league use case. The join table approach is the correct model.
 
-The `Qimela` model currently stores `sport` as a plain `String`. That field is intentionally left alone for now — linking it to the new `Sport` model is a separate migration concern and should be addressed when the Qimela feature is extended.
+The `qimela` model currently stores `sport` as a plain `String`. That field is intentionally left alone for now — linking it to the new `Sport` model is a separate migration concern and should be addressed when the qimela feature is extended.
 
 ---
 

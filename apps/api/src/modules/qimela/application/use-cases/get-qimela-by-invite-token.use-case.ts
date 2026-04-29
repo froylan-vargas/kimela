@@ -1,7 +1,15 @@
-import { GoneException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { INVITE_TOKEN_REPOSITORY, InviteTokenRepository } from '../../domain/invite-token.repository';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {
+  GoneException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  INVITE_TOKEN_REPOSITORY,
+  InviteTokenRepository,
+} from "../../domain/invite-token.repository";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 export interface GetQimelaByInviteTokenResponse {
   data: {
@@ -15,9 +23,9 @@ export interface GetQimelaByInviteTokenResponse {
 
 @Injectable()
 export class GetQimelaByInviteTokenUseCase {
-
   constructor(
-    @InjectPinoLogger(GetQimelaByInviteTokenUseCase.name) private readonly logger: PinoLogger,
+    @InjectPinoLogger(GetQimelaByInviteTokenUseCase.name)
+    private readonly logger: PinoLogger,
     @Inject(INVITE_TOKEN_REPOSITORY)
     private readonly inviteTokenRepository: InviteTokenRepository,
     private readonly prisma: PrismaService,
@@ -28,11 +36,11 @@ export class GetQimelaByInviteTokenUseCase {
 
     const inviteToken = await this.inviteTokenRepository.findByToken(token);
     if (!inviteToken) {
-      throw new NotFoundException('Invite link not found');
+      throw new NotFoundException("Invite link not found");
     }
 
     if (!inviteToken.isActive()) {
-      throw new GoneException('Este enlace de invitación ha sido revocado');
+      throw new GoneException("Este enlace de invitación ha sido revocado");
     }
 
     const qimela = await this.prisma.qimela.findUnique({
@@ -47,7 +55,7 @@ export class GetQimelaByInviteTokenUseCase {
     });
 
     if (!qimela) {
-      throw new NotFoundException('Qimela not found');
+      throw new NotFoundException("qimela not found");
     }
 
     return {

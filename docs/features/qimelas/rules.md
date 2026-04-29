@@ -54,14 +54,14 @@ model QimelaRule {
   rule     Rule    @relation(fields: [ruleId], references: [id])
 
   qimelaId String  @map("qimela_id")
-  qimela   Qimela  @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+  qimela   qimela  @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
 
   @@unique([qimelaId, ruleId])
   @@map("qimela_rules")
 }
 ```
 
-Add `rules QimelaRule[]` to the existing `Qimela` model.
+Add `rules QimelaRule[]` to the existing `qimela` model.
 
 Generate migration: `prisma migrate dev --name add_rule_and_qimela_rule`.
 
@@ -71,10 +71,10 @@ Add a `seedRules` function in `apps/api/prisma/seed/rules.ts`. Rules are keyed b
 
 Initial MATCHUP rules:
 
-| slug | question | sessionFormat |
-|------|----------|---------------|
-| `session_winner` | ¿Cuántos puntos obtiene el usuario si adivina el ganador del partido? | MATCHUP |
-| `exact_session_result` | ¿Cuántos puntos obtiene el usuario si adivina el resultado exacto del partido? | MATCHUP |
+| slug                   | question                                                                       | sessionFormat |
+| ---------------------- | ------------------------------------------------------------------------------ | ------------- |
+| `session_winner`       | ¿Cuántos puntos obtiene el usuario si adivina el ganador del partido?          | MATCHUP       |
+| `exact_session_result` | ¿Cuántos puntos obtiene el usuario si adivina el resultado exacto del partido? | MATCHUP       |
 
 Wire `seedRules` in `apps/api/prisma/seed/index.ts` (no dependencies on other seeds).
 

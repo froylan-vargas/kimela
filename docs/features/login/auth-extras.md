@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan adds two features to Qimela's existing JWT/cookie authentication:
+This plan adds two features to qimela's existing JWT/cookie authentication:
 
 1. **Email confirmation** — Verify the user owns the email they registered with before granting full access.
 2. **Password recovery** — Let users reset a forgotten password via a time-limited email link.
@@ -71,7 +71,9 @@ auth/domain/
 **`email-verification-token.repository.ts`**
 
 ```ts
-export const EMAIL_VERIFICATION_TOKEN_REPOSITORY = Symbol('EMAIL_VERIFICATION_TOKEN_REPOSITORY');
+export const EMAIL_VERIFICATION_TOKEN_REPOSITORY = Symbol(
+  "EMAIL_VERIFICATION_TOKEN_REPOSITORY",
+);
 
 export interface EmailVerificationTokenProps {
   id: string;
@@ -133,7 +135,10 @@ export class SendVerificationEmailUseCase {
 
     // 2. Generate a random token (uuid v4)
     const rawToken = uuidv4();
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     // 3. Save hashed token with 24h expiry
     await this.tokenRepo.create(
@@ -149,7 +154,11 @@ export class SendVerificationEmailUseCase {
 
     // 4. Send email with link containing the RAW token
     const confirmUrl = `${process.env.FRONTEND_URL}/confirm-email?token=${rawToken}`;
-    await this.emailService.sendVerificationEmail(user.email, user.name, confirmUrl);
+    await this.emailService.sendVerificationEmail(
+      user.email,
+      user.name,
+      confirmUrl,
+    );
   }
 }
 ```
@@ -170,7 +179,10 @@ export class ConfirmEmailUseCase {
 
   async execute(rawToken: string): Promise<void> {
     // 1. Hash the incoming token
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     // 2. Look up by hash
     const tokenEntity = await this.tokenRepo.findByHash(tokenHash);
@@ -194,11 +206,19 @@ export class ConfirmEmailUseCase {
 **`email.service.ts`** — Provider abstraction
 
 ```ts
-export const EMAIL_SERVICE = Symbol('EMAIL_SERVICE');
+export const EMAIL_SERVICE = Symbol("EMAIL_SERVICE");
 
 export interface EmailService {
-  sendVerificationEmail(to: string, name: string, confirmUrl: string): Promise<void>;
-  sendPasswordResetEmail(to: string, name: string, resetUrl: string): Promise<void>;
+  sendVerificationEmail(
+    to: string,
+    name: string,
+    confirmUrl: string,
+  ): Promise<void>;
+  sendPasswordResetEmail(
+    to: string,
+    name: string,
+    resetUrl: string,
+  ): Promise<void>;
 }
 ```
 
@@ -208,10 +228,10 @@ The concrete implementation (`ResendEmailService`, `PostmarkEmailService`, etc.)
 
 Add to `AuthController`:
 
-| Method | Path                        | Guard       | Body / Query               | Description                 |
-| ------ | --------------------------- | ----------- | -------------------------- | --------------------------- |
-| POST   | `/auth/confirm-email`       | `@Public()` | `{ token: string }`        | Verify email with token     |
-| POST   | `/auth/resend-verification` | JWT         | —                          | Resend confirmation email   |
+| Method | Path                        | Guard       | Body / Query        | Description               |
+| ------ | --------------------------- | ----------- | ------------------- | ------------------------- |
+| POST   | `/auth/confirm-email`       | `@Public()` | `{ token: string }` | Verify email with token   |
+| POST   | `/auth/resend-verification` | JWT         | —                   | Resend confirmation email |
 
 **Rate limit** both endpoints: 3 requests per minute.
 
@@ -236,7 +256,7 @@ export class EmailVerifiedGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const user = context.switchToHttp().getRequest().user;
     if (!user.emailVerifiedAt) {
-      throw new ForbiddenException('Debes verificar tu correo electrónico');
+      throw new ForbiddenException("Debes verificar tu correo electrónico");
     }
     return true;
   }
@@ -361,12 +381,19 @@ export class RequestPasswordResetUseCase {
 
     // 4. Generate token, hash it, store with 1h expiry
     const rawToken = uuidv4();
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
     await this.resetTokenRepo.create(/* ... expiresAt: 1 hour ... */);
 
     // 5. Send reset email
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
-    await this.emailService.sendPasswordResetEmail(user.email, user.name, resetUrl);
+    await this.emailService.sendPasswordResetEmail(
+      user.email,
+      user.name,
+      resetUrl,
+    );
   }
 }
 ```
@@ -380,7 +407,10 @@ export class RequestPasswordResetUseCase {
 export class ResetPasswordUseCase {
   async execute(rawToken: string, newPassword: string): Promise<void> {
     // 1. Hash token, look up
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
     const tokenEntity = await this.resetTokenRepo.findByHash(tokenHash);
 
     if (!tokenEntity || !tokenEntity.isValid()) {
@@ -410,10 +440,10 @@ export class ResetPasswordUseCase {
 
 Add to `AuthController`:
 
-| Method | Path                     | Guard       | Body                                  | Response                            |
-| ------ | ------------------------ | ----------- | ------------------------------------- | ----------------------------------- |
-| POST   | `/auth/forgot-password`  | `@Public()` | `{ email: string }`                   | Always 200: generic message         |
-| POST   | `/auth/reset-password`   | `@Public()` | `{ token: string, password: string }` | 200 on success, 400 on invalid/expired |
+| Method | Path                    | Guard       | Body                                  | Response                               |
+| ------ | ----------------------- | ----------- | ------------------------------------- | -------------------------------------- |
+| POST   | `/auth/forgot-password` | `@Public()` | `{ email: string }`                   | Always 200: generic message            |
+| POST   | `/auth/reset-password`  | `@Public()` | `{ token: string, password: string }` | 200 on success, 400 on invalid/expired |
 
 **Rate limit:** `forgot-password` → 3 requests per minute. `reset-password` → 5 per minute.
 
@@ -428,7 +458,8 @@ export class ResetPasswordDto {
   @MinLength(8)
   @MaxLength(72)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/, {
-    message: 'password must contain uppercase, lowercase, a number, and a special character',
+    message:
+      "password must contain uppercase, lowercase, a number, and a special character",
   })
   password!: string;
 }
@@ -514,27 +545,33 @@ pnpm --filter @qimela/api add @react-email/components @react-email/render
 
 Both email types need:
 
-| Email          | Subject                             | Body essentials                                                     |
-| -------------- | ----------------------------------- | ------------------------------------------------------------------- |
-| Verification   | "Confirma tu correo — Qimela"       | Greeting, CTA button, expiry note (24h)                             |
-| Password reset | "Restablece tu contraseña — Qimela" | Greeting, CTA button, expiry note (1h), "if you didn't request this..." |
+| Email          | Subject                             | Body essentials                                                         |
+| -------------- | ----------------------------------- | ----------------------------------------------------------------------- |
+| Verification   | "Confirma tu correo — qimela"       | Greeting, CTA button, expiry note (24h)                                 |
+| Password reset | "Restablece tu contraseña — qimela" | Greeting, CTA button, expiry note (1h), "if you didn't request this..." |
 
 **Template example (`verification-email.tsx`):**
 
 ```tsx
-import { Button, Html, Text, Heading } from '@react-email/components';
-import { render } from '@react-email/render';
+import { Button, Html, Text, Heading } from "@react-email/components";
+import { render } from "@react-email/render";
 
 interface VerificationEmailProps {
   name: string;
   confirmUrl: string;
 }
 
-export function VerificationEmail({ name, confirmUrl }: VerificationEmailProps) {
+export function VerificationEmail({
+  name,
+  confirmUrl,
+}: VerificationEmailProps) {
   return (
     <Html>
       <Heading>¡Hola {name}!</Heading>
-      <Text>Confirma tu correo electrónico para acceder a todas las funciones de Qimela.</Text>
+      <Text>
+        Confirma tu correo electrónico para acceder a todas las funciones de
+        qimela.
+      </Text>
       <Button href={confirmUrl}>Confirmar correo</Button>
       <Text>Este enlace expira en 24 horas.</Text>
     </Html>
@@ -552,9 +589,9 @@ import { renderVerificationEmail } from './templates/verification-email';
 
 async sendVerificationEmail(to: string, name: string, confirmUrl: string): Promise<void> {
   await this.resend.emails.send({
-    from: 'Qimela <noreply@qimela.app>',
+    from: 'qimela <noreply@qimela.app>',
     to,
-    subject: 'Confirma tu correo — Qimela',
+    subject: 'Confirma tu correo — qimela',
     html: await renderVerificationEmail({ name, confirmUrl }),
   });
 }
@@ -582,24 +619,28 @@ See `docs/cloud-provider.md` for pg-boss setup and configuration.
 
 ## 4. Email Provider — Resend
 
-Qimela uses **Resend** as the email provider. Free tier: 3,000 emails/month — more than enough for early stage.
+qimela uses **Resend** as the email provider. Free tier: 3,000 emails/month — more than enough for early stage.
 
 ```bash
 pnpm --filter @qimela/api add resend
 ```
 
 ```ts
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 @Injectable()
 export class ResendEmailService implements EmailService {
   private readonly resend = new Resend(process.env.RESEND_API_KEY);
 
-  async sendVerificationEmail(to: string, name: string, confirmUrl: string): Promise<void> {
+  async sendVerificationEmail(
+    to: string,
+    name: string,
+    confirmUrl: string,
+  ): Promise<void> {
     await this.resend.emails.send({
-      from: 'Qimela <noreply@qimela.app>',
+      from: "qimela <noreply@qimela.app>",
       to,
-      subject: 'Confirma tu correo — Qimela',
+      subject: "Confirma tu correo — qimela",
       html: `
         <h2>¡Hola ${name}!</h2>
         <p>Confirma tu correo electrónico haciendo clic en el siguiente enlace:</p>
@@ -609,11 +650,15 @@ export class ResendEmailService implements EmailService {
     });
   }
 
-  async sendPasswordResetEmail(to: string, name: string, resetUrl: string): Promise<void> {
+  async sendPasswordResetEmail(
+    to: string,
+    name: string,
+    resetUrl: string,
+  ): Promise<void> {
     await this.resend.emails.send({
-      from: 'Qimela <noreply@qimela.app>',
+      from: "qimela <noreply@qimela.app>",
       to,
-      subject: 'Restablece tu contraseña — Qimela',
+      subject: "Restablece tu contraseña — qimela",
       html: `
         <h2>¡Hola ${name}!</h2>
         <p>Recibimos una solicitud para restablecer tu contraseña:</p>
@@ -642,15 +687,15 @@ FRONTEND_URL=http://localhost:3001
 
 ## 6. Security Considerations
 
-| Concern                        | Mitigation                                                       |
-| ------------------------------ | ---------------------------------------------------------------- |
-| Token leakage                  | Store only SHA-256 hash in DB. Raw token only in URL/email.       |
-| Brute force on token endpoint  | Rate limit (3 req/min). UUIDs have 122 bits of entropy.          |
-| User enumeration via reset     | Always return generic success message on forgot-password.        |
-| Old tokens lingering           | Delete previous tokens before creating new one.                  |
-| Compromised password           | Revoke all refresh tokens on password reset.                     |
-| Replay attack                  | Mark token as used (`usedAt`) — single-use only.                 |
-| Link interception              | Use HTTPS in production. Token expires (1h reset, 24h verify).  |
+| Concern                       | Mitigation                                                     |
+| ----------------------------- | -------------------------------------------------------------- |
+| Token leakage                 | Store only SHA-256 hash in DB. Raw token only in URL/email.    |
+| Brute force on token endpoint | Rate limit (3 req/min). UUIDs have 122 bits of entropy.        |
+| User enumeration via reset    | Always return generic success message on forgot-password.      |
+| Old tokens lingering          | Delete previous tokens before creating new one.                |
+| Compromised password          | Revoke all refresh tokens on password reset.                   |
+| Replay attack                 | Mark token as used (`usedAt`) — single-use only.               |
+| Link interception             | Use HTTPS in production. Token expires (1h reset, 24h verify). |
 
 ---
 

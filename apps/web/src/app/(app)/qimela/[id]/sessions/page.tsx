@@ -68,6 +68,7 @@ export default function QimelaSessionsPage() {
           Volver
         </Link>
       </div>
+      <div className={styles.headerDivider} aria-hidden="true" />
 
       <div
         className={styles.filters}

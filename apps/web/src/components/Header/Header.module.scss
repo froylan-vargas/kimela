@@ -4,7 +4,7 @@
   background: $color-navbar-bg;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid $color-border;
+  border-bottom: 1px solid rgba($color-primary, 0.2);
   padding: $spacing-md 40px;
   display: flex;
   justify-content: space-between;
@@ -26,6 +26,7 @@
 
 @media (max-width: 767px) {
   .navbar {
+    border-bottom: none;
     padding: $spacing-md;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;

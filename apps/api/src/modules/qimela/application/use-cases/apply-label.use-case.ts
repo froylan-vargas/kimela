@@ -1,7 +1,15 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 export interface ApplyLabelCommand {
   qimelaId: string;
@@ -16,10 +24,11 @@ export interface ApplyLabelResponse {
 
 @Injectable()
 export class ApplyLabelUseCase {
-
   constructor(
-    @InjectPinoLogger(ApplyLabelUseCase.name) private readonly logger: PinoLogger,
-    @Inject(QIMELA_REPOSITORY) private readonly qimelaRepository: QimelaRepository,
+    @InjectPinoLogger(ApplyLabelUseCase.name)
+    private readonly logger: PinoLogger,
+    @Inject(QIMELA_REPOSITORY)
+    private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -29,23 +38,33 @@ export class ApplyLabelUseCase {
     );
 
     const qimela = await this.qimelaRepository.findById(command.qimelaId);
-    if (!qimela) throw new NotFoundException('Qimela not found');
+    if (!qimela) throw new NotFoundException("qimela not found");
     if (qimela.creatorId !== command.requesterId) {
-      throw new ForbiddenException('Only the creator can apply labels');
+      throw new ForbiddenException("Only the creator can apply labels");
     }
 
     const label = await this.prisma.qimelaLabel.findFirst({
       where: { id: command.labelId, qimelaId: command.qimelaId },
     });
-    if (!label) throw new NotFoundException('Label not found');
+    if (!label) throw new NotFoundException("Label not found");
 
     const subscription = await this.prisma.subscription.findUnique({
-      where: { userId_qimelaId: { userId: command.targetUserId, qimelaId: command.qimelaId } },
+      where: {
+        userId_qimelaId: {
+          userId: command.targetUserId,
+          qimelaId: command.qimelaId,
+        },
+      },
     });
-    if (!subscription) throw new NotFoundException('Subscription not found');
+    if (!subscription) throw new NotFoundException("Subscription not found");
 
     await this.prisma.subscriptionLabel.upsert({
-      where: { subscriptionId_labelId: { subscriptionId: subscription.id, labelId: command.labelId } },
+      where: {
+        subscriptionId_labelId: {
+          subscriptionId: subscription.id,
+          labelId: command.labelId,
+        },
+      },
       create: { subscriptionId: subscription.id, labelId: command.labelId },
       update: {},
     });

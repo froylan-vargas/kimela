@@ -6,9 +6,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 import QimelaDropdown from "./QimelaDropdown";
-import type { Qimela } from "@/types/qimela";
+import type { qimela } from "@/types/qimela";
 
-const sub1: Qimela = {
+const sub1: qimela = {
   id: "s1",
   name: "Liga MX",
   sportId: "sport-uuid-1",
@@ -17,7 +17,7 @@ const sub1: Qimela = {
   creatorId: "u1",
 };
 
-const sub2: Qimela = {
+const sub2: qimela = {
   id: "s2",
   name: "Premier League",
   sportId: "sport-uuid-1",
@@ -26,7 +26,7 @@ const sub2: Qimela = {
   creatorId: "u1",
 };
 
-const cre1: Qimela = {
+const cre1: qimela = {
   id: "c1",
   name: "NBA Pool",
   sportId: "sport-uuid-2",
@@ -64,8 +64,8 @@ describe("QimelaDropdown", () => {
   it("renders a divider when both sections are present", () => {
     const { container } = renderDropdown();
     const buttons = screen.getAllByRole("button");
-    expect(buttons).toHaveLength(3); // sub1, sub2, cre1 (Crear Qimela is a link, not a button)
-    // two dividers: one after Crear Qimela, one between sections
+    expect(buttons).toHaveLength(3); // sub1, sub2, cre1 (Crear qimela is a link, not a button)
+    // two dividers: one after Crear qimela, one between sections
     expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(2);
   });
 
@@ -84,7 +84,7 @@ describe("QimelaDropdown", () => {
     expect(screen.queryByText("Participando")).not.toBeInTheDocument();
   });
 
-  it("renders only the Crear Qimela divider when participatingQimelas is empty", () => {
+  it("renders only the Crear qimela divider when participatingQimelas is empty", () => {
     const { container } = renderDropdown({ participatingQimelas: [] });
     expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(1);
   });
@@ -135,14 +135,14 @@ describe("QimelaDropdown", () => {
     expect(ligaMXButton.className).not.toMatch(/selected/);
   });
 
-  it("renders the Crear Qimela link at the top of the dropdown", () => {
+  it("renders the Crear qimela link at the top of the dropdown", () => {
     renderDropdown();
     const link = screen.getByRole("link", { name: "+ Crea tu qimela" });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "/qimela/create");
   });
 
-  it("calls onClose when the Crear Qimela link is clicked", () => {
+  it("calls onClose when the Crear qimela link is clicked", () => {
     const onClose = vi.fn();
     renderDropdown({ onClose });
     fireEvent.click(screen.getByRole("link", { name: "+ Crea tu qimela" }));

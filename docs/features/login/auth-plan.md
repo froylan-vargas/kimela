@@ -1,12 +1,12 @@
-# Authentication Implementation Plan — Qimela
+# Authentication Implementation Plan — qimela
 
 ## Overview
 
-Qimela currently has zero authentication. The `CurrentUser` decorator returns a hardcoded UUID and the `User` Prisma model has no credentials or role fields. This plan covers the full implementation across architecture, backend, and frontend.
+qimela currently has zero authentication. The `CurrentUser` decorator returns a hardcoded UUID and the `User` Prisma model has no credentials or role fields. This plan covers the full implementation across architecture, backend, and frontend.
 
 **Two principal types:**
 
-- **Participant/Creator (USER):** Self-registered. Can create qimelas and subscribe to them. The creator/participant distinction is qimela-scoped (via `Qimela.creatorId` and `Subscription`), not a system role.
+- **Participant/Creator (USER):** Self-registered. Can create qimelas and subscribe to them. The creator/participant distinction is qimela-scoped (via `qimela.creatorId` and `Subscription`), not a system role.
 - **Admin:** Platform operator. Creates leagues, updates event results, defines sport rules, manages all qimelas. Provisioned manually — never self-registered.
 
 ---
@@ -83,7 +83,7 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  qimelas       Qimela[]       @relation("QimelaCreator")
+  qimelas       qimela[]       @relation("QimelaCreator")
   subscriptions Subscription[]
   refreshTokens RefreshToken[]
 

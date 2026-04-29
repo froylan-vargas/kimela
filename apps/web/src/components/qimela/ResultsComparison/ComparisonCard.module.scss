@@ -6,9 +6,9 @@
   gap: $spacing-md;
   padding: $spacing-md $spacing-lg;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.05);
+  background: rgba($color-off-white, 0.82);
+  border: 1px solid rgba($color-off-white, 0.9);
+  box-shadow: 0 12px 40px rgba($color-navy-deep, 0.05);
 }
 
 .actual {
@@ -46,8 +46,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(228, 228, 231, 0.5);
+  background: rgba($color-off-white, 0.95);
+  border: 1px solid rgba($color-navy, 0.5);
   overflow: hidden;
   flex-shrink: 0;
 
@@ -128,7 +128,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-top: 1px dashed rgba(228, 228, 231, 0.8);
+  border-top: 1px dashed rgba($color-navy, 0.22);
   padding-top: $spacing-md;
 }
 
@@ -171,7 +171,7 @@
 }
 
 .userPointsPositive {
-  color: #2f5f18;
+  color: $color-primary-text;
 }
 
 @media (max-width: 560px) {

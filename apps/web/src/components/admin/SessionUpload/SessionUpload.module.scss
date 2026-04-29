@@ -70,11 +70,11 @@
 
 .error {
   font-size: 14px;
-  color: #dc2626;
+  color: $color-navy-deep;
   margin: 0;
   padding: $spacing-sm $spacing-md;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba($color-navy, 0.08);
+  border: 1px solid rgba($color-navy, 0.28);
   border-radius: $radius-sm;
 }
 

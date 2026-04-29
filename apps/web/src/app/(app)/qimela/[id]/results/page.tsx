@@ -76,6 +76,7 @@ export default function QimelaResultsPage() {
           Volver
         </Link>
       </div>
+      <div className={styles.headerDivider} aria-hidden="true" />
 
       <div className={styles.filters}>
         <PhaseFilter

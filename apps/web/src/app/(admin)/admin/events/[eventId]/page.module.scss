@@ -57,7 +57,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: $color-surface-solid;
   border: 1px solid $color-border;
   border-radius: $radius-md;
   overflow: hidden;
@@ -138,7 +138,7 @@
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 .panel {
-  background: #fff;
+  background: $color-surface-solid;
   border: 1px solid $color-border;
   border-radius: $radius-md;
   overflow: hidden;
@@ -238,7 +238,7 @@
 
 .error {
   font-size: 14px;
-  color: #dc2626;
+  color: $color-navy-deep;
   margin: 0;
   padding: $spacing-sm $spacing-md;
 }

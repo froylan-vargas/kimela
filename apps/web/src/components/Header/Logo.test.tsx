@@ -5,12 +5,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Logo from "./Logo";
 import { QimelaProvider, useQimelaContext } from "@/context/QimelaContext";
 import { AuthProvider } from "@/context/AuthContext";
-import type { Qimela } from "@/types/qimela";
+import type { qimela } from "@/types/qimela";
 
 vi.mock("@/lib/apiClient", () => ({
-  authApi: { me: vi.fn().mockRejectedValue(new Error("no user")), login: vi.fn(), logout: vi.fn() },
+  authApi: {
+    me: vi.fn().mockRejectedValue(new Error("no user")),
+    login: vi.fn(),
+    logout: vi.fn(),
+  },
   ApiError: class ApiError extends Error {
-    constructor(public status: number, message: string) {
+    constructor(
+      public status: number,
+      message: string,
+    ) {
       super(message);
     }
   },
@@ -19,7 +26,11 @@ vi.mock("@/lib/apiClient", () => ({
 // Test component to verify context state changes
 function ContextDisplay() {
   const { selectedQimela } = useQimelaContext();
-  return <div>{selectedQimela ? `Selected: ${selectedQimela.name}` : "No selection"}</div>;
+  return (
+    <div>
+      {selectedQimela ? `Selected: ${selectedQimela.name}` : "No selection"}
+    </div>
+  );
 }
 
 let queryClient: QueryClient;
@@ -36,7 +47,9 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe("Logo", () => {
   beforeEach(() => {
-    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
   });
 
   afterEach(() => {
@@ -44,7 +57,7 @@ describe("Logo", () => {
   });
   it("renders the qimela logo image", () => {
     render(<Logo />, { wrapper });
-    expect(screen.getByRole("img", { name: "Qimela" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "qimela" })).toBeInTheDocument();
   });
 
   it("navigates to the default href when clicked", () => {
@@ -60,9 +73,9 @@ describe("Logo", () => {
   });
 
   it("clears qimela selection when navigating to dashboard", async () => {
-    const qimela: Qimela = {
+    const qimela: qimela = {
       id: "q1",
-      name: "Test Qimela",
+      name: "Test qimela",
       sportId: "sport-uuid-1",
       status: "ACTIVE",
       role: "CREATOR",
@@ -76,11 +89,8 @@ describe("Logo", () => {
         <div>
           <Logo href="/dashboard" />
           <ContextDisplay />
-          <button
-            type="button"
-            onClick={() => selectQimela(qimela, "CREATOR")}
-          >
-            Select Qimela
+          <button type="button" onClick={() => selectQimela(qimela, "CREATOR")}>
+            Select qimela
           </button>
         </div>
       );
@@ -92,9 +102,9 @@ describe("Logo", () => {
     expect(screen.getByText("No selection")).toBeInTheDocument();
 
     // Select a qimela
-    fireEvent.click(screen.getByText("Select Qimela"));
+    fireEvent.click(screen.getByText("Select qimela"));
     await waitFor(() => {
-      expect(screen.getByText("Selected: Test Qimela")).toBeInTheDocument();
+      expect(screen.getByText("Selected: Test qimela")).toBeInTheDocument();
     });
 
     // Click the logo to navigate to dashboard
@@ -108,9 +118,9 @@ describe("Logo", () => {
   });
 
   it("does not clear qimela selection when navigating to other routes", async () => {
-    const qimela: Qimela = {
+    const qimela: qimela = {
       id: "q1",
-      name: "Test Qimela",
+      name: "Test qimela",
       sportId: "sport-uuid-1",
       status: "ACTIVE",
       role: "CREATOR",
@@ -124,11 +134,8 @@ describe("Logo", () => {
         <div>
           <Logo href="/other-route" />
           <ContextDisplay />
-          <button
-            type="button"
-            onClick={() => selectQimela(qimela, "CREATOR")}
-          >
-            Select Qimela
+          <button type="button" onClick={() => selectQimela(qimela, "CREATOR")}>
+            Select qimela
           </button>
         </div>
       );
@@ -137,9 +144,9 @@ describe("Logo", () => {
     render(<TestComponent />, { wrapper });
 
     // Select a qimela
-    fireEvent.click(screen.getByText("Select Qimela"));
+    fireEvent.click(screen.getByText("Select qimela"));
     await waitFor(() => {
-      expect(screen.getByText("Selected: Test Qimela")).toBeInTheDocument();
+      expect(screen.getByText("Selected: Test qimela")).toBeInTheDocument();
     });
 
     // Click the logo to navigate to other route
@@ -147,6 +154,6 @@ describe("Logo", () => {
     fireEvent.click(link);
 
     // Selection should NOT be cleared
-    expect(screen.getByText("Selected: Test Qimela")).toBeInTheDocument();
+    expect(screen.getByText("Selected: Test qimela")).toBeInTheDocument();
   });
 });

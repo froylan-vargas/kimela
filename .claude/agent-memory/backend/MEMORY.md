@@ -1,1 +1,1 @@
-- [Qimela project overview](project_qimela_overview.md) — DDD architecture, Prisma v7 adapter pattern, QimelaStatus enum, mock auth user id
+- [qimela project overview](project_qimela_overview.md) — DDD architecture, Prisma v7 adapter pattern, QimelaStatus enum, mock auth user id

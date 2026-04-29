@@ -14,9 +14,9 @@
   border-radius: 28px;
   background:
     radial-gradient(circle at top left, rgba($color-primary, 0.2), transparent 38%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78));
-  border: 1px solid rgba(255, 255, 255, 0.86);
-  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.08);
+    linear-gradient(180deg, rgba($color-off-white, 0.92), rgba($color-off-white, 0.78));
+  border: 1px solid rgba($color-off-white, 0.86);
+  box-shadow: 0 24px 60px rgba($color-navy-deep, 0.08);
 }
 
 .title {
@@ -99,8 +99,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
+  background: rgba($color-navy-deep, 0.45);
+  color: $color-surface-solid;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -139,7 +139,7 @@
   font-family: $font-family-base;
   font-size: 15px;
   color: $color-text-main;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba($color-off-white, 0.8);
   outline: none;
   transition: border-color 0.15s ease;
 
@@ -181,7 +181,7 @@
 .error {
   margin: 0;
   font-size: 13px;
-  color: #dc2626;
+  color: $color-navy-deep;
 }
 
 .success {

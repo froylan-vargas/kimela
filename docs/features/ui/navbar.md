@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-Build a sticky, frosted-glass header for the Qimela dashboard. The header has three zones:
+Build a sticky, frosted-glass header for the qimela dashboard. The header has three zones:
 
 - **Left** — logo (trophy icon that in future will be the qimela logo, the logo will include the app name so don't use text)
 - **Center** — a pill-shaped qimela selector button that opens a dropdown listing the user's qimelas in two sections: "Participando" (subscriber) and "Creadas" (creator)
@@ -25,7 +25,7 @@ src/
     Header/
       Header.tsx                  ← <header> root, composes Logo + QimelaSelector + UserProfile
       Header.module.scss
-      Logo.tsx                    ← trophy icon + "Qimela" text
+      Logo.tsx                    ← trophy icon + "qimela" text
       Logo.module.scss
       QimelaSelector/
         QimelaSelector.tsx        ← pill button + renders <QimelaDropdown> when open
@@ -50,7 +50,7 @@ src/
 export type QimelaRole = "CREATOR" | "SUBSCRIBER";
 export type QimelaStatus = "ACTIVE" | "INACTIVE" | string;
 
-export interface Qimela {
+export interface qimela {
   id: string;
   name: string;
   description: string;
@@ -67,7 +67,7 @@ export interface QimelasMeta {
 }
 
 export interface QimelasResponse {
-  data: Qimela[];
+  data: qimela[];
   meta: QimelasMeta;
 }
 ```
@@ -84,10 +84,10 @@ interface QimelaSelectorProps {} // no props — reads from QimelaContext + useQ
 
 // QimelaDropdown.tsx
 interface QimelaDropdownProps {
-  subscriberQimelas: Qimela[];
-  creatorQimelas: Qimela[];
+  subscriberQimelas: qimela[];
+  creatorQimelas: qimela[];
   selectedId: string | null;
-  onSelect: (qimela: Qimela) => void;
+  onSelect: (qimela: qimela) => void;
   onClose: () => void;
 }
 
@@ -394,11 +394,11 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import type { Qimela } from '@/types/qimela';
+import type { qimela } from '@/types/qimela';
 
 interface QimelaContextValue {
-  selectedQimela: Qimela | null;
-  setSelectedQimela: (qimela: Qimela) => void;
+  selectedQimela: qimela | null;
+  setSelectedQimela: (qimela: qimela) => void;
 }
 
 const QimelaContext = createContext<QimelaContextValue | null>(null);
@@ -408,9 +408,9 @@ export function QimelaProvider({
   initialQimela,
 }: {
   children: ReactNode;
-  initialQimela?: Qimela | null;
+  initialQimela?: qimela | null;
 }) {
-  const [selectedQimela, setSelectedQimela] = useState<Qimela | null>(
+  const [selectedQimela, setSelectedQimela] = useState<qimela | null>(
     initialQimela ?? null,
   );
 
@@ -482,7 +482,7 @@ Inside the same (or a separate) `useEffect`, listen for `keydown` on `document` 
 
 ### Selecting a qimela
 
-`QimelaDropdown` receives an `onSelect: (qimela: Qimela) => void` prop. On item click:
+`QimelaDropdown` receives an `onSelect: (qimela: qimela) => void` prop. On item click:
 
 1. Call `setSelectedQimela(qimela)` (from context).
 2. Call `onClose()` (from the dropdown prop) to set `isOpen = false` in the parent.
@@ -561,7 +561,7 @@ A new `src/app/page.module.scss` provides spacing that mirrors the mockup's `.da
 
 Work through files in this order to keep the build green at each step:
 
-1. **`apps/web/src/types/qimela.ts`** — create; defines `Qimela`, `QimelaRole`, `QimelasResponse`, `QimelasMeta`. No dependencies.
+1. **`apps/web/src/types/qimela.ts`** — create; defines `qimela`, `QimelaRole`, `QimelasResponse`, `QimelasMeta`. No dependencies.
 
 2. **`apps/web/src/styles/_variables.scss`** — replace current content with the full token set from section 3a.
 
@@ -613,5 +613,5 @@ The following items from the mockup are explicitly NOT part of this task:
 - **Bell notifications** — the notification panel or badge count on the bell icon
 - **Pagination / filtering of qimelas** — the `meta` object from `GET /qimelas` is fetched but not used to paginate
 - **Creating a new qimela** — no UI flow for qimela creation
-- **Qimela detail page** — clicking a qimela only updates context; no navigation to a dedicated route
+- **qimela detail page** — clicking a qimela only updates context; no navigation to a dedicated route
 - **Error boundary** — global error UI for failed fetches beyond a local error state in the selector

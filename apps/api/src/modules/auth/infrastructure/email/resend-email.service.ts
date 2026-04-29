@@ -10,7 +10,8 @@ export class ResendEmailService implements EmailService {
   private readonly resend = new Resend(process.env.RESEND_API_KEY);
 
   constructor(
-    @InjectPinoLogger(ResendEmailService.name) private readonly logger: PinoLogger,
+    @InjectPinoLogger(ResendEmailService.name)
+    private readonly logger: PinoLogger,
   ) {}
 
   async sendVerificationEmail(
@@ -22,9 +23,9 @@ export class ResendEmailService implements EmailService {
     this.logger.info(`Sending verification email to: ${to}`);
     console.log("process.env.NODE_ENV", process.env.NODE_ENV);
     await this.resend.emails.send({
-      from: "Qimela <noreply@qimela.com>",
+      from: "qimela <noreply@qimela.com>",
       to,
-      subject: "Confirma tu correo — Qimela",
+      subject: "Confirma tu correo — qimela",
       html,
     });
   }
@@ -37,9 +38,9 @@ export class ResendEmailService implements EmailService {
     const html = await renderPasswordResetEmail({ name, resetUrl });
     this.logger.info(`Sending password reset email to: ${to}`);
     await this.resend.emails.send({
-      from: "Qimela <noreply@qimela.com>",
+      from: "qimela <noreply@qimela.com>",
       to,
-      subject: "Restablece tu contraseña — Qimela",
+      subject: "Restablece tu contraseña — qimela",
       html,
     });
   }

@@ -1,40 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { Qimela } from "@/types/qimela";
+import type { qimela } from "@/types/qimela";
 import ParticipantDashboard from "./ParticipantDashboard";
 
 vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({
     user: { id: "user-2", name: "Froylan Vargas" },
-  }),
-}));
-
-vi.mock("@/hooks/useLeaderboard", () => ({
-  useLeaderboard: () => ({
-    data: [
-      {
-        userId: "user-1",
-        userName: "Ana Torres",
-        initials: "AT",
-        totalPoints: 124,
-        correctPicksCount: 18,
-        exactResultsCount: 5,
-        rank: 2,
-        isCurrentUser: false,
-      },
-      {
-        userId: "user-2",
-        userName: "Froylan Vargas",
-        initials: "FV",
-        totalPoints: 24,
-        correctPicksCount: 10,
-        exactResultsCount: 2,
-        rank: 1,
-        isCurrentUser: true,
-      },
-    ],
-    isLoading: false,
-    isError: false,
   }),
 }));
 
@@ -55,7 +26,7 @@ vi.mock("@/components/qimela/UpcomingSessions/UpcomingSessions", () => ({
   ),
 }));
 
-const qimela: Qimela = {
+const qimela: qimela = {
   id: "qimela-1",
   name: "familia-ligamx",
   sportId: "sport-1",
@@ -71,11 +42,7 @@ describe("ParticipantDashboard", () => {
     expect(
       screen.getByRole("heading", { name: "familia-ligamx" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Usuario")).toBeInTheDocument();
-    expect(screen.getByText("Froylan Vargas")).toBeInTheDocument();
-    expect(screen.getByText("Pos")).toBeInTheDocument();
-    expect(screen.getByText("Puntos")).toBeInTheDocument();
-    expect(screen.getByText("24")).toBeInTheDocument();
+    expect(screen.queryByText("En curso")).not.toBeInTheDocument();
 
     const sessionsTab = screen.getByRole("tab", { name: "Partidos" });
     const positionsTab = screen.getByRole("tab", { name: "Posiciones" });

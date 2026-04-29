@@ -3,9 +3,17 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: $spacing-sm;
+  gap: 8px;
   text-decoration: none;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.logoMark {
+  width: 34px;
+  height: 32px;
+  display: block;
+  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -13,10 +21,32 @@
   width: auto;
   height: 32px;
   display: block;
+  max-width: none;
+}
+
+.logoText {
+  color: $color-text-main;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.logoTextInverse {
+  color: $color-text-inverse;
 }
 
 @media (max-width: 767px) {
+  .logoMark {
+    width: 30px;
+    height: 28px;
+  }
+
   .logoImage {
     height: 28px;
+  }
+
+  .logoText {
+    display: none;
   }
 }

@@ -228,6 +228,46 @@ describe("SessionResultsEditor", () => {
     expect(items[1]).toHaveTextContent("Team C");
   });
 
+  it("moves completed sessions after pending sessions", () => {
+    render(
+      <SessionResultsEditor
+        {...DEFAULT_PROPS}
+        sessions={[
+          makeSession({
+            id: "s1",
+            status: "COMPLETED",
+            scheduledAt: "2026-04-19T18:00:00.000Z",
+            home: { id: "c1", name: "Completed A", imgUrl: null },
+            away: { id: "c2", name: "Completed B", imgUrl: null },
+            score: { home: "1", away: "0" },
+          }),
+          makeSession({
+            id: "s2",
+            status: "SCHEDULED",
+            scheduledAt: "2026-04-19T22:00:00.000Z",
+            home: { id: "c3", name: "Pending A", imgUrl: null },
+            away: { id: "c4", name: "Pending B", imgUrl: null },
+          }),
+          makeSession({
+            id: "s3",
+            status: "LIVE",
+            scheduledAt: "2026-04-19T20:00:00.000Z",
+            home: { id: "c5", name: "Live A", imgUrl: null },
+            away: { id: "c6", name: "Live B", imgUrl: null },
+          }),
+        ]}
+        isLoading={false}
+        isError={false}
+        isPhaseActive={true}
+      />,
+    );
+
+    const items = screen.getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("Live A");
+    expect(items[1]).toHaveTextContent("Pending A");
+    expect(items[2]).toHaveTextContent("Completed A");
+  });
+
   it("shows the saved final score for completed sessions", () => {
     render(
       <SessionResultsEditor

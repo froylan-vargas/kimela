@@ -3,7 +3,6 @@ import {
   GoneException,
   Inject,
   Injectable,
-  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";

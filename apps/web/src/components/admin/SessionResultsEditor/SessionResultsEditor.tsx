@@ -97,10 +97,15 @@ export default function SessionResultsEditor({
 
   const sortedSessions = useMemo(
     () =>
-      [...sessions].sort(
-        (a, b) =>
-          new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
-      ),
+      [...sessions].sort((a, b) => {
+        const completedDelta =
+          Number(a.status === "COMPLETED") - Number(b.status === "COMPLETED");
+        if (completedDelta !== 0) return completedDelta;
+
+        return (
+          new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+        );
+      }),
     [sessions],
   );
 

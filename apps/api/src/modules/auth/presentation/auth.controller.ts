@@ -120,6 +120,13 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res({ passthrough: false }) res: Response): Promise<void> {
     this.logger.info('POST /auth/refresh');
 
+    // Always emit a clear directive for the legacy Path=/auth/refresh cookie
+    // (issued by pre-c8aa3aa builds). When both cookies are present the
+    // legacy one shadows the new Path=/ cookie because cookie-parser keeps
+    // the first occurrence — clearing it here lets the next refresh succeed
+    // without forcing the user to re-login.
+    this.clearLegacyRefreshCookie(res);
+
     const incomingToken: string | undefined = req.cookies?.refresh_token;
     if (!incomingToken) {
       throw new UnauthorizedException('No refresh token provided');
@@ -283,6 +290,10 @@ export class AuthController {
   }
 
   private setRefreshCookie(res: Response, refreshToken: string): void {
+    // Pre-c8aa3aa builds set this cookie with Path=/auth/refresh. Browsers
+    // still holding that cookie shadow the new Path=/ cookie on every refresh
+    // request, so explicitly expire the legacy one before issuing the new.
+    this.clearLegacyRefreshCookie(res);
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -292,7 +303,26 @@ export class AuthController {
   }
 
   private clearAuthCookies(res: Response): void {
-    res.clearCookie('access_token', { httpOnly: true, sameSite: 'strict' });
-    res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'strict' });
+    // Browsers only clear a cookie when the clearing call's attributes match
+    // the original Set-Cookie's attributes. Mirror setAccessCookie /
+    // setRefreshCookie exactly, otherwise logout silently leaves cookies
+    // behind in production (sameSite: 'none', secure: true).
+    const opts = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'strict' as const,
+    };
+    res.clearCookie('access_token', opts);
+    res.clearCookie('refresh_token', opts);
+    this.clearLegacyRefreshCookie(res);
+  }
+
+  private clearLegacyRefreshCookie(res: Response): void {
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'strict' as const,
+      path: '/auth/refresh',
+    });
   }
 }

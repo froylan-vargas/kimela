@@ -2,7 +2,6 @@ import {
   ConflictException,
   Inject,
   Injectable,
-  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";

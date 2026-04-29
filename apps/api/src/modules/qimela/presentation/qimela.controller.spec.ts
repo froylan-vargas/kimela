@@ -22,6 +22,7 @@ import { DeleteQimelaLabelUseCase } from '../application/use-cases/delete-qimela
 import { GetQimelaLabelsUseCase } from '../application/use-cases/get-qimela-labels.use-case';
 import { ApplyLabelUseCase } from '../application/use-cases/apply-label.use-case';
 import { RemoveLabelUseCase } from '../application/use-cases/remove-label.use-case';
+import { GetSessionTop5PicksUseCase } from '../application/use-cases/get-session-top5-picks.use-case';
 import { QIMELA_REPOSITORY } from '../domain/qimela.repository';
 import { RULE_REPOSITORY } from '../domain/rule.repository';
 import { QimelaStatus } from '../domain/qimela-status.enum';
@@ -79,6 +80,7 @@ describe('QimelaController', () => {
   let getQimelaLabels: jest.Mocked<GetQimelaLabelsUseCase>;
   let applyLabel: jest.Mocked<ApplyLabelUseCase>;
   let removeLabel: jest.Mocked<RemoveLabelUseCase>;
+  let getSessionTop5Picks: jest.Mocked<GetSessionTop5PicksUseCase>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -105,6 +107,7 @@ describe('QimelaController', () => {
         { provide: GetQimelaLabelsUseCase,   useValue: { execute: jest.fn() } },
         { provide: ApplyLabelUseCase,        useValue: { execute: jest.fn() } },
         { provide: RemoveLabelUseCase,       useValue: { execute: jest.fn() } },
+        { provide: GetSessionTop5PicksUseCase, useValue: { execute: jest.fn() } },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -129,6 +132,7 @@ describe('QimelaController', () => {
     getQimelaLabels   = module.get(GetQimelaLabelsUseCase);
     applyLabel        = module.get(ApplyLabelUseCase);
     removeLabel       = module.get(RemoveLabelUseCase);
+    getSessionTop5Picks = module.get(GetSessionTop5PicksUseCase);
   });
 
   // ─── getQimelas ──────────────────────────────────────────────────────────
@@ -280,6 +284,23 @@ describe('QimelaController', () => {
         qimelaId: QIMELA_ID,
         userId: MOCK_USER_ID,
       });
+    });
+  });
+
+  describe('getSessionTop5', () => {
+    it('delegates to use case with qimelaId, sessionId, userId, and phaseId', async () => {
+      const response = { overall: [], phase: [] };
+      getSessionTop5Picks.execute.mockResolvedValue(response);
+
+      const result = await controller.getSessionTop5(QIMELA_ID, 'session-1', MOCK_USER, 'phase-1');
+
+      expect(getSessionTop5Picks.execute).toHaveBeenCalledWith(
+        QIMELA_ID,
+        'session-1',
+        MOCK_USER_ID,
+        'phase-1',
+      );
+      expect(result).toEqual(response);
     });
   });
 

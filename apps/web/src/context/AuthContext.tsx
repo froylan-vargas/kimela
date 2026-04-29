@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { AuthUser } from "@/types/auth";
-import { authApi, ApiError } from "@/lib/apiClient";
+import { authApi } from "@/lib/apiClient";
 
 export interface AuthContextValue {
   user: AuthUser | null;
@@ -32,17 +32,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasInitializedRef = useRef(false);
 
   useEffect(() => {
+    let cancelled = false;
+    const setIfActive = (next: AuthUser | null) => {
+      if (!cancelled) setUser(next);
+    };
+
+    // apiFetch already auto-refreshes /auth/me on 401 via the shared
+    // refresh-coalescing path, so a transient access-token expiry resolves
+    // transparently. The catch below only fires when refresh genuinely
+    // failed (no/expired/revoked refresh token, or backend unreachable),
+    // which means the user truly isn't authenticated.
     authApi
       .me()
-      .then((authUser) => setUser(authUser))
-      .catch((err) => {
-        if (err instanceof ApiError && err.status === 401) {
-          setUser(null);
-        } else {
-          setUser(null);
-        }
-      })
-      .finally(() => setIsLoading(false));
+      .then((authUser) => setIfActive(authUser))
+      .catch(() => setIfActive(null))
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

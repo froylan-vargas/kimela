@@ -75,12 +75,17 @@ export interface SessionTop5Picks {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
+// Endpoints that must NOT trigger auto-refresh on 401:
+// - login/register: the 401 means bad credentials, not an expired session
+// - refresh: we'd loop
+// - logout: refreshing while logging out makes no sense
+// `/auth/me` is intentionally NOT here — it's a protected read that should
+// transparently refresh just like any other protected endpoint.
 const AUTH_ENDPOINTS = [
   "/auth/login",
   "/auth/register",
   "/auth/refresh",
   "/auth/logout",
-  "/auth/me",
 ];
 
 export class ApiError extends Error {
@@ -118,28 +123,23 @@ async function parseError(res: Response): Promise<{ message: string; code?: stri
   }
 }
 
-let refreshPromise: Promise<void> | null = null;
+let refreshPromise: Promise<boolean> | null = null;
 
-function ensureRefreshed(): Promise<void> {
-  // Coalesce concurrent refresh attempts onto a single in-flight request,
-  // so token rotation can't race itself across parallel queries.
+// Coalesce concurrent refresh attempts onto a single in-flight request, so
+// token rotation can't race itself across parallel queries. Resolves with
+// whether the refresh succeeded — never rejects, so callers don't have to
+// wrap it in try/catch.
+function ensureRefreshed(): Promise<boolean> {
   if (!refreshPromise) {
-    refreshPromise = authApi.refresh().finally(() => {
-      refreshPromise = null;
-    });
+    refreshPromise = authApi
+      .refresh()
+      .then(() => true)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      }) as Promise<boolean>;
   }
   return refreshPromise;
-}
-
-async function tryRefreshOrRedirect(): Promise<void> {
-  try {
-    await ensureRefreshed();
-  } catch {
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
-    throw new ApiError(401, "Session expired");
-  }
 }
 
 export async function apiFetch<T>(
@@ -163,7 +163,14 @@ export async function apiFetch<T>(
   }
 
   if (res.status === 401 && !isAuthEndpoint) {
-    await tryRefreshOrRedirect();
+    const refreshed = await ensureRefreshed();
+    if (!refreshed) {
+      // No valid refresh token (logged out, expired beyond 7d, or revoked).
+      // Surface the 401 so the AuthContext can flip user → null and route
+      // guards can redirect. Don't hard-redirect here: it produces spurious
+      // logouts during refresh-token rotation races.
+      throw new ApiError(401, "Session expired");
+    }
 
     const retryRes = await fetch(`${API_URL}${path}`, {
       ...init,
@@ -458,7 +465,8 @@ export const usersApi = {
     if (res.ok) return res.json() as Promise<AuthUser>;
 
     if (res.status === 401) {
-      await tryRefreshOrRedirect();
+      const refreshed = await ensureRefreshed();
+      if (!refreshed) throw new ApiError(401, "Session expired");
       const retry = await fetch(url, { method: "POST", credentials: "include", body: formData });
       if (retry.ok) return retry.json() as Promise<AuthUser>;
       const retryErr = await parseError(retry);
@@ -560,7 +568,8 @@ export const adminApi = {
     }
 
     if (res.status === 401) {
-      await tryRefreshOrRedirect();
+      const refreshed = await ensureRefreshed();
+      if (!refreshed) throw new ApiError(401, "Session expired");
 
       const retryRes = await fetch(url, {
         method: "POST",

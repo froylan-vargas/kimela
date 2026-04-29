@@ -36,4 +36,48 @@ describe("apiFetch", () => {
       code: "EMAIL_NOT_VERIFIED",
     });
   });
+
+  it("refreshes and retries /auth/me after an expired access token", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+          statusText: "Unauthorized",
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "user-1" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: "user-1", email: "test@example.com" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+
+    await expect(apiFetch("/auth/me")).resolves.toMatchObject({
+      id: "user-1",
+      email: "test@example.com",
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:3000/auth/me",
+      expect.objectContaining({ credentials: "include" })
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:3000/auth/refresh",
+      expect.objectContaining({ method: "POST", credentials: "include" })
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "http://localhost:3000/auth/me",
+      expect.objectContaining({ credentials: "include" })
+    );
+  });
 });

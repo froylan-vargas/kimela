@@ -246,6 +246,23 @@ describe('AuthController', () => {
       // Act & Assert
       await expect(controller.refresh(req, res)).rejects.toThrow(UnauthorizedException);
     });
+
+    it('clears the legacy Path=/auth/refresh cookie on every refresh attempt', async () => {
+      // Pre-c8aa3aa builds set refresh_token at Path=/auth/refresh. When that
+      // legacy cookie shadows the new Path=/ cookie, refresh fails forever
+      // unless we explicitly emit a clear directive. The directive must be
+      // sent on both the success and failure paths so a stuck session can
+      // self-heal without forcing a re-login.
+      const req = makeCookieRequest({});
+      const res = makeMockRes();
+
+      await expect(controller.refresh(req, res)).rejects.toThrow(UnauthorizedException);
+
+      const legacyClear = (res.clearCookie as jest.Mock).mock.calls.find(
+        ([name, opts]) => name === 'refresh_token' && opts?.path === '/auth/refresh',
+      );
+      expect(legacyClear).toBeDefined();
+    });
   });
 
   // ─── POST /auth/logout ──────────────────────────────────────────────────────

@@ -159,7 +159,7 @@ export default function TablePositions({ qimelaId, currentUserId }: TablePositio
                       <td>
                         <div className={styles.player}>
                           <span className={styles.avatar} aria-hidden="true">
-                            {entry.initials}
+                            <AvatarCell imageUrl={entry.imageUrl} initials={entry.initials} />
                           </span>
                           <span className={styles.playerText}>
                             <span className={styles.playerName}>{entry.userName}</span>
@@ -190,7 +190,7 @@ export default function TablePositions({ qimelaId, currentUserId }: TablePositio
                         <td>
                           <div className={styles.player}>
                             <span className={styles.avatar} aria-hidden="true">
-                              {currentUserEntry.initials}
+                              <AvatarCell imageUrl={currentUserEntry.imageUrl} initials={currentUserEntry.initials} />
                             </span>
                             <span className={styles.playerText}>
                               <span className={styles.playerName}>{currentUserEntry.userName}</span>

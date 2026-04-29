@@ -23,6 +23,7 @@ vi.mock("@/hooks/useLeaderboard", () => ({
         userId: "2",
         userName: "Froylan Vargas",
         initials: "FV",
+        imageUrl: "https://example.com/avatar.jpg",
         totalPoints: 110,
         correctPicksCount: 16,
         exactResultsCount: 3,
@@ -50,6 +51,16 @@ describe("TablePositions", () => {
   it("marks the current user with Tú badge", () => {
     render(<TablePositions qimelaId="qimela-1" currentUserId="2" />);
     expect(screen.getAllByText("Tú").length).toBeGreaterThan(0);
+  });
+
+  it("renders the current user's avatar image in both responsive layouts", () => {
+    render(<TablePositions qimelaId="qimela-1" currentUserId="2" />);
+    const avatars = screen.getAllByRole("img", { hidden: true });
+
+    expect(avatars).toHaveLength(2);
+    avatars.forEach((avatar) => {
+      expect(avatar).toHaveAttribute("src", "https://example.com/avatar.jpg");
+    });
   });
 
   it("renders a link to the results page", () => {

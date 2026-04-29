@@ -1,10 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import Home from "./(app)/dashboard/page";
 import { useQimelaContext } from "@/context/QimelaContext";
-import type { qimela } from "@/types/qimela";
+import { useQimelas } from "@/hooks/useQimelas";
+import type { qimela, QimelasResponse } from "@/types/qimela";
+import type { UseQueryResult } from "@tanstack/react-query";
 
 vi.mock("@/context/QimelaContext");
+vi.mock("@/hooks/useQimelas");
 vi.mock("@/components/dashboard/ParticipantDashboard", () => ({
   default: ({ qimela }: { qimela: qimela }) => (
     <div>{qimela.name} - Participant</div>
@@ -34,7 +37,22 @@ const creatorQimela: qimela = {
   creatorId: "u1",
 };
 
+function mockUseQimelas(data: QimelasResponse["data"] = [subscriberQimela]) {
+  vi.mocked(useQimelas).mockReturnValue({
+    data: { data, meta: { total: data.length, page: 1, limit: 10 } },
+    isLoading: false,
+    isError: false,
+    isPending: false,
+    isSuccess: true,
+    error: null,
+  } as UseQueryResult<QimelasResponse, Error>);
+}
+
 describe("Home page", () => {
+  beforeEach(() => {
+    mockUseQimelas();
+  });
+
   it("renders ParticipantDashboard when selectedQimela with viewAs SUBSCRIBER", () => {
     vi.mocked(useQimelaContext).mockReturnValue({
       selectedQimela: subscriberQimela,
@@ -61,7 +79,7 @@ describe("Home page", () => {
     expect(screen.getByText("NBA Pool - Creator")).toBeInTheDocument();
   });
 
-  it("renders fallback text when no qimela is selected", () => {
+  it("renders fallback text when subscribed qimelas exist but no qimela is selected", () => {
     vi.mocked(useQimelaContext).mockReturnValue({
       selectedQimela: null,
       viewAs: null,
@@ -72,8 +90,52 @@ describe("Home page", () => {
     render(<Home />);
 
     expect(
-      screen.getByText("Select a qimela to get started."),
+      screen.getByText("Selecciona una qimela para empezar."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /¡También puedes crear\s+tu propia qimela!/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders a create prompt when no subscribed qimelas exist", () => {
+    mockUseQimelas([]);
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: null,
+      viewAs: null,
+      selectQimela: vi.fn(),
+      clearQimela: vi.fn(),
+    });
+
+    render(<Home />);
+
+    expect(
+      screen.queryByText("Selecciona una qimela para empezar."),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /Aún no te has suscrito a ninguna qimela 😢\s+¡Crea la tuya!/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the home step cards when no qimela is selected", () => {
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: null,
+      viewAs: null,
+      selectQimela: vi.fn(),
+      clearQimela: vi.fn(),
+    });
+
+    render(<Home />);
+
+    expect(screen.getAllByText("Crea tu qimela").length).toBeGreaterThan(0);
+    expect(screen.getByText("Invita a tus amigos")).toBeInTheDocument();
+    expect(screen.getByText("¡Diviértanse!")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "+ Crea tu qimela" }),
+    ).toHaveAttribute("href", "/qimela/create");
   });
 
   it("does not render any dashboard when selectedQimela is null", () => {

@@ -2,72 +2,81 @@
 
 .landing {
   min-height: 100vh;
-  background: $color-navy-deep;
+  background:
+    linear-gradient(rgba($color-off-white, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($color-off-white, 0.035) 1px, transparent 1px),
+    #070b13;
+  background-size: 240px 240px;
   color: $color-surface-solid;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
-
-/* ─── Navbar ─────────────────────────────────────────────────────────────── */
 
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-md 40px;
+  gap: $spacing-lg;
+  padding: 46px clamp($spacing-lg, 6vw, 96px) 20px;
   position: relative;
   z-index: 2;
-}
-
-.navLogo {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: $color-surface-solid;
-  text-decoration: none;
-
-  span {
-    color: $color-primary;
-  }
 }
 
 .navLinks {
   display: flex;
   align-items: center;
-  gap: $spacing-md;
+  gap: 24px;
+}
+
+.navLink,
+.navCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  border-radius: $radius-pill;
+  font-family: $font-family-base;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
 }
 
 .navLink {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba($color-off-white, 0.7);
-  text-decoration: none;
-  transition: color 0.2s ease;
+  min-width: 170px;
+  padding: 0 24px;
+  border: 2px solid rgba($color-off-white, 0.23);
+  color: $color-surface-solid;
+  background: rgba(#000, 0.18);
+  font-size: 20px;
 
   &:hover {
-    color: $color-surface-solid;
-  }
-}
-
-.navCta {
-  font-size: 14px;
-  font-weight: 600;
-  color: $color-primary-contrast;
-  background: $color-primary;
-  border: none;
-  border-radius: $radius-pill;
-  padding: 8px 20px;
-  text-decoration: none;
-  transition: background 0.2s ease, transform 0.15s ease;
-  cursor: pointer;
-
-  &:hover {
-    background: $color-primary-hover;
+    border-color: rgba($color-off-white, 0.42);
     transform: translateY(-1px);
   }
 }
 
-/* ─── Hero ───────────────────────────────────────────────────────────────── */
+.navCta {
+  min-width: 162px;
+  padding: 0 24px;
+  border: 2px solid $color-primary;
+  color: $color-primary-contrast;
+  background: color-mix(in srgb, #ffffff 20%, $color-primary);
+  font-size: 21px;
+
+  &:hover {
+    background: $color-primary;
+    box-shadow: 0 0 30px rgba($color-primary, 0.28);
+    transform: translateY(-1px);
+  }
+}
 
 .hero {
   flex: 1;
@@ -76,137 +85,249 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0 $spacing-lg;
+  padding: 74px $spacing-lg 80px;
   position: relative;
-  overflow: hidden;
 }
 
-.glow {
+.heroGlow {
   position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
+  width: min(760px, 80vw);
+  height: 420px;
+  top: 47%;
+  left: 50%;
+  transform: translate(-50%, -12%);
   background: radial-gradient(
-    circle,
-    rgba($color-primary, 0.18) 0%,
-    rgba($color-primary, 0.08) 40%,
+    ellipse at center,
+    rgba($color-primary, 0.15) 0%,
+    rgba($color-primary, 0.07) 36%,
     transparent 70%
   );
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -55%);
+  filter: blur(18px);
   pointer-events: none;
-  z-index: 0;
 }
 
 .heroContent {
+  width: min(100%, 1260px);
   position: relative;
   z-index: 1;
-  max-width: 700px;
 }
 
 .headline {
-  font-size: clamp(36px, 6vw, 64px);
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
-  margin-bottom: $spacing-md;
+  max-width: 720px;
+  margin: 0 auto 42px;
   color: $color-surface-solid;
+  font-size: clamp(42px, 4.8vw, 70px);
+  font-weight: 900;
+  line-height: 1.06;
+  letter-spacing: 0;
+
+  span {
+    display: block;
+    color: color-mix(in srgb, #ffffff 18%, $color-primary);
+  }
 }
 
-.subheadline {
-  font-size: clamp(16px, 2.5vw, 20px);
-  color: rgba($color-off-white, 0.65);
-  line-height: 1.6;
-  margin-bottom: $spacing-xl;
-  max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
+.stepShowcase {
+  min-height: 286px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(360px, 504px) minmax(
+      220px,
+      1fr
+    );
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  margin: 0 auto;
 }
 
-.ctaGroup {
+.stepCard {
+  height: 204px;
+  border: 1px solid rgba($color-off-white, 0.07);
+  border-radius: 32px;
+  background: rgba(#090d12, 0.84);
+  color: rgba($color-off-white, 0.54);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: $spacing-md;
-}
+  justify-content: center;
+  gap: 26px;
+  position: relative;
+  overflow: hidden;
 
-.ctaPrimary {
-  display: inline-block;
-  font-size: 18px;
-  font-weight: 700;
-  font-family: $font-family-base;
-  color: $color-primary-contrast;
-  background: $color-primary;
-  border: none;
-  border-radius: $radius-md;
-  padding: 16px 40px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-  box-shadow: 0 0 24px rgba($color-primary, 0.25);
-
-  &:hover {
-    background: $color-primary-hover;
-    transform: translateY(-2px);
-    box-shadow: 0 0 32px rgba($color-primary, 0.4);
+  h2 {
+    margin: 0;
+    font-size: clamp(17px, 1.7vw, 22px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0;
   }
 }
 
-.ctaDivider {
-  font-size: 14px;
-  color: rgba($color-off-white, 0.4);
-}
-
-.ctaSecondary {
-  display: inline-block;
-  font-size: 16px;
-  font-weight: 500;
-  font-family: $font-family-base;
+.stepCardActive {
+  height: 284px;
+  border: 2px solid rgba($color-primary, 0.36);
+  background: rgba($color-navy-deep, 0.42);
   color: $color-surface-solid;
-  background: transparent;
-  border: 1px solid rgba($color-off-white, 0.2);
-  border-radius: $radius-md;
-  padding: 12px 32px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.15s ease;
+  box-shadow:
+    0 30px 64px rgba(#000, 0.44),
+    0 0 70px rgba($color-primary, 0.12);
 
-  &:hover {
-    border-color: rgba($color-off-white, 0.5);
-    transform: translateY(-1px);
+  &::after {
+    content: "";
+    width: 60%;
+    height: 4px;
+    border-radius: $radius-pill;
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    background: color-mix(in srgb, #ffffff 15%, $color-primary);
+  }
+
+  h2 {
+    font-size: clamp(24px, 2.4vw, 31px);
   }
 }
 
-/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.stepIcon {
+  width: 70px;
+  height: 70px;
+  color: rgba($color-primary, 0.82);
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.stepCard:not(.stepCardActive) .stepIcon {
+  color: rgba($color-primary, 0.45);
+}
 
 .footer {
-  border-top: 1px solid rgba($color-off-white, 0.08);
-  padding: $spacing-lg 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  min-height: 1px;
   position: relative;
   z-index: 2;
 }
 
 .footerCopy {
-  font-size: 13px;
-  color: rgba($color-off-white, 0.35);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* ─── Responsive ─────────────────────────────────────────────────────────── */
-
-@media (max-width: 640px) {
+@media (max-width: 980px) {
   .navbar {
-    padding: $spacing-md $spacing-md;
+    padding: 30px $spacing-lg 14px;
+  }
+
+  .navLinks {
+    gap: 12px;
+  }
+
+  .navLink,
+  .navCta {
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 20px;
+    border-width: 2px;
+    font-size: 17px;
   }
 
   .hero {
-    padding: 0 $spacing-md;
+    padding-top: 42px;
   }
 
-  .footer {
-    padding: $spacing-md;
+  .headline {
+    margin-bottom: 34px;
+    max-width: 650px;
+    font-size: clamp(40px, 7vw, 62px);
   }
+
+  .stepShowcase {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .stepCard,
+  .stepCardActive {
+    width: min(100%, 520px);
+    height: 156px;
+    margin: 0 auto;
+    border-radius: 26px;
+    gap: 16px;
+  }
+
+  .stepCardActive h2 {
+    font-size: 24px;
+  }
+
+  .stepIcon {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing {
+    background-size: 140px 140px;
+  }
+
+  .navbar {
+    padding: 22px $spacing-md 8px;
+  }
+
+  .navLinks {
+    gap: 8px;
+  }
+
+  .navLink,
+  .navCta {
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .hero {
+    justify-content: flex-start;
+    padding: 38px $spacing-md 52px;
+  }
+
+  .headline {
+    margin-bottom: 28px;
+    font-size: clamp(40px, 13vw, 58px);
+  }
+
+  .stepCard,
+  .stepCardActive {
+    height: 132px;
+    border-radius: 20px;
+  }
+
+  .stepCard h2,
+  .stepCardActive h2 {
+    font-size: 19px;
+  }
+
+  .stepIcon {
+    width: 46px;
+    height: 46px;
+
+    svg {
+      stroke-width: 4.4;
+    }
+  }
+
 }

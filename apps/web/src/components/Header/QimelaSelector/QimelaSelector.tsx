@@ -20,15 +20,6 @@ export default function QimelaSelector() {
   const participatingQimelas = activeQimelas.filter((k) => k.role === "SUBSCRIBER");
   const creatorQimelas = activeQimelas.filter((k) => k.role === "CREATOR");
 
-  // Default: last qimela with SUBSCRIBER role — never a creator-only qimela
-  const defaultQimela = activeQimelas.findLast((k) => k.role === "SUBSCRIBER") ?? null;
-
-  useEffect(() => {
-    if (!selectedQimela && defaultQimela) {
-      selectQimela(defaultQimela, "SUBSCRIBER");
-    }
-  }, [defaultQimela]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Keep selectedQimela in sync when the list refetches (e.g. after a name edit)
   useEffect(() => {
     if (!selectedQimela || !data) return;
@@ -62,10 +53,10 @@ export default function QimelaSelector() {
   }, [isOpen]);
 
   function getPillLabel(): string {
-    if (isLoading) return "Loading...";
-    if (isError) return "Error loading";
+    if (isLoading) return "Cargando...";
+    if (isError) return "Error al cargar";
     if (selectedQimela) return selectedQimela.name;
-    return "Select a qimela";
+    return "Selecciona una qimela";
   }
 
   return (

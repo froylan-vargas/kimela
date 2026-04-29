@@ -100,7 +100,7 @@ describe("QimelaSelector", () => {
     queryClient.clear();
   });
 
-  it("shows 'Loading...' while fetching", () => {
+  it("shows 'Cargando...' while fetching", () => {
     mockUseQimelas({
       data: undefined,
       isLoading: true,
@@ -108,10 +108,10 @@ describe("QimelaSelector", () => {
       isSuccess: false,
     });
     render(<QimelaSelector />, { wrapper });
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.getByText("Cargando...")).toBeInTheDocument();
   });
 
-  it("shows 'Error loading' on fetch failure", () => {
+  it("shows 'Error al cargar' on fetch failure", () => {
     mockUseQimelas({
       data: undefined,
       isLoading: false,
@@ -120,24 +120,22 @@ describe("QimelaSelector", () => {
       error: new Error("500"),
     });
     render(<QimelaSelector />, { wrapper });
-    expect(screen.getByText("Error loading")).toBeInTheDocument();
+    expect(screen.getByText("Error al cargar")).toBeInTheDocument();
   });
 
-  it("shows 'Select a qimela' when data loaded but nothing selected", () => {
+  it("shows 'Selecciona una qimela' when data loaded but nothing selected", () => {
     mockUseQimelas({
       data: { data: [], meta: { total: 0, page: 1, limit: 10 } },
     });
 
     render(<QimelaSelector />, { wrapper });
-    expect(screen.getByText("Select a qimela")).toBeInTheDocument();
+    expect(screen.getByText("Selecciona una qimela")).toBeInTheDocument();
   });
 
-  it("auto-selects the last SUBSCRIBER qimela after data loads", async () => {
+  it("does not auto-select a qimela after data loads", () => {
     render(<QimelaSelector />, { wrapper });
-    // sub2 is the last SUBSCRIBER in the array
-    await waitFor(() => {
-      expect(screen.getByText("Premier League")).toBeInTheDocument();
-    });
+    expect(screen.getByText("Selecciona una qimela")).toBeInTheDocument();
+    expect(screen.queryByText("Premier League")).not.toBeInTheDocument();
   });
 
   it("opens the dropdown when the pill button is clicked", async () => {

@@ -1,0 +1,424 @@
+@use "../../../styles/variables" as *;
+
+$fold-shadow: $color-navy-deep;
+
+.stepShowcase {
+  min-height: 316px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  position: relative;
+  margin: 0 auto;
+  isolation: isolate;
+  background: transparent;
+  filter: drop-shadow(0 28px 34px rgba($color-navy-deep, 0.28));
+
+  &::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &::before {
+    inset: 0;
+    z-index: 3;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 32.8%,
+        rgba($fold-shadow, 0.28) 33.1%,
+        rgba($color-primary, 0.2) 34%,
+        transparent 35.2%,
+        transparent 64.8%,
+        rgba($color-primary, 0.18) 66%,
+        rgba($fold-shadow, 0.3) 66.9%,
+        transparent 68.1%
+      );
+  }
+}
+
+.stepCard {
+  min-height: 316px;
+  color: rgba($color-surface-solid, 0.78);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba($color-primary, 0.16);
+
+  & + & {
+    margin-left: -1px;
+  }
+
+  &:nth-child(1) {
+    border-radius: 22px 0 0 22px;
+    clip-path: polygon(0 3%, 100% 0, 100% 100%, 0 96%);
+    transform: perspective(900px) rotateY(4deg);
+    transform-origin: right center;
+  }
+
+  &:nth-child(2) {
+    z-index: 3;
+    clip-path: polygon(0 0, 100% 3%, 100% 96%, 0 100%);
+    box-shadow:
+      inset 18px 0 28px rgba($color-navy-deep, 0.24),
+      inset -18px 0 28px rgba($color-navy-deep, 0.24),
+      inset 0 0 0 1px rgba($color-primary, 0.3);
+  }
+
+  &:nth-child(3) {
+    border-radius: 0 22px 22px 0;
+    clip-path: polygon(0 0, 100% 4%, 100% 96%, 0 100%);
+    transform: perspective(900px) rotateY(-4deg);
+    transform-origin: left center;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(17px, 1.7vw, 22px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-shadow: 0 2px 12px rgba($color-navy-deep, 0.26);
+    position: relative;
+    z-index: 5;
+  }
+}
+
+.stepCardActive {
+  background:
+    radial-gradient(
+      circle at 50% 18%,
+      rgba($color-primary, 0.32),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      rgba($color-primary, 0.16),
+      rgba($color-navy-deep, 0.48)
+    );
+  color: $color-surface-solid;
+  box-shadow:
+    inset 0 0 0 3px rgba($color-primary, 0.58),
+    inset 0 0 28px rgba($color-primary, 0.12);
+
+  h2 {
+    font-size: clamp(24px, 2.4vw, 31px);
+  }
+}
+
+.stepIcon {
+  width: 70px;
+  height: 70px;
+  color: $color-primary;
+  filter: drop-shadow(0 8px 18px rgba($color-primary, 0.22));
+  position: relative;
+  z-index: 5;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.stepCard:not(.stepCardActive) .stepIcon {
+  color: rgba($color-primary, 0.72);
+}
+
+.createCta {
+  width: fit-content;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 34px auto 0;
+  padding: 0 28px;
+  border: 2px solid rgba($color-primary, 0.78);
+  border-radius: $radius-pill;
+  background: color-mix(in srgb, #ffffff 18%, $color-primary);
+  color: $color-primary-contrast;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-decoration: none;
+  box-shadow:
+    0 16px 34px rgba($color-primary, 0.2),
+    0 0 0 6px rgba($color-primary, 0.08);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: $color-primary;
+    box-shadow:
+      0 20px 42px rgba($color-primary, 0.28),
+      0 0 0 7px rgba($color-primary, 0.12);
+    transform: translateY(-1px);
+  }
+}
+
+.dashboardShowcase {
+  filter: drop-shadow(0 20px 34px rgba($color-navy-deep, 0.12));
+
+  &::before {
+    background:
+      linear-gradient(
+        90deg,
+        transparent 32.5%,
+        rgba($color-navy-deep, 0.18) 33.1%,
+        rgba($color-primary, 0.3) 34%,
+        transparent 35.5%,
+        transparent 64.5%,
+        rgba($color-primary, 0.28) 66%,
+        rgba($color-navy-deep, 0.18) 66.9%,
+        transparent 68.4%
+      );
+  }
+
+  .stepCard,
+  .stepCardActive {
+    color: $color-text-main;
+  }
+
+  .stepCard {
+    background:
+      radial-gradient(
+        circle at 50% 18%,
+        rgba($color-primary, 0.12),
+        transparent 44%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(#ffffff, 0.72),
+        rgba($color-primary-light, 0.42)
+      );
+    box-shadow:
+      inset 0 0 0 1px rgba($color-primary, 0.18),
+      inset 0 -18px 34px rgba($color-navy-deep, 0.04);
+    color: rgba($color-text-main, 0.74);
+  }
+
+  .stepCard:nth-child(1) {
+    box-shadow:
+      inset -14px 0 26px rgba($color-navy-deep, 0.08),
+      inset 0 0 0 1px rgba($color-primary, 0.16);
+  }
+
+  .stepCard:nth-child(3) {
+    box-shadow:
+      inset 14px 0 26px rgba($color-navy-deep, 0.08),
+      inset 0 0 0 1px rgba($color-primary, 0.16);
+  }
+
+  .stepCardActive {
+    background:
+      radial-gradient(
+        circle at 50% 18%,
+        rgba($color-primary, 0.26),
+        transparent 45%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(#ffffff, 0.72),
+        rgba($color-primary, 0.18)
+      );
+    box-shadow:
+      inset 20px 0 32px rgba($color-navy-deep, 0.11),
+      inset -20px 0 32px rgba($color-navy-deep, 0.12),
+      inset 0 0 0 3px rgba($color-primary, 0.44),
+      inset 0 0 34px rgba($color-primary, 0.14);
+    color: $color-text-main;
+  }
+
+  .stepIcon {
+    filter: drop-shadow(0 8px 18px rgba($color-primary, 0.18));
+  }
+}
+
+.dashboardCreateCta {
+  border-color: rgba($color-primary, 0.7);
+  background: $color-navy-deep;
+  color: $color-surface-solid;
+  box-shadow:
+    0 16px 32px rgba($color-navy-deep, 0.16),
+    0 0 0 6px rgba($color-primary, 0.1);
+
+  &:hover {
+    background: $color-navy;
+    box-shadow:
+      0 20px 38px rgba($color-navy-deep, 0.2),
+      0 0 0 7px rgba($color-primary, 0.14);
+  }
+}
+
+@media (max-width: 980px) {
+  .stepShowcase {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    width: min(100%, 520px);
+
+    &::before {
+      background:
+        linear-gradient(
+          transparent 32.8%,
+          rgba($fold-shadow, 0.24) 33.2%,
+          rgba($color-primary, 0.18) 34.2%,
+          transparent 35.6%,
+          transparent 64.8%,
+          rgba($color-primary, 0.18) 66%,
+          rgba($fold-shadow, 0.24) 66.8%,
+          transparent 68.2%
+        );
+    }
+
+  }
+
+  .stepShowcase:not(.dashboardShowcase) {
+    filter: drop-shadow(0 22px 32px rgba(#000, 0.28));
+
+    &::before {
+      background:
+        linear-gradient(
+          transparent 32.2%,
+          rgba($color-primary, 0.24) 33%,
+          rgba($color-navy-deep, 0.42) 34.4%,
+          transparent 36.2%,
+          transparent 64.2%,
+          rgba($color-navy-deep, 0.42) 65.6%,
+          rgba($color-primary, 0.24) 67%,
+          transparent 68.6%
+        );
+    }
+
+    .stepCard {
+      background:
+        radial-gradient(
+          circle at 50% 18%,
+          rgba($color-primary, 0.13),
+          transparent 44%
+        ),
+        linear-gradient(
+          180deg,
+          rgba($color-primary, 0.08),
+          rgba($color-navy-deep, 0.32)
+        );
+      box-shadow:
+        inset 0 0 0 1px rgba($color-primary, 0.2),
+        inset 0 -20px 34px rgba(#000, 0.16);
+      color: rgba($color-surface-solid, 0.74);
+    }
+
+    .stepCard:first-child {
+      box-shadow:
+        inset 0 -18px 28px rgba(#000, 0.16),
+        inset 0 14px 24px rgba($color-primary, 0.08),
+        inset 0 0 0 1px rgba($color-primary, 0.18);
+    }
+
+    .stepCardActive {
+      background:
+        radial-gradient(
+          circle at 50% 18%,
+          rgba($color-primary, 0.34),
+          transparent 44%
+        ),
+        linear-gradient(
+          180deg,
+          rgba($color-primary, 0.18),
+          rgba($color-navy-deep, 0.54)
+        );
+      box-shadow:
+        inset 0 18px 30px rgba($color-primary, 0.12),
+        inset 0 -22px 34px rgba(#000, 0.2),
+        inset 0 0 0 3px rgba($color-primary, 0.5);
+    }
+
+    .stepCard:last-child {
+      box-shadow:
+        inset 0 18px 28px rgba(#000, 0.14),
+        inset 0 -14px 24px rgba($color-primary, 0.07),
+        inset 0 0 0 1px rgba($color-primary, 0.18);
+    }
+  }
+
+  .stepCard,
+  .stepCardActive {
+    min-height: 156px;
+    gap: 16px;
+    transform: none;
+    clip-path: none;
+    border-radius: 0;
+
+    & + & {
+      margin-left: 0;
+    }
+  }
+
+  .stepCard:first-child {
+    border-radius: 22px 22px 0 0;
+    clip-path: polygon(3% 0, 97% 0, 100% 100%, 0 100%);
+  }
+
+  .stepCard:last-child {
+    border-radius: 0 0 22px 22px;
+    clip-path: polygon(0 0, 100% 0, 97% 100%, 3% 100%);
+  }
+
+  .stepCardActive h2 {
+    font-size: 24px;
+  }
+
+  .stepIcon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .createCta {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .stepShowcase {
+    width: min(100%, 440px);
+  }
+
+  .stepCard,
+  .stepCardActive {
+    min-height: 132px;
+  }
+
+  .stepCard h2,
+  .stepCardActive h2 {
+    font-size: 19px;
+  }
+
+  .stepIcon {
+    width: 46px;
+    height: 46px;
+
+    svg {
+      stroke-width: 4.4;
+    }
+  }
+
+  .createCta {
+    min-height: 48px;
+    padding: 0 22px;
+    font-size: 16px;
+  }
+}

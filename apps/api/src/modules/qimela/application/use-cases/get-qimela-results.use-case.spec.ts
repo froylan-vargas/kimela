@@ -170,6 +170,7 @@ describe("GetQimelaResultsUseCase", () => {
       {
         id: "session-1",
         name: "Italia vs México",
+        status: "COMPLETED",
         scheduledAt: new Date("2026-04-20T20:00:00Z"),
         phase: { id: PHASE_ID, name: "Jornada 1" },
         contenders: [

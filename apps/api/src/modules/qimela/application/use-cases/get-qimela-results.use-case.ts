@@ -51,6 +51,7 @@ export interface GetQimelaResultsResponse {
 type SessionRecord = {
   id: string;
   name: string;
+  status: string;
   scheduledAt: Date;
   phase: { id: string; name: string };
   contenders: { role: string | null; contender: { id: string; name: string; imgUrl: string | null } }[];
@@ -120,7 +121,11 @@ export class GetQimelaResultsUseCase {
       where: {
         phaseId: query.phaseId,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        scheduledAt: true,
         phase: { select: { id: true, name: true } },
         contenders: {
           include: {
@@ -203,7 +208,9 @@ export class GetQimelaResultsUseCase {
             ? pickByKey.get(pickKey(uid, session.id, scoreAwayCategoryId)) ?? null
             : null;
           const hasAnyPick = homePick !== null || awayPick !== null;
-          const points = pointsByKey.get(pointsKey(uid, session.id));
+          const points = session.status === 'COMPLETED'
+            ? pointsByKey.get(pointsKey(uid, session.id))
+            : undefined;
 
           return {
             userId: uid,

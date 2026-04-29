@@ -62,6 +62,12 @@ export class ScoringWorkerService implements OnModuleInit {
         return;
       }
 
+      if (session.status !== 'COMPLETED') {
+        this.logger.info(`Session ${sessionId} is ${session.status}, clearing points without re-scoring`);
+        await this.clearSessionPoints(sessionId, session.phase.eventId);
+        return;
+      }
+
       const { eventId } = session.phase;
       const categories = session.sessionCategories.map((sc) => sc.pickCategory);
       const results = session.results.map((r) => ({
@@ -186,5 +192,53 @@ export class ScoringWorkerService implements OnModuleInit {
     });
 
     this.logger.info(`Scored ${userIds.length} users for qimela ${qimela.id}, session ${sessionId}`);
+  }
+
+  private async clearSessionPoints(sessionId: string, eventId: string): Promise<void> {
+    const qimelas = await this.prisma.qimela.findMany({
+      where: { eventId },
+      include: { subscriptions: { select: { userId: true } } },
+    });
+
+    for (const qimela of qimelas) {
+      const subscriberIds = new Set(qimela.subscriptions.map((s) => s.userId));
+      subscriberIds.add(qimela.creatorId);
+      const userIds = [...subscriberIds];
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.userSessionPoints.deleteMany({ where: { sessionId, qimelaId: qimela.id } });
+
+        for (const userId of userIds) {
+          const aggregate = await tx.userSessionPoints.aggregate({
+            where: { userId, qimelaId: qimela.id },
+            _sum: { points: true },
+          });
+          const exactCount = await tx.userSessionPoints.count({
+            where: { userId, qimelaId: qimela.id, exactResult: true },
+          });
+          const correctCount = await tx.userSessionPoints.count({
+            where: { userId, qimelaId: qimela.id, correctPick: true },
+          });
+
+          await tx.userQimelaPoints.upsert({
+            where: { userId_qimelaId: { userId, qimelaId: qimela.id } },
+            create: {
+              userId,
+              qimelaId: qimela.id,
+              totalPoints: aggregate._sum.points ?? 0,
+              correctPicksCount: correctCount,
+              exactResultsCount: exactCount,
+            },
+            update: {
+              totalPoints: aggregate._sum.points ?? 0,
+              correctPicksCount: correctCount,
+              exactResultsCount: exactCount,
+            },
+          });
+        }
+      });
+    }
+
+    this.logger.info(`Cleared session points for session ${sessionId} across ${qimelas.length} qimelas`);
   }
 }

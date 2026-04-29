@@ -546,6 +546,13 @@ export const adminApi = {
     );
   },
 
+  cancelSessionResult(eventId: string, phaseId: string, sessionId: string): Promise<void> {
+    return apiFetch<void>(
+      `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/sessions/${encodeURIComponent(sessionId)}/results`,
+      { method: "DELETE" },
+    );
+  },
+
   async uploadSessions(
     eventId: string,
     phaseId: string,

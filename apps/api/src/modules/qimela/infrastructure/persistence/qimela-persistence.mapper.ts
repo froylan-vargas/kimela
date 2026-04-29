@@ -1,5 +1,5 @@
 import {
-  Qimela as PrismaQimela,
+  qimela as PrismaQimela,
   QimelaStatus as PrismaQimelaStatus,
 } from "@prisma/client";
 import { QimelaEntity } from "../../domain/qimela.entity";

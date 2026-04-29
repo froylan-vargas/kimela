@@ -1,11 +1,13 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import SessionResultsEditor from "./SessionResultsEditor";
 import type { Session } from "@/types/session";
 
 vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }));
 vi.mock("@/context/ToastContext", () => ({ useToast: () => ({ toast: vi.fn() }) }));
-vi.mock("@/lib/apiClient", () => ({ adminApi: { saveSessionResults: vi.fn() } }));
+vi.mock("@/lib/apiClient", () => ({
+  adminApi: { saveSessionResults: vi.fn(), cancelSessionResult: vi.fn() },
+}));
 
 const DEFAULT_PROPS = { eventId: "event-1", phaseId: "phase-1" };
 
@@ -289,7 +291,7 @@ describe("SessionResultsEditor", () => {
     expect(screen.getByText("Resultado final registrado")).toBeInTheDocument();
     expect(screen.getByLabelText("Resultado de América")).toHaveValue("3");
     expect(screen.getByLabelText("Resultado de Chivas")).toHaveValue("2");
-    expect(screen.getByRole("button", { name: "Completado" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Anular resultado" })).toBeInTheDocument();
   });
 
   it("does not render the session name in the results card header", () => {
@@ -310,5 +312,118 @@ describe("SessionResultsEditor", () => {
     );
 
     expect(screen.queryByText("AMÉRICA VS CHIVAS")).not.toBeInTheDocument();
+  });
+
+  describe("cancel result flow", () => {
+    const completedSession = makeSession({
+      status: "COMPLETED",
+      home: { id: "c1", name: "América", imgUrl: null },
+      away: { id: "c2", name: "Chivas", imgUrl: null },
+      score: { home: "2", away: "1" },
+    });
+
+    it("shows 'Anular resultado' button for completed sessions", () => {
+      render(
+        <SessionResultsEditor
+          {...DEFAULT_PROPS}
+          sessions={[completedSession]}
+          isLoading={false}
+          isError={false}
+          isPhaseActive={true}
+        />,
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Anular resultado" }),
+      ).toBeInTheDocument();
+    });
+
+    it("clicking 'Anular resultado' shows a confirmation dialog", () => {
+      render(
+        <SessionResultsEditor
+          {...DEFAULT_PROPS}
+          sessions={[completedSession]}
+          isLoading={false}
+          isError={false}
+          isPhaseActive={true}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Anular resultado" }));
+
+      expect(screen.getByText("¿Confirmar anulación?")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Sí, anular" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "No" })).toBeInTheDocument();
+    });
+
+    it("clicking 'No' dismisses the confirmation dialog", () => {
+      render(
+        <SessionResultsEditor
+          {...DEFAULT_PROPS}
+          sessions={[completedSession]}
+          isLoading={false}
+          isError={false}
+          isPhaseActive={true}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Anular resultado" }));
+      fireEvent.click(screen.getByRole("button", { name: "No" }));
+
+      expect(screen.queryByText("¿Confirmar anulación?")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Anular resultado" }),
+      ).toBeInTheDocument();
+    });
+
+    it("clicking 'Sí, anular' calls cancelSessionResult with the correct ids", async () => {
+      const { adminApi } = await import("@/lib/apiClient");
+      vi.mocked(adminApi.cancelSessionResult).mockResolvedValue(undefined);
+
+      render(
+        <SessionResultsEditor
+          {...DEFAULT_PROPS}
+          sessions={[completedSession]}
+          isLoading={false}
+          isError={false}
+          isPhaseActive={true}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Anular resultado" }));
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Sí, anular" }));
+      });
+
+      expect(adminApi.cancelSessionResult).toHaveBeenCalledWith(
+        DEFAULT_PROPS.eventId,
+        DEFAULT_PROPS.phaseId,
+        completedSession.id,
+      );
+    });
+
+    it("disables the cancel button while the cancellation is in-flight", async () => {
+      const { adminApi } = await import("@/lib/apiClient");
+      vi.mocked(adminApi.cancelSessionResult).mockReturnValue(new Promise<void>(() => {}));
+
+      render(
+        <SessionResultsEditor
+          {...DEFAULT_PROPS}
+          sessions={[completedSession]}
+          isLoading={false}
+          isError={false}
+          isPhaseActive={true}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Anular resultado" }));
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Sí, anular" }));
+      });
+
+      expect(screen.getByRole("button", { name: "Anular resultado" })).toBeDisabled();
+    });
   });
 });

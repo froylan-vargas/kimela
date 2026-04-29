@@ -113,6 +113,8 @@ export default function SessionResultsEditor({
     buildInitialDrafts(sessions),
   );
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmingCancelId, setConfirmingCancelId] = useState<string | null>(null);
 
   useEffect(() => {
     setDrafts(buildInitialDrafts(sessions));
@@ -135,6 +137,20 @@ export default function SessionResultsEditor({
         [side]: normalizedValue,
       },
     }));
+  }
+
+  async function handleCancel(sessionId: string) {
+    setCancellingId(sessionId);
+    setConfirmingCancelId(null);
+    try {
+      await adminApi.cancelSessionResult(eventId, phaseId, sessionId);
+      await queryClient.invalidateQueries({ queryKey: ["admin", "sessions", eventId, phaseId] });
+      toast("Resultado anulado. Los puntos serán recalculados.", "success");
+    } catch (err) {
+      toast(toUserMessage(err), "error");
+    } finally {
+      setCancellingId(null);
+    }
   }
 
   async function handleSave(sessionId: string) {
@@ -187,6 +203,8 @@ export default function SessionResultsEditor({
           const draft = drafts[session.id] ?? { home: "", away: "" };
           const isCompleted = session.status === "COMPLETED";
           const isSaving = savingId === session.id;
+          const isCancelling = cancellingId === session.id;
+          const isConfirmingCancel = confirmingCancelId === session.id;
           const canSave =
             !isCompleted &&
             isPhaseActive &&
@@ -270,14 +288,47 @@ export default function SessionResultsEditor({
               </div>
 
               <div className={styles.footer}>
-                <button
-                  type="button"
-                  className={styles.saveButton}
-                  disabled={!canSave}
-                  onClick={() => handleSave(session.id)}
-                >
-                  {isCompleted ? "Completado" : isSaving ? "Guardando..." : "Guardar resultados"}
-                </button>
+                {isCompleted ? (
+                  isConfirmingCancel ? (
+                    <div className={styles.cancelConfirm}>
+                      <span>¿Confirmar anulación?</span>
+                      <button
+                        type="button"
+                        className={styles.confirmYes}
+                        disabled={isCancelling}
+                        onClick={() => handleCancel(session.id)}
+                      >
+                        {isCancelling ? "Anulando..." : "Sí, anular"}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.confirmNo}
+                        disabled={isCancelling}
+                        onClick={() => setConfirmingCancelId(null)}
+                      >
+                        No
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.cancelButton}
+                      disabled={isCancelling}
+                      onClick={() => setConfirmingCancelId(session.id)}
+                    >
+                      Anular resultado
+                    </button>
+                  )
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.saveButton}
+                    disabled={!canSave}
+                    onClick={() => handleSave(session.id)}
+                  >
+                    {isSaving ? "Guardando..." : "Guardar resultados"}
+                  </button>
+                )}
               </div>
             </li>
           );

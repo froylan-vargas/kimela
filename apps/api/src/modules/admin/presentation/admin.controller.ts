@@ -31,6 +31,8 @@ import {
   UploadSessionsResponse,
 } from '../application/use-cases/upload-sessions.use-case';
 import { SaveSessionResultsUseCase } from '../application/use-cases/save-session-results.use-case';
+import { CancelSessionResultsUseCase } from '../application/use-cases/cancel-session-results.use-case';
+import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetEventsRequestDto } from './dtos/get-events-request.dto';
 import { CreatePhaseRequestDto } from './dtos/create-phase-request.dto';
 import { ReorderPhasesRequestDto } from './dtos/reorder-phases-request.dto';
@@ -54,6 +56,7 @@ export class AdminController {
     private readonly getSessionsByPhase: GetSessionsByPhaseUseCase,
     private readonly uploadSessions: UploadSessionsUseCase,
     private readonly saveSessionResultsUseCase: SaveSessionResultsUseCase,
+    private readonly cancelSessionResultsUseCase: CancelSessionResultsUseCase,
   ) {}
 
   @Get('sports')
@@ -172,5 +175,18 @@ export class AdminController {
     this.logger.info(`PUT /admin/events/${eventId}/phases/${phaseId}/sessions/${sessionId}/results requested`);
 
     await this.saveSessionResultsUseCase.execute({ eventId, phaseId, sessionId, homeScore: body.homeScore, awayScore: body.awayScore });
+  }
+
+  @Delete('events/:eventId/phases/:phaseId/sessions/:sessionId/results')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async cancelSessionResults(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('phaseId', ParseUUIDPipe) phaseId: string,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<void> {
+    this.logger.info(`DELETE /admin/events/${eventId}/phases/${phaseId}/sessions/${sessionId}/results requested`);
+
+    await this.cancelSessionResultsUseCase.execute({ eventId, phaseId, sessionId, cancelledByUserId: user.id });
   }
 }

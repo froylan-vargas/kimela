@@ -11,6 +11,7 @@ import { DeletePhaseUseCase } from '../application/use-cases/delete-phase.use-ca
 import { ActivatePhaseUseCase } from '../application/use-cases/activate-phase.use-case';
 import { CompletePhaseUseCase } from '../application/use-cases/complete-phase.use-case';
 import { SaveSessionResultsUseCase } from '../application/use-cases/save-session-results.use-case';
+import { CancelSessionResultsUseCase } from '../application/use-cases/cancel-session-results.use-case';
 import { PgBossModule } from '../../../shared/queue/pgboss.module';
 import { AdminController } from './admin.controller';
 
@@ -28,6 +29,7 @@ import { AdminController } from './admin.controller';
     GetSessionsByPhaseUseCase,
     UploadSessionsUseCase,
     SaveSessionResultsUseCase,
+    CancelSessionResultsUseCase,
   ],
   controllers: [AdminController],
 })

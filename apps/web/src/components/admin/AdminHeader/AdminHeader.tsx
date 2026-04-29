@@ -11,7 +11,7 @@ export default function AdminHeader() {
 
   return (
     <header className={styles.navbar}>
-      <Logo href="/admin" variant="inverse" />
+      <Logo href="/admin/events" variant="inverse" />
       <nav className={styles.nav}>
         <Link href="/admin/events" className={styles.navLink}>
           Eventos

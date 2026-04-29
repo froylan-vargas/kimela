@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/Header/Logo";
+import HomeStepShowcase from "@/components/home/HomeStepShowcase";
 import styles from "./page.module.scss";
 
 export default async function LandingPage() {
@@ -15,9 +17,7 @@ export default async function LandingPage() {
     <div className={styles.landing}>
       {/* ── Navbar ──────────────────────────────────────────────────────── */}
       <nav className={styles.navbar}>
-        <Link href="/" className={styles.navLogo}>
-          qimela<span>.</span>
-        </Link>
+        <Logo variant="inverse" />
 
         <div className={styles.navLinks}>
           <Link href="/login" className={styles.navLink}>
@@ -31,26 +31,15 @@ export default async function LandingPage() {
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section className={styles.hero}>
-        <div className={styles.glow} aria-hidden="true" />
+        <div className={styles.heroGlow} aria-hidden="true" />
 
         <div className={styles.heroContent}>
           <h1 className={styles.headline}>
-            Tu quiniela deportiva, simplificada
+            Tu quiniela deportiva,
+            <span>simplificada</span>
           </h1>
-          <p className={styles.subheadline}>
-            Crea y participa en quinielas deportivas con tus amigos. Rápido,
-            fácil y divertido.
-          </p>
 
-          <div className={styles.ctaGroup}>
-            <Link href="/register" className={styles.ctaPrimary}>
-              Regístrate gratis
-            </Link>
-            <span className={styles.ctaDivider}>o</span>
-            <Link href="/login" className={styles.ctaSecondary}>
-              Iniciar sesión
-            </Link>
-          </div>
+          <HomeStepShowcase />
         </div>
       </section>
 

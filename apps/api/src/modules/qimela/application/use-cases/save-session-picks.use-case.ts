@@ -58,7 +58,7 @@ export class SaveSessionPicksUseCase {
       });
     }
 
-    await this.assertUserHasAccess(command.userId, qimela.id, qimela.creatorId);
+    await this.assertUserHasAccess(command.userId, qimela.id);
 
     const session = await this.prisma.session.findUnique({
       where: { id: command.sessionId },
@@ -127,6 +127,7 @@ export class SaveSessionPicksUseCase {
     const picks = await this.sessionPickRepository.savePicksForSession({
       userId: command.userId,
       sessionId: command.sessionId,
+      qimelaId: command.qimelaId,
       picks: command.picks,
     });
 
@@ -140,11 +141,7 @@ export class SaveSessionPicksUseCase {
     };
   }
 
-  private async assertUserHasAccess(userId: string, qimelaId: string, creatorId: string): Promise<void> {
-    if (creatorId === userId) {
-      return;
-    }
-
+  private async assertUserHasAccess(userId: string, qimelaId: string): Promise<void> {
     const subscription = await this.prisma.subscription.findFirst({
       where: { userId, qimelaId },
       select: { id: true },

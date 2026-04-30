@@ -11,6 +11,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/",
 }));
 
 vi.mock("@/hooks/useQimelas");

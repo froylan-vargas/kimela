@@ -117,7 +117,7 @@ export class ScoringWorkerService implements OnModuleInit {
     const userIds = [...subscriberIds];
 
     const allPicks = await this.prisma.userPick.findMany({
-      where: { sessionId, userId: { in: userIds } },
+      where: { sessionId, qimelaId: qimela.id, userId: { in: userIds } },
       select: {
         userId: true,
         pickCategoryId: true,

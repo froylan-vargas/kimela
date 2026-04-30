@@ -1,9 +1,18 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+let mockPush = vi.fn();
+let mockPathname = "/";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mockPush }),
+  usePathname: () => mockPathname,
 }));
+
+beforeEach(() => {
+  mockPush = vi.fn();
+  mockPathname = "/";
+});
 
 import QimelaDropdown from "./QimelaDropdown";
 import type { qimela } from "@/types/qimela";
@@ -147,5 +156,41 @@ describe("QimelaDropdown", () => {
     renderDropdown({ onClose });
     fireEvent.click(screen.getByRole("link", { name: "+ Crea tu qimela" }));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves the /results sub-route when switching qimela from a results page", () => {
+    mockPathname = "/qimela/s1/results";
+    renderDropdown();
+
+    fireEvent.click(screen.getByText("Premier League"));
+
+    expect(mockPush).toHaveBeenCalledWith(`/qimela/${sub2.id}/results`);
+  });
+
+  it("preserves the /sessions sub-route when switching qimela from a sessions page", () => {
+    mockPathname = "/qimela/s1/sessions";
+    renderDropdown();
+
+    fireEvent.click(screen.getByText("Premier League"));
+
+    expect(mockPush).toHaveBeenCalledWith(`/qimela/${sub2.id}/sessions`);
+  });
+
+  it("navigates to /dashboard for a subscriber item when not on a sub-route", () => {
+    mockPathname = "/qimela/s1";
+    renderDropdown();
+
+    fireEvent.click(screen.getByText("Liga MX"));
+
+    expect(mockPush).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("navigates to /qimela/:id for a creator item when not on a sub-route", () => {
+    mockPathname = "/dashboard";
+    renderDropdown();
+
+    fireEvent.click(screen.getByText("NBA Pool"));
+
+    expect(mockPush).toHaveBeenCalledWith(`/qimela/${cre1.id}`);
   });
 });

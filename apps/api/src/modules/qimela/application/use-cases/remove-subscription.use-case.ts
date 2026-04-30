@@ -55,9 +55,20 @@ export class RemoveSubscriptionUseCase {
 
     if (!subscription) throw new NotFoundException("Subscription not found");
 
-    await this.prisma.subscription.delete({
-      where: { id: subscription.id },
-    });
+    await this.prisma.$transaction([
+      this.prisma.userPick.deleteMany({
+        where: { userId: command.targetUserId, qimelaId: command.qimelaId },
+      }),
+      this.prisma.userSessionPoints.deleteMany({
+        where: { userId: command.targetUserId, qimelaId: command.qimelaId },
+      }),
+      this.prisma.userQimelaPoints.deleteMany({
+        where: { userId: command.targetUserId, qimelaId: command.qimelaId },
+      }),
+      this.prisma.subscription.delete({
+        where: { id: subscription.id },
+      }),
+    ]);
 
     return { data: { removed: true } };
   }

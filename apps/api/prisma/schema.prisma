@@ -81,6 +81,7 @@ model qimela {
   sessionPoints UserSessionPoints[]
   qimelaPoints  UserQimelaPoints[]
   labels        QimelaLabel[]
+  picks         UserPick[]
 
   @@map("qimelas")
 }
@@ -451,11 +452,14 @@ model UserPick {
   pickCategoryId String       @map("pick_category_id")
   pickCategory   PickCategory @relation(fields: [pickCategoryId], references: [id])
 
+  qimelaId String @map("qimela_id")
+  qimela   qimela @relation(fields: [qimelaId], references: [id], onDelete: Cascade)
+
   // The contender the user predicts for this slot (used when valueType = CONTENDER)
   pickedContenderId String?    @map("picked_contender_id")
   pickedContender   Contender? @relation("PickedContender", fields: [pickedContenderId], references: [id])
 
-  @@unique([userId, sessionId, pickCategoryId])
+  @@unique([userId, sessionId, pickCategoryId, qimelaId])
   @@map("user_picks")
 }
 

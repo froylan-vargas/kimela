@@ -43,7 +43,6 @@ export class GetSessionTop5PicksUseCase {
         id: true,
         creatorId: true,
         sportId: true,
-        creator: { select: { id: true, name: true } },
         subscriptions: {
           select: { user: { select: { id: true, name: true } } },
         },
@@ -126,7 +125,7 @@ export class GetSessionTop5PicksUseCase {
       .slice(0, 5)
       .map((p, i) => ({ ...p, rank: i + 1 }));
 
-    return this.attachPicks(ranked, sessionId, homeCatId, awayCatId);
+    return this.attachPicks(ranked, sessionId, qimelaId, homeCatId, awayCatId);
   }
 
   private async buildTop5ForPhase(
@@ -174,12 +173,13 @@ export class GetSessionTop5PicksUseCase {
       .slice(0, 5)
       .map((p, i) => ({ ...p, rank: i + 1 }));
 
-    return this.attachPicks(ranked, sessionId, homeCatId, awayCatId);
+    return this.attachPicks(ranked, sessionId, qimelaId, homeCatId, awayCatId);
   }
 
   private async attachPicks(
     ranked: { rank: number; userId: string; userName: string }[],
     sessionId: string,
+    qimelaId: string,
     homeCatId: string | null,
     awayCatId: string | null,
   ): Promise<Top5PickEntry[]> {
@@ -192,6 +192,7 @@ export class GetSessionTop5PicksUseCase {
             where: {
               userId: { in: userIds },
               sessionId,
+              qimelaId,
               pickCategoryId: { in: categoryIds },
             },
             select: { userId: true, pickCategoryId: true, value: true },
@@ -217,18 +218,12 @@ export class GetSessionTop5PicksUseCase {
   }
 
   private buildParticipants(qimela: {
-    creator: { id: string; name: string };
     subscriptions: { user: { id: string; name: string } }[];
   }): { userId: string; userName: string }[] {
-    const map = new Map<string, { userId: string; userName: string }>();
-    map.set(qimela.creator.id, {
-      userId: qimela.creator.id,
-      userName: qimela.creator.name,
-    });
-    for (const sub of qimela.subscriptions) {
-      map.set(sub.user.id, { userId: sub.user.id, userName: sub.user.name });
-    }
-    return [...map.values()];
+    return qimela.subscriptions.map((s) => ({
+      userId: s.user.id,
+      userName: s.user.name,
+    }));
   }
 
   private async assertAccess(

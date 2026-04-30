@@ -138,6 +138,22 @@ describe("GetQimelaResultsUseCase", () => {
     ).rejects.toThrow(NotFoundException);
   });
 
+  it("throws ForbiddenException when the creator is passed as a compare user but has no subscription", async () => {
+    mockQimelaRepository.findById.mockResolvedValue(makeQimela());
+    mockPrisma.subscription.findFirst.mockResolvedValue({ id: "sub-id" });
+    mockPrisma.phase.findFirst.mockResolvedValue({ id: PHASE_ID });
+    mockPrisma.subscription.findMany.mockResolvedValue([]);
+
+    await expect(
+      useCase.execute({
+        qimelaId: QIMELA_ID,
+        userId: USER_ID,
+        phaseId: PHASE_ID,
+        compareUserIds: [CREATOR_ID],
+      }),
+    ).rejects.toThrow(ForbiddenException);
+  });
+
   it("throws ForbiddenException when a compare user does not belong to the qimela", async () => {
     mockQimelaRepository.findById.mockResolvedValue(makeQimela());
     mockPrisma.subscription.findFirst.mockResolvedValue({ id: "sub-id" });
@@ -254,6 +270,11 @@ describe("GetQimelaResultsUseCase", () => {
         where: {
           phaseId: PHASE_ID,
         },
+      }),
+    );
+    expect(mockPrisma.userPick.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ qimelaId: QIMELA_ID }),
       }),
     );
   });

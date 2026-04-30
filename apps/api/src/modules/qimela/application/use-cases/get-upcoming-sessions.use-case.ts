@@ -111,6 +111,7 @@ export class GetUpcomingSessionsUseCase {
     const picksBySessionId = await this.getPicksBySessionId(
       query.userId,
       sessions.map((session: SessionRecord) => session.id),
+      query.qimelaId,
     );
 
     const sessionsByPhaseId = new Map<string, SessionWithPickDto[]>();
@@ -176,7 +177,7 @@ export class GetUpcomingSessionsUseCase {
     };
   }
 
-  private async getPicksBySessionId(userId: string, sessionIds: string[]) {
+  private async getPicksBySessionId(userId: string, sessionIds: string[], qimelaId: string) {
     const map = new Map<string, PickDto[]>();
 
     if (sessionIds.length === 0) {
@@ -187,6 +188,7 @@ export class GetUpcomingSessionsUseCase {
       where: {
         userId,
         sessionId: { in: sessionIds },
+        qimelaId,
       },
       include: {
         pickCategory: {

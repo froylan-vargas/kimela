@@ -160,6 +160,38 @@ describe("GetAllSessionsUseCase", () => {
     );
   });
 
+  it("fetches picks filtered by qimelaId so picks from other qimelas are not shown", async () => {
+    jest
+      .spyOn(Date, "now")
+      .mockReturnValue(new Date("2026-04-21T23:30:00Z").getTime());
+
+    mockQimelaRepository.findById.mockResolvedValue(makeQimela());
+    mockPrisma.subscription.findFirst.mockResolvedValue({ id: "sub-id" });
+    mockPrisma.phase.findMany.mockResolvedValue([
+      { id: "phase-1", name: "Jornada 1", order: 1 },
+    ]);
+    mockPrisma.session.findMany.mockResolvedValue([
+      {
+        id: "session-1",
+        name: "Atlas vs América",
+        scheduledAt: new Date("2026-05-01T20:00:00Z"),
+        status: "SCHEDULED",
+        phase: { id: "phase-1", name: "Jornada 1", order: 1 },
+        contenders: [],
+        sessionCategories: [],
+      },
+    ]);
+    mockPrisma.userPick.findMany.mockResolvedValue([]);
+
+    await useCase.execute({ qimelaId: QIMELA_ID, userId: USER_ID });
+
+    expect(mockPrisma.userPick.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ qimelaId: QIMELA_ID }),
+      }),
+    );
+  });
+
   it("marks sessions with saved picks via hasUserPicks", async () => {
     jest
       .spyOn(Date, "now")

@@ -11,16 +11,18 @@ export class PrismaSessionPickRepository implements SessionPickRepository {
       options.picks.map((pick) =>
         this.prisma.userPick.upsert({
           where: {
-            userId_sessionId_pickCategoryId: {
+            userId_sessionId_pickCategoryId_qimelaId: {
               userId: options.userId,
               sessionId: options.sessionId,
               pickCategoryId: pick.pickCategoryId,
+              qimelaId: options.qimelaId,
             },
           },
           create: {
             userId: options.userId,
             sessionId: options.sessionId,
             pickCategoryId: pick.pickCategoryId,
+            qimelaId: options.qimelaId,
             value: pick.value,
             pickedContenderId: pick.pickedContenderId,
           },
@@ -32,12 +34,12 @@ export class PrismaSessionPickRepository implements SessionPickRepository {
       ),
     );
 
-    return this.findPicksForUserAndSession(options.userId, options.sessionId);
+    return this.findPicksForUserAndSession(options.userId, options.sessionId, options.qimelaId);
   }
 
-  async findPicksForUserAndSession(userId: string, sessionId: string): Promise<PickRow[]> {
+  async findPicksForUserAndSession(userId: string, sessionId: string, qimelaId: string): Promise<PickRow[]> {
     const rows = await this.prisma.userPick.findMany({
-      where: { userId, sessionId },
+      where: { userId, sessionId, qimelaId },
       include: {
         pickCategory: {
           select: {

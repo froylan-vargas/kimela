@@ -112,6 +112,20 @@ describe("SaveSessionPicksUseCase", () => {
     ).rejects.toThrow(ForbiddenException);
   });
 
+  it("throws ForbiddenException when the creator has no subscription (creator bypass removed)", async () => {
+    mockQimelaRepository.findById.mockResolvedValue(makeQimela());
+    mockPrisma.subscription.findFirst.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute({
+        qimelaId: QIMELA_ID,
+        sessionId: SESSION_ID,
+        userId: CREATOR_ID,
+        picks: [],
+      }),
+    ).rejects.toThrow(ForbiddenException);
+  });
+
   it("throws NotFoundException when session does not exist", async () => {
     mockQimelaRepository.findById.mockResolvedValue(makeQimela());
     mockPrisma.subscription.findFirst.mockResolvedValue({ id: "sub-id" });
@@ -242,6 +256,7 @@ describe("SaveSessionPicksUseCase", () => {
     expect(mockSessionPickRepository.savePicksForSession).toHaveBeenCalledWith({
       userId: USER_ID,
       sessionId: SESSION_ID,
+      qimelaId: QIMELA_ID,
       picks: [
         {
           pickCategoryId: PICK_CATEGORY_ID,

@@ -100,7 +100,7 @@ export class GetQimelaResultsUseCase {
     }
 
     const userIds = this.buildUserIds(query.userId, query.compareUserIds);
-    await this.assertUsersBelongToQimela(userIds, qimela.id, qimela.creatorId, query.userId);
+    await this.assertUsersBelongToQimela(userIds, qimela.id, query.userId);
 
     const sport = await this.prisma.sport.findUnique({
       where: { id: qimela.sportId },
@@ -151,6 +151,7 @@ export class GetQimelaResultsUseCase {
         where: {
           userId: { in: userIds },
           sessionId: { in: sessionIds },
+          qimelaId: qimela.id,
           pickCategoryId: { in: [scoreHomeCategoryId, scoreAwayCategoryId].filter(Boolean) as string[] },
         },
         select: { userId: true, sessionId: true, pickCategoryId: true, value: true },
@@ -255,10 +256,9 @@ export class GetQimelaResultsUseCase {
   private async assertUsersBelongToQimela(
     userIds: string[],
     qimelaId: string,
-    creatorId: string,
     currentUserId: string,
   ): Promise<void> {
-    const extras = userIds.filter((id) => id !== creatorId && id !== currentUserId);
+    const extras = userIds.filter((id) => id !== currentUserId);
     if (extras.length === 0) return;
 
     const subscriptions = await this.prisma.subscription.findMany({

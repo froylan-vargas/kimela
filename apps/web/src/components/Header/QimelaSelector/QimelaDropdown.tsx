@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { qimela, QimelaRole } from "@/types/qimela";
 import styles from "./QimelaDropdown.module.scss";
 
@@ -23,10 +23,16 @@ export default function QimelaDropdown({
   onClose,
 }: QimelaDropdownProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   function handleSelect(qimela: qimela, viewAs: QimelaRole) {
     onSelect(qimela, viewAs);
     onClose();
+    const subRouteMatch = pathname.match(/^\/qimela\/[^/]+\/(results|sessions)$/);
+    if (subRouteMatch) {
+      router.push(`/qimela/${qimela.id}/${subRouteMatch[1]}`);
+      return;
+    }
     if (viewAs === "CREATOR") {
       router.push(`/qimela/${qimela.id}`);
     } else {

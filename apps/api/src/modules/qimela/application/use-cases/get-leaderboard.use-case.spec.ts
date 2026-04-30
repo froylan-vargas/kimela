@@ -41,10 +41,9 @@ describe('GetLeaderboardUseCase', () => {
     await expect(useCase.execute(QIMELA_ID)).rejects.toThrow(NotFoundException);
   });
 
-  it('returns all participants even when some have no event points yet', async () => {
+  it('returns all subscribers even when some have no event points yet', async () => {
     mockPrisma.qimela.findUnique.mockResolvedValue({
       id: QIMELA_ID,
-      creator: { id: 'creator', name: 'Creador', imageUrl: null },
       subscriptions: [
         { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
         { user: { id: 'luis', name: 'Luis Ramos', imageUrl: null } },
@@ -64,15 +63,29 @@ describe('GetLeaderboardUseCase', () => {
 
     expect(result.data).toEqual([
       expect.objectContaining({ userId: 'ana', totalPoints: 8, rank: 1 }),
-      expect.objectContaining({ userId: 'creator', totalPoints: 0, rank: 2 }),
-      expect.objectContaining({ userId: 'luis', totalPoints: 0, rank: 3 }),
+      expect.objectContaining({ userId: 'luis', totalPoints: 0, rank: 2 }),
     ]);
   });
 
-  it('returns all participants for a phase even before phase scoring exists', async () => {
+  it('does not include the creator as a standalone participant (creator must subscribe)', async () => {
     mockPrisma.qimela.findUnique.mockResolvedValue({
       id: QIMELA_ID,
-      creator: { id: 'creator', name: 'Creador', imageUrl: null },
+      subscriptions: [
+        { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
+      ],
+    });
+    mockPrisma.userQimelaPoints.findMany.mockResolvedValue([]);
+
+    const result = await useCase.execute(QIMELA_ID);
+
+    const userIds = result.data.map((e: { userId: string }) => e.userId);
+    expect(userIds).toEqual(['ana']);
+    expect(userIds).not.toContain('creator');
+  });
+
+  it('returns all subscribers for a phase even before phase scoring exists', async () => {
+    mockPrisma.qimela.findUnique.mockResolvedValue({
+      id: QIMELA_ID,
       subscriptions: [
         { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
         { user: { id: 'luis', name: 'Luis Ramos', imageUrl: null } },
@@ -89,7 +102,6 @@ describe('GetLeaderboardUseCase', () => {
     );
     expect(result.data).toEqual([
       expect.objectContaining({ userId: 'ana', totalPoints: 0 }),
-      expect.objectContaining({ userId: 'creator', totalPoints: 0 }),
       expect.objectContaining({ userId: 'luis', totalPoints: 0 }),
     ]);
   });

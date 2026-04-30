@@ -36,7 +36,6 @@ export class GetLeaderboardUseCase {
       where: { id: qimelaId },
       select: {
         id: true,
-        creator: { select: { id: true, name: true, imageUrl: true } },
         subscriptions: {
           select: {
             user: { select: { id: true, name: true, imageUrl: true } },
@@ -133,7 +132,6 @@ export class GetLeaderboardUseCase {
   }
 
   private getParticipants(qimela: {
-    creator: { id: string; name: string; imageUrl: string | null };
     subscriptions: {
       user: { id: string; name: string; imageUrl: string | null };
     }[];
@@ -141,26 +139,11 @@ export class GetLeaderboardUseCase {
     LeaderboardEntry,
     "totalPoints" | "correctPicksCount" | "exactResultsCount" | "rank"
   >[] {
-    const byUserId = new Map<
-      string,
-      Omit<
-        LeaderboardEntry,
-        "totalPoints" | "correctPicksCount" | "exactResultsCount" | "rank"
-      >
-    >();
-    byUserId.set(qimela.creator.id, {
-      userId: qimela.creator.id,
-      userName: qimela.creator.name,
-      imageUrl: qimela.creator.imageUrl,
-    });
-    for (const subscription of qimela.subscriptions) {
-      byUserId.set(subscription.user.id, {
-        userId: subscription.user.id,
-        userName: subscription.user.name,
-        imageUrl: subscription.user.imageUrl,
-      });
-    }
-    return [...byUserId.values()];
+    return qimela.subscriptions.map((s) => ({
+      userId: s.user.id,
+      userName: s.user.name,
+      imageUrl: s.user.imageUrl,
+    }));
   }
 
   private rankParticipants(entries: LeaderboardEntry[]): LeaderboardEntry[] {

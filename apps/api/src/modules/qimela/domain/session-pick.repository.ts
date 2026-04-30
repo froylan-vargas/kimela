@@ -9,6 +9,7 @@ export interface PickInput {
 export interface SavePicksOptions {
   userId: string;
   sessionId: string;
+  qimelaId: string;
   picks: PickInput[];
 }
 
@@ -23,5 +24,5 @@ export interface PickRow {
 
 export interface SessionPickRepository {
   savePicksForSession(options: SavePicksOptions): Promise<PickRow[]>;
-  findPicksForUserAndSession(userId: string, sessionId: string): Promise<PickRow[]>;
+  findPicksForUserAndSession(userId: string, sessionId: string, qimelaId: string): Promise<PickRow[]>;
 }

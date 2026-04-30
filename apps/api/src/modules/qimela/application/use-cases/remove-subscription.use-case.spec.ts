@@ -36,6 +36,10 @@ describe("RemoveSubscriptionUseCase", () => {
   let mockQimelaRepo: jest.Mocked<QimelaRepository>;
   let mockPrisma: {
     subscription: { findUnique: jest.Mock; delete: jest.Mock };
+    userPick: { deleteMany: jest.Mock };
+    userSessionPoints: { deleteMany: jest.Mock };
+    userQimelaPoints: { deleteMany: jest.Mock };
+    $transaction: jest.Mock;
   };
 
   beforeEach(() => {
@@ -49,8 +53,12 @@ describe("RemoveSubscriptionUseCase", () => {
     mockPrisma = {
       subscription: {
         findUnique: jest.fn(),
-        delete: jest.fn(),
+        delete: jest.fn().mockResolvedValue({}),
       },
+      userPick: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+      userSessionPoints: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+      userQimelaPoints: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+      $transaction: jest.fn().mockImplementation((ops: Promise<unknown>[]) => Promise.all(ops)),
     };
 
     const mockLogger: any = {
@@ -136,13 +144,10 @@ describe("RemoveSubscriptionUseCase", () => {
       });
     });
 
-    it("deletes the subscription by its id", async () => {
+    it("deletes picks, session points, qimela points and subscription inside a transaction", async () => {
       // Arrange
       mockQimelaRepo.findById.mockResolvedValue(makeQimela());
-      mockPrisma.subscription.findUnique.mockResolvedValue({
-        id: SUBSCRIPTION_ID,
-      });
-      mockPrisma.subscription.delete.mockResolvedValue({});
+      mockPrisma.subscription.findUnique.mockResolvedValue({ id: SUBSCRIPTION_ID });
 
       // Act
       await useCase.execute({
@@ -152,6 +157,16 @@ describe("RemoveSubscriptionUseCase", () => {
       });
 
       // Assert
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.userPick.deleteMany).toHaveBeenCalledWith({
+        where: { userId: TARGET_USER_ID, qimelaId: QIMELA_ID },
+      });
+      expect(mockPrisma.userSessionPoints.deleteMany).toHaveBeenCalledWith({
+        where: { userId: TARGET_USER_ID, qimelaId: QIMELA_ID },
+      });
+      expect(mockPrisma.userQimelaPoints.deleteMany).toHaveBeenCalledWith({
+        where: { userId: TARGET_USER_ID, qimelaId: QIMELA_ID },
+      });
       expect(mockPrisma.subscription.delete).toHaveBeenCalledWith({
         where: { id: SUBSCRIPTION_ID },
       });

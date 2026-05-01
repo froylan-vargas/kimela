@@ -1,9 +1,11 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { GetLeaderboardUseCase } from './get-leaderboard.use-case';
 
 const QIMELA_ID = 'qimela-1';
 const PHASE_ID = 'phase-1';
+const USER_ID = 'ana';
+const CREATOR_ID = 'creator';
 
 describe('GetLeaderboardUseCase', () => {
   let useCase: GetLeaderboardUseCase;
@@ -38,12 +40,25 @@ describe('GetLeaderboardUseCase', () => {
   it('throws NotFoundException when qimela does not exist', async () => {
     mockPrisma.qimela.findUnique.mockResolvedValue(null);
 
-    await expect(useCase.execute(QIMELA_ID)).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(QIMELA_ID, USER_ID)).rejects.toThrow(NotFoundException);
+  });
+
+  it('throws ForbiddenException when user is not a member', async () => {
+    mockPrisma.qimela.findUnique.mockResolvedValue({
+      id: QIMELA_ID,
+      creatorId: CREATOR_ID,
+      subscriptions: [
+        { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
+      ],
+    });
+
+    await expect(useCase.execute(QIMELA_ID, 'outsider')).rejects.toThrow(ForbiddenException);
   });
 
   it('returns all subscribers even when some have no event points yet', async () => {
     mockPrisma.qimela.findUnique.mockResolvedValue({
       id: QIMELA_ID,
+      creatorId: CREATOR_ID,
       subscriptions: [
         { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
         { user: { id: 'luis', name: 'Luis Ramos', imageUrl: null } },
@@ -59,7 +74,7 @@ describe('GetLeaderboardUseCase', () => {
       },
     ]);
 
-    const result = await useCase.execute(QIMELA_ID);
+    const result = await useCase.execute(QIMELA_ID, USER_ID);
 
     expect(result.data).toEqual([
       expect.objectContaining({ userId: 'ana', totalPoints: 8, rank: 1 }),
@@ -70,13 +85,14 @@ describe('GetLeaderboardUseCase', () => {
   it('does not include the creator as a standalone participant (creator must subscribe)', async () => {
     mockPrisma.qimela.findUnique.mockResolvedValue({
       id: QIMELA_ID,
+      creatorId: CREATOR_ID,
       subscriptions: [
         { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
       ],
     });
     mockPrisma.userQimelaPoints.findMany.mockResolvedValue([]);
 
-    const result = await useCase.execute(QIMELA_ID);
+    const result = await useCase.execute(QIMELA_ID, CREATOR_ID);
 
     const userIds = result.data.map((e: { userId: string }) => e.userId);
     expect(userIds).toEqual(['ana']);
@@ -86,6 +102,7 @@ describe('GetLeaderboardUseCase', () => {
   it('returns all subscribers for a phase even before phase scoring exists', async () => {
     mockPrisma.qimela.findUnique.mockResolvedValue({
       id: QIMELA_ID,
+      creatorId: CREATOR_ID,
       subscriptions: [
         { user: { id: 'ana', name: 'Ana Torres', imageUrl: null } },
         { user: { id: 'luis', name: 'Luis Ramos', imageUrl: null } },
@@ -93,7 +110,7 @@ describe('GetLeaderboardUseCase', () => {
     });
     mockPrisma.userSessionPoints.findMany.mockResolvedValue([]);
 
-    const result = await useCase.execute(QIMELA_ID, PHASE_ID);
+    const result = await useCase.execute(QIMELA_ID, USER_ID, PHASE_ID);
 
     expect(mockPrisma.userSessionPoints.findMany).toHaveBeenCalledWith(
       expect.objectContaining({

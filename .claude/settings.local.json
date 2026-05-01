@@ -63,7 +63,9 @@
       "Bash(sed -n '29,55p' src/modules/qimela/presentation/invite.controller.spec.ts)",
       "Bash(git log *)",
       "Bash(grep -rn --include=\"*.scss\" -E \"\\(#[0-9a-fA-F]{3,6}|rgba?\\\\\\(|color:|background\\)\" /Users/fvg/Source/qimela/apps/web/src --include=\"*.scss\")",
-      "Bash(psql *)"
+      "Bash(psql *)",
+      "Read(//Users/fvg/.claude/**)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")"
     ]
   }
 }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { getLoggerToken } from 'nestjs-pino';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
@@ -124,12 +124,10 @@ describe('AuthController', () => {
       password: 'Password1!',
     };
 
-    it('returns 201 with user data on success', async () => {
+    it('returns 201 with generic message on success', async () => {
       // Arrange
       const user = makeUser({ email: registerDto.email, name: registerDto.name });
       mockRegisterUserUseCase.execute.mockResolvedValue(user);
-      mockRefreshTokenRepository.create.mockResolvedValue(undefined);
-      mockJwtService.sign.mockReturnValue('mock-access-token');
       const res = makeMockRes();
 
       // Act
@@ -138,38 +136,36 @@ describe('AuthController', () => {
       // Assert
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        }),
+        expect.objectContaining({ message: expect.any(String) }),
       );
     });
 
-    it('throws ConflictException when EmailAlreadyExistsError is thrown', async () => {
-      // Arrange
+    it('returns 201 with the same generic message when email already exists', async () => {
+      // Arrange — no user data or conflict code is leaked
       mockRegisterUserUseCase.execute.mockRejectedValue(new EmailAlreadyExistsError());
-      const res = makeMockRes();
-
-      // Act & Assert
-      await expect(controller.register(registerDto, res)).rejects.toThrow(ConflictException);
-    });
-
-    it('sets access_token and refresh_token cookies on success', async () => {
-      // Arrange
-      const user = makeUser({ email: registerDto.email });
-      mockRegisterUserUseCase.execute.mockResolvedValue(user);
-      mockRefreshTokenRepository.create.mockResolvedValue(undefined);
-      mockJwtService.sign.mockReturnValue('mock-access-token');
       const res = makeMockRes();
 
       // Act
       await controller.register(registerDto, res);
 
       // Assert
-      const cookieCalls = (res.cookie as jest.Mock).mock.calls.map((c: unknown[]) => c[0]);
-      expect(cookieCalls).toEqual([]);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.any(String) }),
+      );
+    });
+
+    it('does not set any auth cookies on registration', async () => {
+      // Arrange
+      const user = makeUser({ email: registerDto.email });
+      mockRegisterUserUseCase.execute.mockResolvedValue(user);
+      const res = makeMockRes();
+
+      // Act
+      await controller.register(registerDto, res);
+
+      // Assert
+      expect(res.cookie as jest.Mock).not.toHaveBeenCalled();
     });
   });
 

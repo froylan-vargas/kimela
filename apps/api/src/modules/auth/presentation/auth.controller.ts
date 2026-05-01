@@ -29,7 +29,6 @@ import { UserEntity } from '../../users/domain/user.entity';
 import { USER_REPOSITORY, UserRepository } from '../../users/domain/user.repository';
 import { Inject } from '@nestjs/common';
 import { EmailAlreadyExistsError } from '../domain/errors/email-already-exists.error';
-import { ConflictException } from '@nestjs/common';
 import { InvalidVerificationTokenError } from '../domain/errors/invalid-verification-token.error';
 import { InvalidResetTokenError } from '../domain/errors/invalid-reset-token.error';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
@@ -66,26 +65,17 @@ export class AuthController {
   ): Promise<void> {
     this.logger.info(`POST /auth/register - email: ${dto.email}`);
 
-    let user: UserEntity;
     try {
-      user = await this.registerUserUseCase.execute(dto);
+      await this.registerUserUseCase.execute(dto);
     } catch (error) {
-      if (error instanceof EmailAlreadyExistsError) {
-        throw new ConflictException('El correo electrónico ya está registrado');
+      if (!(error instanceof EmailAlreadyExistsError)) {
+        throw error;
       }
-      throw error;
     }
 
-    const body: AuthUserDto = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      emailVerifiedAt: user.emailVerifiedAt,
-      imageUrl: user.imageUrl,
-    };
-
-    res.status(HttpStatus.CREATED).json(body);
+    res.status(HttpStatus.CREATED).json({
+      message: 'Te hemos enviado un correo de verificación. Revisa tu bandeja de entrada.',
+    });
   }
 
   @Public()
@@ -284,7 +274,8 @@ export class AuthController {
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict',
+      domain: process.env.COOKIE_DOMAIN,
       maxAge: ACCESS_TOKEN_TTL_MS,
     });
   }
@@ -297,7 +288,8 @@ export class AuthController {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict',
+      domain: process.env.COOKIE_DOMAIN,
       maxAge: REFRESH_TOKEN_TTL_MS,
     });
   }
@@ -306,11 +298,12 @@ export class AuthController {
     // Browsers only clear a cookie when the clearing call's attributes match
     // the original Set-Cookie's attributes. Mirror setAccessCookie /
     // setRefreshCookie exactly, otherwise logout silently leaves cookies
-    // behind in production (sameSite: 'none', secure: true).
+    // behind in production.
     const opts = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'strict' as const,
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' as const : 'strict' as const,
+      domain: process.env.COOKIE_DOMAIN,
     };
     res.clearCookie('access_token', opts);
     res.clearCookie('refresh_token', opts);
@@ -321,7 +314,7 @@ export class AuthController {
     res.clearCookie('refresh_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'strict' as const,
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' as const : 'strict' as const,
       path: '/auth/refresh',
     });
   }

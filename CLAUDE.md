@@ -6,6 +6,7 @@ system to create, manage and participate in sports pools
 
 - ** Backend **: Nest.js
 - ** Frontend **: Next.js
+- ** Mobile **: React Native (Expo)
 
 ## Tech stack
 
@@ -21,8 +22,16 @@ system to create, manage and participate in sports pools
 ### Frontend (Next.js)
 
 - **Framework**: Next.js
-- **Estilos**: SCSS + CSS Modules
+- **Styles**: SCSS + CSS Modules
 - **Testing**: Vitest + React Testing Library
+
+### Mobile (React Native)
+
+- **Framework**: React Native + Expo (managed workflow)
+- **Navigation**: Expo Router
+- **Styles**: StyleSheet / NativeWind
+- **Testing**: Jest + React Native Testing Library
+- **Dependency management**: pnpm (same monorepo workspace)
 
 ## Importat
 

@@ -9,6 +9,7 @@ import { QimelaModule } from './modules/qimela/qimela.module';
 import { AuthModule } from './modules/auth/presentation/auth.module';
 import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/presentation/guards/roles.guard';
+import { CsrfGuard } from './modules/auth/presentation/guards/csrf.guard';
 import { HealthController } from './health.controller';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { AdminModule } from './modules/admin/presentation/admin.module';
@@ -53,6 +54,10 @@ import { UsersModule } from './modules/users/users.module';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: CsrfGuard,
     },
     {
       provide: APP_GUARD,

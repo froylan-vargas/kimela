@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../../../shared/prisma/prisma.service";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
@@ -26,6 +26,7 @@ export class GetLeaderboardUseCase {
 
   async execute(
     qimelaId: string,
+    userId: string,
     phaseId?: string,
   ): Promise<GetLeaderboardResponse> {
     this.logger.info(
@@ -36,6 +37,7 @@ export class GetLeaderboardUseCase {
       where: { id: qimelaId },
       select: {
         id: true,
+        creatorId: true,
         subscriptions: {
           select: {
             user: { select: { id: true, name: true, imageUrl: true } },
@@ -46,6 +48,13 @@ export class GetLeaderboardUseCase {
 
     if (!qimela) {
       throw new NotFoundException(`qimela ${qimelaId} not found`);
+    }
+
+    const isMember =
+      qimela.creatorId === userId ||
+      qimela.subscriptions.some((s) => s.user.id === userId);
+    if (!isMember) {
+      throw new ForbiddenException(`Access to qimela ${qimelaId} leaderboard denied`);
     }
 
     if (phaseId) {

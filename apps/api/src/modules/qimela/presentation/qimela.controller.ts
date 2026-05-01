@@ -198,10 +198,11 @@ export class QimelaController {
   @Get(':qimelaId/leaderboard')
   async listLeaderboard(
     @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @CurrentUser() user: CurrentUserPayload,
     @Query('phaseId') phaseId?: string,
   ): Promise<GetLeaderboardResponse> {
-    this.logger.info(`GET /qimelas/${qimelaId}/leaderboard requested`);
-    return this.getLeaderboard.execute(qimelaId, phaseId);
+    this.logger.info(`GET /qimelas/${qimelaId}/leaderboard requested by user ${user.id}`);
+    return this.getLeaderboard.execute(qimelaId, user.id, phaseId);
   }
 
   @Get(':qimelaId/phases')

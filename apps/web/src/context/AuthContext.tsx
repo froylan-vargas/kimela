@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const nextId = user?.id ?? null;
-    if (hasInitializedRef.current && previousUserIdRef.current !== nextId) {
+    if (hasInitializedRef.current && previousUserIdRef.current !== null && previousUserIdRef.current !== nextId) {
       queryClient.clear();
     }
     previousUserIdRef.current = nextId;

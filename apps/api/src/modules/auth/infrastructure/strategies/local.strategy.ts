@@ -16,13 +16,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     try {
       return await this.loginUserUseCase.execute(email, password);
     } catch (error) {
-      if (error instanceof EmailNotVerifiedError) {
-        throw new UnauthorizedException({
-          message: 'Email not verified',
-          code: 'EMAIL_NOT_VERIFIED',
-        });
-      }
-      if (error instanceof InvalidCredentialsError) {
+      if (error instanceof EmailNotVerifiedError || error instanceof InvalidCredentialsError) {
         throw new UnauthorizedException({
           message: 'Invalid credentials',
           code: 'INVALID_CREDENTIALS',

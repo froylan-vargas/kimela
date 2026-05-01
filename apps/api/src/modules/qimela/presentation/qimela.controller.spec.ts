@@ -297,13 +297,13 @@ describe("QimelaController", () => {
   });
 
   describe("listLeaderboard", () => {
-    it("delegates to the leaderboard use case with the qimela id", async () => {
+    it("delegates to the leaderboard use case with the qimela id and user id", async () => {
       const response = { data: [] };
       getLeaderboard.execute.mockResolvedValue(response);
 
-      const result = await controller.listLeaderboard(QIMELA_ID);
+      const result = await controller.listLeaderboard(QIMELA_ID, MOCK_USER);
 
-      expect(getLeaderboard.execute).toHaveBeenCalledWith(QIMELA_ID, undefined);
+      expect(getLeaderboard.execute).toHaveBeenCalledWith(QIMELA_ID, MOCK_USER_ID, undefined);
       expect(result).toEqual(response);
     });
   });

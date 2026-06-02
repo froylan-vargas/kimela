@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { fetchQimelas, qimelasQueryKey } from "@/hooks/useQimelas";
 import { useQimelaContext } from "@/context/QimelaContext";
+import { resolveQimelaLandingTarget } from "@/lib/qimelaNavigation";
 import styles from "./Logo.module.scss";
 
 interface LogoProps {
@@ -11,11 +17,33 @@ interface LogoProps {
 }
 
 export default function Logo({ href = "/", variant = "default" }: LogoProps) {
-  const { clearQimela } = useQimelaContext();
+  const { user } = useAuth();
+  const { selectQimela, clearQimela } = useQimelaContext();
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  function handleClick() {
-    if (href === "/dashboard") {
+  async function handleClick(e: MouseEvent<HTMLAnchorElement>) {
+    if (href !== "/dashboard") return;
+
+    e.preventDefault();
+
+    try {
+      const qimelas = await queryClient.fetchQuery({
+        queryKey: qimelasQueryKey,
+        queryFn: fetchQimelas,
+      });
+      const target = resolveQimelaLandingTarget(user, qimelas);
+
+      if (target.qimela && target.viewAs) {
+        selectQimela(target.qimela, target.viewAs);
+      } else {
+        clearQimela();
+      }
+
+      router.push(target.href);
+    } catch {
       clearQimela();
+      router.push(href);
     }
   }
 

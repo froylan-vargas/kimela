@@ -93,13 +93,13 @@ describe("Home page", () => {
       screen.getByText("Selecciona una qimela para empezar."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
+      screen.queryByRole("heading", {
         name: /¡También puedes crear\s+tu propia qimela!/i,
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
-  it("renders a create prompt when no subscribed qimelas exist", () => {
+  it("renders an invite prompt when no subscribed qimelas exist", () => {
     mockUseQimelas([]);
     vi.mocked(useQimelaContext).mockReturnValue({
       selectedQimela: null,
@@ -115,12 +115,12 @@ describe("Home page", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: /Aún no te has suscrito a ninguna qimela 😢\s+¡Crea la tuya!/i,
+        name: /Aún no te has suscrito a ninguna qimela 😢\s+¡Pide que te inviten a la quiniela del mundial!/i,
       }),
     ).toBeInTheDocument();
   });
 
-  it("renders the home step cards when no qimela is selected", () => {
+  it("does not render the create step cards when no qimela is selected", () => {
     vi.mocked(useQimelaContext).mockReturnValue({
       selectedQimela: null,
       viewAs: null,
@@ -130,12 +130,12 @@ describe("Home page", () => {
 
     render(<Home />);
 
-    expect(screen.getAllByText("Crea tu qimela").length).toBeGreaterThan(0);
-    expect(screen.getByText("Invita a tus amigos")).toBeInTheDocument();
-    expect(screen.getByText("¡Diviértanse!")).toBeInTheDocument();
+    expect(screen.queryByText("Crea tu qimela")).not.toBeInTheDocument();
+    expect(screen.queryByText("Invita a tus amigos")).not.toBeInTheDocument();
+    expect(screen.queryByText("¡Diviértanse!")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "+ Crea tu qimela" }),
-    ).toHaveAttribute("href", "/qimela/create");
+      screen.queryByRole("link", { name: "+ Crea tu qimela" }),
+    ).not.toBeInTheDocument();
   });
 
   it("does not render any dashboard when selectedQimela is null", () => {

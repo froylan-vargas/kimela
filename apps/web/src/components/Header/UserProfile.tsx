@@ -86,14 +86,6 @@ export default function UserProfile({ name, imageUrl }: UserProfileProps) {
               <Icon name="user" className={styles.menuIcon} />
               Mi perfil
             </Link>
-            <Link
-              href="/qimela/create"
-              className={styles.menuItem}
-              onClick={() => setIsAccountMenuOpen(false)}
-            >
-              <Icon name="plus" className={styles.menuIcon} />
-              Crea tu qimela
-            </Link>
             <button
               type="button"
               className={styles.menuItem}

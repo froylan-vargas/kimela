@@ -3,8 +3,30 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import LoginPage from "./page";
 import { ApiError, authApi } from "@/lib/apiClient";
 
-const mockPush = vi.fn();
-const mockGetSearchParam = vi.fn().mockReturnValue(null);
+const {
+  mockPush,
+  mockGetSearchParam,
+  mockFetchQuery,
+  mockSelectQimela,
+  mockClearQimela,
+} = vi.hoisted(() => ({
+  mockPush: vi.fn(),
+  mockGetSearchParam: vi.fn().mockReturnValue(null),
+  mockFetchQuery: vi.fn(),
+  mockSelectQimela: vi.fn(),
+  mockClearQimela: vi.fn(),
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ fetchQuery: mockFetchQuery }),
+}));
+
+vi.mock("@/context/QimelaContext", () => ({
+  useQimelaContext: () => ({
+    selectQimela: mockSelectQimela,
+    clearQimela: mockClearQimela,
+  }),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
@@ -51,6 +73,10 @@ describe("LoginPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockClear();
+    mockFetchQuery.mockResolvedValue({
+      data: [],
+      meta: { total: 0, page: 1, limit: 10 },
+    });
     mockGetSearchParam.mockReturnValue(null);
     vi.mocked(useAuth).mockReturnValue({
       user: null,
@@ -261,7 +287,14 @@ describe("LoginPage", () => {
   });
 
   it("redirects to /dashboard after successful login (default redirect)", async () => {
-    const mockLogin = vi.fn().mockResolvedValue(undefined);
+    const mockLogin = vi.fn().mockResolvedValue({
+      id: "u1",
+      name: "Test User",
+      email: "test@example.com",
+      role: "USER",
+      emailVerifiedAt: null,
+      imageUrl: null,
+    });
     vi.mocked(useAuth).mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -320,6 +353,66 @@ describe("LoginPage", () => {
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/profile");
+    });
+    expect(mockFetchQuery).not.toHaveBeenCalled();
+  });
+
+  it("selects the newest subscribed qimela after successful login", async () => {
+    const mockLogin = vi.fn().mockResolvedValue({
+      id: "u1",
+      name: "Test User",
+      email: "test@example.com",
+      role: "USER",
+      emailVerifiedAt: null,
+      imageUrl: null,
+    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: mockLogin,
+      logout: vi.fn(),
+      updateUser: vi.fn(),
+    });
+    const newest = {
+      id: "q-new",
+      name: "Qimela nueva",
+      sportId: "sport-1",
+      status: "ACTIVE",
+      role: "SUBSCRIBER" as const,
+      creatorId: "creator-1",
+      createdAt: "2026-02-01T00:00:00.000Z",
+    };
+    mockFetchQuery.mockResolvedValue({
+      data: [
+        {
+          ...newest,
+          id: "q-old",
+          name: "Qimela vieja",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        },
+        newest,
+      ],
+      meta: { total: 2, page: 1, limit: 10 },
+    });
+
+    render(<LoginPage />);
+
+    await act(async () => {
+      fireEvent.change(await screen.findByLabelText(/correo electrónico/i), {
+        target: { value: "test@example.com" },
+      });
+      fireEvent.change(await screen.findByLabelText(/contraseña/i), {
+        target: { value: "password123" },
+      });
+      fireEvent.click(
+        await screen.findByRole("button", { name: /iniciar sesión/i }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockSelectQimela).toHaveBeenCalledWith(newest, "SUBSCRIBER");
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
 });

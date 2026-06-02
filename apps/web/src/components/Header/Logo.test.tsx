@@ -7,6 +7,20 @@ import { QimelaProvider, useQimelaContext } from "@/context/QimelaContext";
 import { AuthProvider } from "@/context/AuthContext";
 import type { qimela } from "@/types/qimela";
 
+const { mockPush, mockFetchQimelas } = vi.hoisted(() => ({
+  mockPush: vi.fn(),
+  mockFetchQimelas: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
+vi.mock("@/hooks/useQimelas", () => ({
+  qimelasQueryKey: ["qimelas"],
+  fetchQimelas: mockFetchQimelas,
+}));
+
 vi.mock("@/lib/apiClient", () => ({
   authApi: {
     me: vi.fn().mockRejectedValue(new Error("no user")),
@@ -50,9 +64,14 @@ describe("Logo", () => {
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false, gcTime: 0 } },
     });
+    mockFetchQimelas.mockResolvedValue({
+      data: [],
+      meta: { total: 0, page: 1, limit: 10 },
+    });
   });
 
   afterEach(() => {
+    vi.clearAllMocks();
     queryClient.clear();
   });
   it("renders the qimela logo image", () => {
@@ -115,6 +134,44 @@ describe("Logo", () => {
     await waitFor(() => {
       expect(screen.getByText("No selection")).toBeInTheDocument();
     });
+    expect(mockPush).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("selects the newest subscribed qimela when navigating to dashboard", async () => {
+    const oldQimela: qimela = {
+      id: "q1",
+      name: "Qimela vieja",
+      sportId: "sport-uuid-1",
+      status: "ACTIVE",
+      role: "SUBSCRIBER",
+      creatorId: "u1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+    const newestQimela: qimela = {
+      ...oldQimela,
+      id: "q2",
+      name: "Qimela nueva",
+      createdAt: "2026-02-01T00:00:00.000Z",
+    };
+    mockFetchQimelas.mockResolvedValue({
+      data: [oldQimela, newestQimela],
+      meta: { total: 2, page: 1, limit: 10 },
+    });
+
+    render(
+      <div>
+        <Logo href="/dashboard" />
+        <ContextDisplay />
+      </div>,
+      { wrapper },
+    );
+
+    fireEvent.click(screen.getByRole("link"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Selected: Qimela nueva")).toBeInTheDocument();
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    });
   });
 
   it("does not clear qimela selection when navigating to other routes", async () => {
@@ -151,6 +208,7 @@ describe("Logo", () => {
 
     // Click the logo to navigate to other route
     const link = screen.getByRole("link");
+    link.addEventListener("click", (event) => event.preventDefault());
     fireEvent.click(link);
 
     // Selection should NOT be cleared

@@ -17,6 +17,8 @@ export interface qimela {
   status: QimelaStatus;
   role: QimelaRole;
   creatorId: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface QimelasMeta {

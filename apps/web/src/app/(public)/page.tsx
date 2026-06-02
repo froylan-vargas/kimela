@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Header/Logo";
-import HomeStepShowcase from "@/components/home/HomeStepShowcase";
 import styles from "./page.module.scss";
 
 export default async function LandingPage() {
@@ -39,7 +38,7 @@ export default async function LandingPage() {
             <span>simplificada</span>
           </h1>
 
-          <HomeStepShowcase />
+          {/* <HomeStepShowcase /> */}
         </div>
       </section>
 

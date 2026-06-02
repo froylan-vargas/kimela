@@ -73,19 +73,14 @@ describe("QimelaDropdown", () => {
   it("renders a divider when both sections are present", () => {
     const { container } = renderDropdown();
     const buttons = screen.getAllByRole("button");
-    expect(buttons).toHaveLength(3); // sub1, sub2, cre1 (Crear qimela is a link, not a button)
-    // two dividers: one after Crear qimela, one between sections
-    expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(2);
+    expect(buttons).toHaveLength(3);
+    expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(1);
   });
 
-  it("always renders the Creadas section title", () => {
+  it("does not render the Creadas section when creatorQimelas is empty", () => {
     renderDropdown({ creatorQimelas: [] });
-    expect(screen.getByText("Creadas")).toBeInTheDocument();
-  });
-
-  it("shows empty message when creatorQimelas is empty", () => {
-    renderDropdown({ creatorQimelas: [] });
-    expect(screen.getByText("No has creado qimelas")).toBeInTheDocument();
+    expect(screen.queryByText("Creadas")).not.toBeInTheDocument();
+    expect(screen.queryByText("No has creado qimelas")).not.toBeInTheDocument();
   });
 
   it("does not render Participando section when participatingQimelas is empty", () => {
@@ -93,9 +88,9 @@ describe("QimelaDropdown", () => {
     expect(screen.queryByText("Participando")).not.toBeInTheDocument();
   });
 
-  it("renders only the Crear qimela divider when participatingQimelas is empty", () => {
+  it("does not render a divider when participatingQimelas is empty", () => {
     const { container } = renderDropdown({ participatingQimelas: [] });
-    expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[class*="divider"]')).toHaveLength(0);
   });
 
   it("calls onSelect and onClose when a subscriber item is clicked", () => {
@@ -144,18 +139,11 @@ describe("QimelaDropdown", () => {
     expect(ligaMXButton.className).not.toMatch(/selected/);
   });
 
-  it("renders the Crear qimela link at the top of the dropdown", () => {
+  it("does not render the Crear qimela link in the dropdown", () => {
     renderDropdown();
-    const link = screen.getByRole("link", { name: "+ Crea tu qimela" });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/qimela/create");
-  });
-
-  it("calls onClose when the Crear qimela link is clicked", () => {
-    const onClose = vi.fn();
-    renderDropdown({ onClose });
-    fireEvent.click(screen.getByRole("link", { name: "+ Crea tu qimela" }));
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("link", { name: "+ Crea tu qimela" }),
+    ).not.toBeInTheDocument();
   });
 
   it("preserves the /results sub-route when switching qimela from a results page", () => {

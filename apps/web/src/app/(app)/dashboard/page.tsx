@@ -4,7 +4,6 @@ import { useQimelaContext } from "@/context/QimelaContext";
 import { useQimelas } from "@/hooks/useQimelas";
 import ParticipantDashboard from "@/components/dashboard/ParticipantDashboard";
 import CreatorDashboard from "@/components/dashboard/CreatorDashboard";
-import HomeStepShowcase from "@/components/home/HomeStepShowcase";
 import styles from "./page.module.scss";
 
 export default function Home() {
@@ -30,19 +29,19 @@ export default function Home() {
                   Selecciona una qimela para empezar.
                 </p>
               </div>
-              <h1 className={styles.createHeadline}>
+              {/* <h1 className={styles.createHeadline}>
                 ¡También puedes crear
                 <span>tu propia qimela!</span>
-              </h1>
+              </h1> */}
             </>
           )}
           {!hasSubscribedQimelas && (
             <h1 className={styles.createHeadline}>
               Aún no te has suscrito a ninguna qimela 😢
-              <span>¡Crea la tuya!</span>
+              <span>¡Pide que te inviten a la quiniela del mundial!</span>
             </h1>
           )}
-          <HomeStepShowcase variant="dashboard" />
+          {/* <HomeStepShowcase variant="dashboard" /> */}
         </section>
       )}
     </main>

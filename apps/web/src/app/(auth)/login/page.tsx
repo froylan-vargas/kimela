@@ -1,16 +1,22 @@
 "use client";
 
 import { Suspense, type FormEvent, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { authApi, ApiError } from "@/lib/apiClient";
+import { useQimelaContext } from "@/context/QimelaContext";
+import { fetchQimelas, qimelasQueryKey } from "@/hooks/useQimelas";
+import { resolveQimelaLandingTarget } from "@/lib/qimelaNavigation";
 import styles from "./page.module.scss";
 
 function LoginForm() {
   const { login } = useAuth();
+  const { selectQimela, clearQimela } = useQimelaContext();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,8 +34,37 @@ function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
-      const redirect = searchParams.get("redirect") ?? "/dashboard";
+      const user = await login(email, password);
+      const explicitRedirect = searchParams.get("redirect");
+      if (explicitRedirect) {
+        router.push(explicitRedirect);
+        return;
+      }
+
+      if (user.role === "ADMIN") {
+        clearQimela();
+        router.push("/admin/events");
+        return;
+      }
+
+      let target;
+      try {
+        const qimelas = await queryClient.fetchQuery({
+          queryKey: qimelasQueryKey,
+          queryFn: fetchQimelas,
+        });
+        target = resolveQimelaLandingTarget(user, qimelas);
+      } catch {
+        target = resolveQimelaLandingTarget(user, undefined);
+      }
+
+      if (target.qimela && target.viewAs) {
+        selectQimela(target.qimela, target.viewAs);
+      } else {
+        clearQimela();
+      }
+
+      const redirect = target.href;
       router.push(redirect);
     } catch (err) {
       if (

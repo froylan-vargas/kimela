@@ -33,6 +33,9 @@ describe("UserProfile", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cuenta de Froy Landcito" }));
 
     expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Crea tu qimela" }),
+    ).not.toBeInTheDocument();
   });
 
   it("logs out from the account menu", async () => {

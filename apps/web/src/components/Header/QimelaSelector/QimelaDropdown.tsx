@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import type { qimela, QimelaRole } from "@/types/qimela";
 import styles from "./QimelaDropdown.module.scss";
@@ -24,6 +23,8 @@ export default function QimelaDropdown({
 }: QimelaDropdownProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const hasParticipatingQimelas = participatingQimelas.length > 0;
+  const hasCreatorQimelas = creatorQimelas.length > 0;
 
   function handleSelect(qimela: qimela, viewAs: QimelaRole) {
     onSelect(qimela, viewAs);
@@ -42,15 +43,7 @@ export default function QimelaDropdown({
 
   return (
     <div className={styles.dropdown}>
-      <Link
-        href="/qimela/create"
-        className={styles.createItem}
-        onClick={onClose}
-      >
-        + Crea tu qimela
-      </Link>
-      <div className={styles.divider} />
-      {participatingQimelas.length > 0 && (
+      {hasParticipatingQimelas && (
         <div>
           <p className={styles.sectionTitle}>Participando</p>
           {participatingQimelas.map((qimela) => {
@@ -70,14 +63,14 @@ export default function QimelaDropdown({
         </div>
       )}
 
-      {participatingQimelas.length > 0 && <div className={styles.divider} />}
+      {hasParticipatingQimelas && hasCreatorQimelas && (
+        <div className={styles.divider} />
+      )}
 
-      <div>
-        <p className={styles.sectionTitle}>Creadas</p>
-        {creatorQimelas.length === 0 ? (
-          <p className={styles.emptySection}>No has creado qimelas</p>
-        ) : (
-          creatorQimelas.map((qimela) => {
+      {hasCreatorQimelas && (
+        <div>
+          <p className={styles.sectionTitle}>Creadas</p>
+          {creatorQimelas.map((qimela) => {
             const isSelected =
               qimela.id === selectedId && selectedViewAs === "CREATOR";
             return (
@@ -90,9 +83,9 @@ export default function QimelaDropdown({
                 {qimela.name}
               </button>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 }

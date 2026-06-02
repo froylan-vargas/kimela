@@ -125,4 +125,32 @@ describe("GetQimelaPhasesUseCase", () => {
       }),
     );
   });
+
+  it("returns the first phase by order when there are no completed or active phases", async () => {
+    mockQimelaRepository.findById.mockResolvedValue(makeQimela());
+    mockPrisma.subscription.findFirst.mockResolvedValue({ id: "sub-id" });
+    mockPrisma.phase.findMany
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { id: "phase-1", name: "Jornada 1", order: 1, status: "UPCOMING" },
+      ]);
+
+    const result = await useCase.execute({
+      qimelaId: QIMELA_ID,
+      userId: USER_ID,
+    });
+
+    expect(result.data).toEqual([
+      { id: "phase-1", name: "Jornada 1", order: 1, status: "UPCOMING" },
+    ]);
+
+    expect(mockPrisma.phase.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        where: { eventId: EVENT_ID },
+        orderBy: { order: "asc" },
+        take: 1,
+      }),
+    );
+  });
 });

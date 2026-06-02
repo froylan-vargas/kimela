@@ -22,7 +22,7 @@ export interface LeaderboardEntry {
   imageUrl: string | null;
 }
 
-export type QimelaPhaseStatus = "COMPLETED" | "ACTIVE";
+export type QimelaPhaseStatus = "UPCOMING" | "COMPLETED" | "ACTIVE";
 
 export interface QimelaPhase {
   id: string;

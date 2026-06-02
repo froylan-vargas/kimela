@@ -55,4 +55,23 @@ describe("ParticipantDashboard", () => {
     expect(sessionsTab).toHaveAttribute("aria-selected", "false");
     expect(positionsTab).toHaveAttribute("aria-selected", "true");
   });
+
+  it("opens and closes the qimela rules modal", () => {
+    render(<ParticipantDashboard qimela={qimela} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Reglas qimela" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Reglas de la qimela" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Las suscripciones a la qimela/i),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cerrar reglas" }));
+
+    expect(
+      screen.queryByRole("heading", { name: "Reglas de la qimela" }),
+    ).not.toBeInTheDocument();
+  });
 });

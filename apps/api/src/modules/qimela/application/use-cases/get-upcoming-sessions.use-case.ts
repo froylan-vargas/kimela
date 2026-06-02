@@ -1,9 +1,22 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { PrismaService } from '../../../../shared/prisma/prisma.service';
-import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { PhaseSessionsGroupDto, PickDto, SessionWithPickDto } from '../dtos/session-with-pick.dto';
-import { formatFloatingIso, getFloatingNow } from '../utils/session-time';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
+import { PrismaService } from "../../../../shared/prisma/prisma.service";
+import {
+  QIMELA_REPOSITORY,
+  QimelaRepository,
+} from "../../domain/qimela.repository";
+import {
+  PhaseSessionsGroupDto,
+  PickDto,
+  SessionWithPickDto,
+} from "../dtos/session-with-pick.dto";
+import { formatFloatingIso, getFloatingNow } from "../utils/session-time";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 const PICKS_DEADLINE_MS = 3 * 60 * 1000;
 
@@ -17,10 +30,20 @@ type SessionRecord = {
   id: string;
   name: string;
   scheduledAt: Date;
-  status: 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'CANCELLED' | 'POSTPONED';
+  status: "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED" | "POSTPONED";
   phase: { id: string; name: string; order: number };
-  contenders: { role: string | null; contender: { id: string; name: string; imgUrl: string | null } }[];
-  sessionCategories: { pickCategory: { id: string; name: string; label: string; valueType: 'CONTENDER' | 'SCALAR' } }[];
+  contenders: {
+    role: string | null;
+    contender: { id: string; name: string; imgUrl: string | null };
+  }[];
+  sessionCategories: {
+    pickCategory: {
+      id: string;
+      name: string;
+      label: string;
+      valueType: "CONTENDER" | "SCALAR";
+    };
+  }[];
 };
 
 export interface GetUpcomingSessionsQuery {
@@ -34,40 +57,51 @@ export interface GetUpcomingSessionsResponse {
 
 @Injectable()
 export class GetUpcomingSessionsUseCase {
-
   constructor(
-    @InjectPinoLogger(GetUpcomingSessionsUseCase.name) private readonly logger: PinoLogger,
+    @InjectPinoLogger(GetUpcomingSessionsUseCase.name)
+    private readonly logger: PinoLogger,
     @Inject(QIMELA_REPOSITORY)
     private readonly qimelaRepository: QimelaRepository,
     private readonly prisma: PrismaService,
   ) {}
 
-  async execute(query: GetUpcomingSessionsQuery): Promise<GetUpcomingSessionsResponse> {
-    this.logger.info(`Fetching upcoming sessions for qimela ${query.qimelaId} and user ${query.userId}`);
+  async execute(
+    query: GetUpcomingSessionsQuery,
+  ): Promise<GetUpcomingSessionsResponse> {
+    this.logger.info(
+      `Fetching upcoming sessions for qimela ${query.qimelaId} and user ${query.userId}`,
+    );
 
     const qimela = await this.qimelaRepository.findById(query.qimelaId);
     if (!qimela) {
-      throw new NotFoundException('La qimela no existe');
+      throw new NotFoundException("La qimela no existe");
     }
 
     if (!qimela.eventId) {
       throw new UnprocessableEntityException({
-        code: 'QIMELA_NO_EVENT',
-        message: 'Esta qimela no tiene un evento asociado',
+        code: "QIMELA_NO_EVENT",
+        message: "Esta qimela no tiene un evento asociado",
       });
     }
 
     await this.assertUserHasAccess(query.userId, qimela.id, qimela.creatorId);
 
-    const phaseRange = await this.resolvePhaseRange(qimela.eventId, qimela.startPhaseId, qimela.endPhaseId);
+    const phaseRange = await this.resolvePhaseRange(
+      qimela.eventId,
+      qimela.startPhaseId,
+      qimela.endPhaseId,
+    );
     const floatingNow = getFloatingNow();
     const cutoff = new Date(floatingNow.getTime() + PICKS_DEADLINE_MS);
     const upcomingWindowEnd = new Date(
       Date.UTC(
         floatingNow.getUTCFullYear(),
         floatingNow.getUTCMonth(),
-        floatingNow.getUTCDate() + 2,
-        23, 59, 59, 999,
+        floatingNow.getUTCDate() + 6,
+        23,
+        59,
+        59,
+        999,
       ),
     );
 
@@ -77,13 +111,13 @@ export class GetUpcomingSessionsUseCase {
         order: { gte: phaseRange.minOrder, lte: phaseRange.maxOrder },
       },
       select: { id: true, name: true, order: true },
-      orderBy: { order: 'asc' },
+      orderBy: { order: "asc" },
     });
 
     const sessions: SessionRecord[] = await this.prisma.session.findMany({
       where: {
         phaseId: { in: phases.map((p) => p.id) },
-        status: 'SCHEDULED',
+        status: "SCHEDULED",
         scheduledAt: { gt: cutoff, lte: upcomingWindowEnd },
       },
       include: {
@@ -105,7 +139,7 @@ export class GetUpcomingSessionsUseCase {
           },
         },
       },
-      orderBy: [{ phase: { order: 'asc' } }, { scheduledAt: 'asc' }],
+      orderBy: [{ phase: { order: "asc" } }, { scheduledAt: "asc" }],
     });
 
     const picksBySessionId = await this.getPicksBySessionId(
@@ -117,7 +151,9 @@ export class GetUpcomingSessionsUseCase {
     const sessionsByPhaseId = new Map<string, SessionWithPickDto[]>();
     for (const session of sessions) {
       const items = sessionsByPhaseId.get(session.phase.id) ?? [];
-      items.push(this.toSessionDto(session, picksBySessionId.get(session.id) ?? []));
+      items.push(
+        this.toSessionDto(session, picksBySessionId.get(session.id) ?? []),
+      );
       sessionsByPhaseId.set(session.phase.id, items);
     }
 
@@ -130,12 +166,18 @@ export class GetUpcomingSessionsUseCase {
       }))
       .filter((group) => group.sessions.length > 0);
 
-    this.logger.info(`Returning ${sessions.length} upcoming sessions across ${data.length} phases for qimela ${query.qimelaId}`);
+    this.logger.info(
+      `Returning ${sessions.length} upcoming sessions across ${data.length} phases for qimela ${query.qimelaId}`,
+    );
 
     return { data };
   }
 
-  private async assertUserHasAccess(userId: string, qimelaId: string, creatorId: string): Promise<void> {
+  private async assertUserHasAccess(
+    userId: string,
+    qimelaId: string,
+    creatorId: string,
+  ): Promise<void> {
     if (creatorId === userId) {
       return;
     }
@@ -146,29 +188,35 @@ export class GetUpcomingSessionsUseCase {
     });
 
     if (!subscription) {
-      throw new ForbiddenException('No tienes acceso a esta qimela');
+      throw new ForbiddenException("No tienes acceso a esta qimela");
     }
   }
 
-  private async resolvePhaseRange(eventId: string, startPhaseId: string | null, endPhaseId: string | null) {
+  private async resolvePhaseRange(
+    eventId: string,
+    startPhaseId: string | null,
+    endPhaseId: string | null,
+  ) {
     const phases = await this.prisma.phase.findMany({
       where: { eventId },
       select: { id: true, order: true },
-      orderBy: { order: 'asc' },
+      orderBy: { order: "asc" },
     });
 
     if (phases.length === 0) {
       throw new UnprocessableEntityException({
-        code: 'QIMELA_NO_EVENT_PHASES',
-        message: 'Esta qimela no tiene fases disponibles',
+        code: "QIMELA_NO_EVENT_PHASES",
+        message: "Esta qimela no tiene fases disponibles",
       });
     }
 
     const startOrder = startPhaseId
-      ? (phases.find((phase) => phase.id === startPhaseId)?.order ?? phases[0].order)
+      ? (phases.find((phase) => phase.id === startPhaseId)?.order ??
+        phases[0].order)
       : phases[0].order;
     const endOrder = endPhaseId
-      ? (phases.find((phase) => phase.id === endPhaseId)?.order ?? phases[phases.length - 1].order)
+      ? (phases.find((phase) => phase.id === endPhaseId)?.order ??
+        phases[phases.length - 1].order)
       : phases[phases.length - 1].order;
 
     return {
@@ -177,7 +225,11 @@ export class GetUpcomingSessionsUseCase {
     };
   }
 
-  private async getPicksBySessionId(userId: string, sessionIds: string[], qimelaId: string) {
+  private async getPicksBySessionId(
+    userId: string,
+    sessionIds: string[],
+    qimelaId: string,
+  ) {
     const map = new Map<string, PickDto[]>();
 
     if (sessionIds.length === 0) {
@@ -217,10 +269,16 @@ export class GetUpcomingSessionsUseCase {
     session: SessionRecord,
     picks: PickDto[],
   ): SessionWithPickDto {
-    const home = session.contenders.find((item) => item.role === 'home')?.contender ?? session.contenders[0]?.contender;
-    const away = session.contenders.find((item) => item.role === 'away')?.contender ?? session.contenders[1]?.contender;
+    const home =
+      session.contenders.find((item) => item.role === "home")?.contender ??
+      session.contenders[0]?.contender;
+    const away =
+      session.contenders.find((item) => item.role === "away")?.contender ??
+      session.contenders[1]?.contender;
 
-    const picksByCategory = new Map(picks.map((pick) => [pick.pickCategoryId, pick]));
+    const picksByCategory = new Map(
+      picks.map((pick) => [pick.pickCategoryId, pick]),
+    );
 
     return {
       id: session.id,
@@ -230,13 +288,13 @@ export class GetUpcomingSessionsUseCase {
       phaseId: session.phase.id,
       phaseName: session.phase.name,
       home: {
-        id: home?.id ?? '',
-        name: home?.name ?? '',
+        id: home?.id ?? "",
+        name: home?.name ?? "",
         imgUrl: home?.imgUrl ?? null,
       },
       away: {
-        id: away?.id ?? '',
-        name: away?.name ?? '',
+        id: away?.id ?? "",
+        name: away?.name ?? "",
         imgUrl: away?.imgUrl ?? null,
       },
       picks: session.sessionCategories.map(({ pickCategory }) => ({
@@ -245,7 +303,8 @@ export class GetUpcomingSessionsUseCase {
         label: pickCategory.label,
         valueType: pickCategory.valueType,
         value: picksByCategory.get(pickCategory.id)?.value ?? null,
-        pickedContenderId: picksByCategory.get(pickCategory.id)?.pickedContenderId ?? null,
+        pickedContenderId:
+          picksByCategory.get(pickCategory.id)?.pickedContenderId ?? null,
       })),
       hasUserPicks: picks.length > 0,
     };

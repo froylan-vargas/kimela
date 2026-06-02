@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { qimela } from "@/types/qimela";
+import QimelaRulesModal from "@/components/dashboard/QimelaRulesModal";
 import TablePositions from "@/components/dashboard/TablePositions";
 import UpcomingSessions from "@/components/qimela/UpcomingSessions/UpcomingSessions";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +18,7 @@ export default function ParticipantDashboard({
   const [activeMobilePanel, setActiveMobilePanel] = useState<
     "sessions" | "positions"
   >("sessions");
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const { user } = useAuth();
 
   return (
@@ -24,8 +26,19 @@ export default function ParticipantDashboard({
       <div className={styles.summaryCard}>
         <div className={styles.summaryPrimary}>
           <h1>{qimela.name}</h1>
+          <button
+            type="button"
+            className={styles.rulesButton}
+            onClick={() => setIsRulesModalOpen(true)}
+          >
+            Reglas qimela
+          </button>
         </div>
       </div>
+      <QimelaRulesModal
+        open={isRulesModalOpen}
+        onClose={() => setIsRulesModalOpen(false)}
+      />
       <div className={styles.headerDivider} aria-hidden="true" />
       <div
         className={styles.mobileSwitch}

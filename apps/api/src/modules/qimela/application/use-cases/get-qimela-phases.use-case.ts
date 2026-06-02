@@ -3,7 +3,7 @@ import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
-export type QimelaPhaseStatus = 'COMPLETED' | 'ACTIVE';
+export type QimelaPhaseStatus = 'UPCOMING' | 'COMPLETED' | 'ACTIVE';
 
 export interface QimelaPhaseDto {
   id: string;
@@ -48,7 +48,7 @@ export class GetQimelaPhasesUseCase {
 
     await this.assertUserHasAccess(query.userId, qimela.id, qimela.creatorId);
 
-    const phases = await this.prisma.phase.findMany({
+    let phases = await this.prisma.phase.findMany({
       where: {
         eventId: qimela.eventId,
         status: { in: ['COMPLETED', 'ACTIVE'] },
@@ -56,6 +56,15 @@ export class GetQimelaPhasesUseCase {
       select: { id: true, name: true, order: true, status: true },
       orderBy: { order: 'asc' },
     });
+
+    if (phases.length === 0) {
+      phases = await this.prisma.phase.findMany({
+        where: { eventId: qimela.eventId },
+        select: { id: true, name: true, order: true, status: true },
+        orderBy: { order: 'asc' },
+        take: 1,
+      });
+    }
 
     const data: QimelaPhaseDto[] = phases.map((phase) => ({
       id: phase.id,

@@ -1,6 +1,7 @@
 {
   "name": "qimela",
   "private": true,
+  "packageManager": "pnpm@10.27.0",
   "scripts": {
     "dev:api": "pnpm --filter @qimela/api dev",
     "dev:web": "pnpm --filter @qimela/web dev",
@@ -21,9 +22,13 @@
     },
     "onlyBuiltDependencies": [
       "@nestjs/core",
+      "@parcel/watcher",
       "@prisma/engines",
       "bcrypt",
-      "prisma"
+      "esbuild",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
     ]
   }
 }

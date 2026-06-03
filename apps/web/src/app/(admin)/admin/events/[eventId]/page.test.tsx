@@ -1,11 +1,14 @@
 import { Suspense } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EventManagementPage from "./page";
 
-const { invalidateQueries, toast, uploadSessions } = vi.hoisted(() => ({
+const { deletePhase, getQueryData, invalidateQueries, setQueryData, toast, uploadSessions } = vi.hoisted(() => ({
+  deletePhase: vi.fn().mockResolvedValue(undefined),
+  getQueryData: vi.fn(),
   invalidateQueries: vi.fn().mockResolvedValue(undefined),
+  setQueryData: vi.fn(),
   toast: vi.fn(),
   uploadSessions: vi.fn().mockResolvedValue({ data: [{ id: "session-1" }, { id: "session-2" }] }),
 }));
@@ -33,8 +36,8 @@ vi.mock("@tanstack/react-query", async () => {
   return {
     ...actual,
     useQueryClient: () => ({
-      setQueryData: vi.fn(),
-      getQueryData: vi.fn(),
+      setQueryData,
+      getQueryData,
       invalidateQueries,
     }),
   };
@@ -80,7 +83,7 @@ vi.mock("@/lib/apiClient", () => ({
     reorderPhases: vi.fn(),
     activatePhase: vi.fn(),
     completePhase: vi.fn(),
-    deletePhase: vi.fn(),
+    deletePhase,
     uploadSessions,
   },
 }));
@@ -97,15 +100,22 @@ vi.mock("@/components/admin/PhaseList/PhaseList", () => ({
   default: ({
     phases,
     onSelect,
+    onDelete,
   }: {
     phases: Array<{ id: string; name: string }>;
     onSelect: (phase: { id: string; name: string }) => void;
+    onDelete: (phaseId: string) => void;
   }) => (
     <div>
       {phases.map((phase) => (
-        <button key={phase.id} type="button" onClick={() => onSelect(phase)}>
-          {phase.name}
-        </button>
+        <div key={phase.id}>
+          <button type="button" onClick={() => onSelect(phase)}>
+            {phase.name}
+          </button>
+          <button type="button" onClick={() => onDelete(phase.id)}>
+            Eliminar {phase.name}
+          </button>
+        </div>
       ))}
     </div>
   ),
@@ -144,6 +154,16 @@ vi.mock("./page.module.scss", () => ({ default: {} }));
 describe("EventManagementPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getQueryData.mockReturnValue([
+      {
+        id: "phase-1",
+        name: "Jornada 1",
+        order: 1,
+        type: "REGULAR_SEASON",
+        status: "UPCOMING",
+        eventId: "event-1",
+      },
+    ]);
   });
 
   it("shows uploaded sessions in the resultados tab after loading a CSV", async () => {
@@ -191,6 +211,70 @@ describe("EventManagementPage", () => {
         "true",
       );
       expect(screen.getByText("Resultados view: 1")).toBeInTheDocument();
+    });
+  });
+
+  it("asks for confirmation before deleting a phase", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: 0,
+        },
+      },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={null}>
+          <EventManagementPage
+            params={{ eventId: "event-1" } as unknown as Promise<{ eventId: string }>}
+            searchParams={{ name: "Liga%20MX" } as unknown as Promise<{ name?: string }>}
+          />
+        </Suspense>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar Jornada 1" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Eliminar fase" });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText("Jornada 1")).toBeInTheDocument();
+    expect(deletePhase).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(screen.queryByRole("dialog", { name: "Eliminar fase" })).not.toBeInTheDocument();
+    expect(deletePhase).not.toHaveBeenCalled();
+  });
+
+  it("deletes the phase after confirmation", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: 0,
+        },
+      },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={null}>
+          <EventManagementPage
+            params={{ eventId: "event-1" } as unknown as Promise<{ eventId: string }>}
+            searchParams={{ name: "Liga%20MX" } as unknown as Promise<{ name?: string }>}
+          />
+        </Suspense>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar Jornada 1" }));
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar fase" }));
+
+    await waitFor(() => {
+      expect(deletePhase).toHaveBeenCalledWith("event-1", "phase-1");
+      expect(toast).toHaveBeenCalledWith("Fase eliminada correctamente.", "success");
     });
   });
 });

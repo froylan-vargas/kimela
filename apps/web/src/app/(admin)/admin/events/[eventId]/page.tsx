@@ -38,6 +38,7 @@ export default function EventManagementPage({
   const [activeTab, setActiveTab] = useState<Tab>("resultados");
   const [showPhaseForm, setShowPhaseForm] = useState(false);
   const [localPhases, setLocalPhases] = useState<Phase[] | null>(null);
+  const [phasePendingDelete, setPhasePendingDelete] = useState<Phase | null>(null);
   const [isUploading, startUploadTransition] = useTransition();
 
   const {
@@ -114,12 +115,23 @@ export default function EventManagementPage({
     return !displayedPhases.some((item) => item.id !== phase.id && item.status === "ACTIVE");
   }
 
-  async function handleDeletePhase(phaseId: string) {
+  function handleDeletePhase(phaseId: string) {
+    const phase = displayedPhases.find((item) => item.id === phaseId);
+    if (!phase) return;
+    setPhasePendingDelete(phase);
+  }
+
+  async function confirmDeletePhase() {
+    if (!phasePendingDelete) return;
+
+    const phaseId = phasePendingDelete.id;
     const prev = queryClient.getQueryData<Phase[]>(["admin", "phases", eventId]) ?? [];
     const updated = prev.filter((p) => p.id !== phaseId);
     queryClient.setQueryData<Phase[]>(["admin", "phases", eventId], updated);
     setLocalPhases(null);
     if (selectedPhase?.id === phaseId) setSelectedPhase(null);
+    setPhasePendingDelete(null);
+
     try {
       await adminApi.deletePhase(eventId, phaseId);
       toast("Fase eliminada correctamente.", "success");
@@ -282,6 +294,51 @@ export default function EventManagementPage({
           )}
         </section>
       </div>
+
+      {phasePendingDelete && (
+        <div
+          className={styles.confirmOverlay}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setPhasePendingDelete(null);
+            }
+          }}
+        >
+          <section
+            className={styles.confirmDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-phase-title"
+          >
+            <h2 id="delete-phase-title" className={styles.confirmTitle}>
+              Eliminar fase
+            </h2>
+            <p className={styles.confirmText}>
+              ¿Seguro que quieres eliminar la fase <strong>{phasePendingDelete.name}</strong>?
+            </p>
+            <p className={styles.confirmWarning}>
+              También se eliminarán sus partidos, resultados y pronósticos asociados.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.confirmCancel}
+                onClick={() => setPhasePendingDelete(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.confirmDelete}
+                onClick={confirmDeletePhase}
+              >
+                Eliminar fase
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

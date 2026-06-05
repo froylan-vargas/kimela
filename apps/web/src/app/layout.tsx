@@ -11,7 +11,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "qimela",
-  description: "Sports pools platform",
+  description: "Quinielas Deportivas por FVG",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

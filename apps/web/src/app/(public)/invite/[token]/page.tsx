@@ -8,6 +8,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { useQimelaContext } from "@/context/QimelaContext";
 import { useToast } from "@/context/ToastContext";
 import { toUserMessage } from "@/lib/errors";
+import { fetchQimelas, qimelasQueryKey } from "@/hooks/useQimelas";
 import styles from "./page.module.scss";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -28,7 +29,7 @@ export default function InvitePage() {
   const { token } = useParams<{ token: string }>();
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuthContext();
-  const { clearQimela } = useQimelaContext();
+  const { selectQimela, clearQimela } = useQimelaContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -61,7 +62,34 @@ export default function InvitePage() {
     try {
       await inviteApi.subscribe(token);
       await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
-      clearQimela();
+      if (user.role === "ADMIN") {
+        clearQimela();
+        toast("Te suscribiste correctamente.", "success");
+        router.push("/admin/events");
+        return;
+      }
+
+      try {
+        const qimelas = await queryClient.fetchQuery({
+          queryKey: qimelasQueryKey,
+          queryFn: fetchQimelas,
+        });
+        const subscribedQimela =
+          invite &&
+          (qimelas.data.find(
+            (item) => item.id === invite.qimelaId && item.role === "SUBSCRIBER",
+          ) ??
+            null);
+
+        if (subscribedQimela) {
+          selectQimela(subscribedQimela, "SUBSCRIBER");
+        } else {
+          clearQimela();
+        }
+      } catch {
+        clearQimela();
+      }
+
       toast("Te suscribiste correctamente.", "success");
       router.push("/dashboard");
     } catch (err) {

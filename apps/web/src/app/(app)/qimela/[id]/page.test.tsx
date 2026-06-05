@@ -1,13 +1,36 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+const {
+  mockRouterPush,
+  mockSelectQimela,
+  mockClearQimela,
+  mockInvalidateQueries,
+  mockFetchQuery,
+  mockFetchQimelas,
+} = vi.hoisted(() => ({
+  mockRouterPush: vi.fn(),
+  mockSelectQimela: vi.fn(),
+  mockClearQimela: vi.fn(),
+  mockInvalidateQueries: vi.fn(),
+  mockFetchQuery: vi.fn(),
+  mockFetchQimelas: vi.fn(),
+}));
+
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "qimela-uuid" }),
+  useRouter: () => ({ push: mockRouterPush }),
 }));
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
-  return { ...actual, useQueryClient: () => ({ invalidateQueries: vi.fn() }) };
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      invalidateQueries: mockInvalidateQueries,
+      fetchQuery: mockFetchQuery,
+    }),
+  };
 });
 
 vi.mock("@/components/qimela/SubscribersList/SubscribersList", () => ({
@@ -18,6 +41,7 @@ vi.mock("@/lib/apiClient", () => ({
   qimelasApi: {
     getById: vi.fn(),
     update: vi.fn(),
+    subscribe: vi.fn(),
   },
   inviteApi: {
     generate: vi.fn(),
@@ -36,6 +60,18 @@ vi.mock("@/lib/apiClient", () => ({
 
 vi.mock("@/context/AuthContext", () => ({
   useAuthContext: vi.fn(),
+}));
+
+vi.mock("@/context/QimelaContext", () => ({
+  useQimelaContext: () => ({
+    selectQimela: mockSelectQimela,
+    clearQimela: mockClearQimela,
+  }),
+}));
+
+vi.mock("@/hooks/useQimelas", () => ({
+  qimelasQueryKey: ["qimelas"],
+  fetchQimelas: mockFetchQimelas,
 }));
 
 const mockToast = vi.fn();
@@ -91,6 +127,23 @@ describe("QimelaDetailPage — Share section", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(qimelasApi.getById).mockResolvedValue(mockQimela);
+    vi.mocked(qimelasApi.subscribe).mockResolvedValue({
+      data: { subscriptionId: "subscription-1" },
+    });
+    mockInvalidateQueries.mockResolvedValue(undefined);
+    mockFetchQuery.mockResolvedValue({
+      data: [
+        {
+          id: QIMELA_ID,
+          name: "Mi Quiniela",
+          sportId: "sport-1",
+          status: "UPCOMING",
+          role: "SUBSCRIBER",
+          creatorId: CREATOR_ID,
+        },
+      ],
+      meta: { total: 1, page: 1, limit: 10 },
+    });
     vi.mocked(useAuthContext).mockReturnValue({
       user: creatorUser,
       isAuthenticated: true,
@@ -218,6 +271,24 @@ describe("QimelaDetailPage — Share section", () => {
 
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(expect.any(String), "error");
+    });
+  });
+
+  it("subscribes, selects the qimela, and redirects to dashboard", async () => {
+    render(<QimelaDetailPage />);
+
+    const subscribeButton = await screen.findByRole("button", {
+      name: "Suscribirme",
+    });
+    fireEvent.click(subscribeButton);
+
+    await waitFor(() => {
+      expect(qimelasApi.subscribe).toHaveBeenCalledWith(QIMELA_ID);
+      expect(mockSelectQimela).toHaveBeenCalledWith(
+        expect.objectContaining({ id: QIMELA_ID }),
+        "SUBSCRIBER",
+      );
+      expect(mockRouterPush).toHaveBeenCalledWith("/dashboard");
     });
   });
 });

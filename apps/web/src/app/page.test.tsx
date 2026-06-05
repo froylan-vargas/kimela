@@ -1,12 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Home from "./(app)/dashboard/page";
 import { useQimelaContext } from "@/context/QimelaContext";
+import { useAuthContext } from "@/context/AuthContext";
 import { useQimelas } from "@/hooks/useQimelas";
 import type { qimela, QimelasResponse } from "@/types/qimela";
 import type { UseQueryResult } from "@tanstack/react-query";
 
+const mockReplace = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: mockReplace }),
+}));
+
 vi.mock("@/context/QimelaContext");
+vi.mock("@/context/AuthContext");
 vi.mock("@/hooks/useQimelas");
 vi.mock("@/components/dashboard/ParticipantDashboard", () => ({
   default: ({ qimela }: { qimela: qimela }) => (
@@ -37,6 +45,15 @@ const creatorQimela: qimela = {
   creatorId: "u1",
 };
 
+const user = {
+  id: "u1",
+  name: "Test User",
+  email: "test@example.com",
+  role: "USER" as const,
+  emailVerifiedAt: null,
+  imageUrl: null,
+};
+
 function mockUseQimelas(data: QimelasResponse["data"] = [subscriberQimela]) {
   vi.mocked(useQimelas).mockReturnValue({
     data: { data, meta: { total: data.length, page: 1, limit: 10 } },
@@ -50,6 +67,15 @@ function mockUseQimelas(data: QimelasResponse["data"] = [subscriberQimela]) {
 
 describe("Home page", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useAuthContext).mockReturnValue({
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      updateUser: vi.fn(),
+    });
     mockUseQimelas();
   });
 
@@ -97,6 +123,45 @@ describe("Home page", () => {
         name: /¡También puedes crear\s+tu propia qimela!/i,
       }),
     ).not.toBeInTheDocument();
+  });
+
+  it("selects the subscribed qimela on dashboard reload", async () => {
+    const selectQimela = vi.fn();
+    const clearQimela = vi.fn();
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: null,
+      viewAs: null,
+      selectQimela,
+      clearQimela,
+    });
+
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(selectQimela).toHaveBeenCalledWith(
+        subscriberQimela,
+        "SUBSCRIBER",
+      );
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("redirects creator-only users to their qimela on dashboard reload", async () => {
+    const selectQimela = vi.fn();
+    mockUseQimelas([creatorQimela]);
+    vi.mocked(useQimelaContext).mockReturnValue({
+      selectedQimela: null,
+      viewAs: null,
+      selectQimela,
+      clearQimela: vi.fn(),
+    });
+
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(selectQimela).toHaveBeenCalledWith(creatorQimela, "CREATOR");
+      expect(mockReplace).toHaveBeenCalledWith("/qimela/c1");
+    });
   });
 
   it("renders an invite prompt when no subscribed qimelas exist", () => {

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { qimelasApi, inviteApi } from "@/lib/apiClient";
 import { useAuthContext } from "@/context/AuthContext";
+import { useQimelaContext } from "@/context/QimelaContext";
 import { useToast } from "@/context/ToastContext";
 import { toUserMessage } from "@/lib/errors";
+import { fetchQimelas, qimelasQueryKey } from "@/hooks/useQimelas";
 import type { QimelaDetail } from "@/types/qimela";
 import SubscribersList from "@/components/qimela/SubscribersList/SubscribersList";
 import styles from "./page.module.scss";
@@ -20,8 +22,10 @@ const STATUS_LABELS: Record<string, string> = {
 export default function QimelaDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuthContext();
+  const { selectQimela, clearQimela } = useQimelaContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [qimela, setQimela] = useState<QimelaDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -156,7 +160,34 @@ export default function QimelaDetailPage() {
       await qimelasApi.subscribe(id);
       setQimela((prev) => (prev ? { ...prev, isSubscribed: true } : prev));
       await queryClient.invalidateQueries({ queryKey: ["qimelas"] });
+      if (user?.role === "ADMIN") {
+        clearQimela();
+        toast("Te has suscrito a la qimela.", "success");
+        router.push("/admin/events");
+        return;
+      }
+
+      try {
+        const qimelas = await queryClient.fetchQuery({
+          queryKey: qimelasQueryKey,
+          queryFn: fetchQimelas,
+        });
+        const subscribedQimela =
+          qimelas.data.find(
+            (item) => item.id === id && item.role === "SUBSCRIBER",
+          ) ?? null;
+
+        if (subscribedQimela) {
+          selectQimela(subscribedQimela, "SUBSCRIBER");
+        } else {
+          clearQimela();
+        }
+      } catch {
+        clearQimela();
+      }
+
       toast("Te has suscrito a la qimela.", "success");
+      router.push("/dashboard");
     } catch (err) {
       toast(toUserMessage(err), "error");
     } finally {

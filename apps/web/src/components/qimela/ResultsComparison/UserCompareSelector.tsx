@@ -104,12 +104,14 @@ export default function UserCompareSelector({
       {isOpen && (
         <div className={styles.panel}>
           <input
-            type="search"
+            type="text"
             className={styles.search}
             placeholder="Buscar..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             aria-label="Buscar usuario"
+            autoComplete="off"
+            inputMode="search"
           />
           <ul className={styles.list}>
             {filtered.length === 0 && (

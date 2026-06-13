@@ -20,7 +20,10 @@ describe("UserCompareSelector", () => {
     );
     expect(screen.queryByPlaceholderText("Buscar...")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Comparar con otros/ }));
-    expect(screen.getByPlaceholderText("Buscar...")).toBeInTheDocument();
+    const searchInput = screen.getByPlaceholderText("Buscar...");
+    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveAttribute("type", "text");
+    expect(searchInput).toHaveAttribute("autocomplete", "off");
   });
 
   it("toggles selection via checkboxes", () => {

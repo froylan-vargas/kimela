@@ -104,14 +104,19 @@ export default function UserCompareSelector({
       {isOpen && (
         <div className={styles.panel}>
           <input
-            type="text"
+            type="search"
+            name="qimela-compare-user-search"
             className={styles.search}
             placeholder="Buscar..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             aria-label="Buscar usuario"
-            autoComplete="off"
+            autoComplete="new-password"
             inputMode="search"
+            data-1p-ignore="true"
+            data-bwignore="true"
+            data-form-type="other"
+            data-lpignore="true"
           />
           <ul className={styles.list}>
             {filtered.length === 0 && (

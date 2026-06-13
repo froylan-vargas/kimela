@@ -22,8 +22,10 @@ describe("UserCompareSelector", () => {
     fireEvent.click(screen.getByRole("button", { name: /Comparar con otros/ }));
     const searchInput = screen.getByPlaceholderText("Buscar...");
     expect(searchInput).toBeInTheDocument();
-    expect(searchInput).toHaveAttribute("type", "text");
-    expect(searchInput).toHaveAttribute("autocomplete", "off");
+    expect(searchInput).toHaveAttribute("type", "search");
+    expect(searchInput).toHaveAttribute("name", "qimela-compare-user-search");
+    expect(searchInput).toHaveAttribute("autocomplete", "new-password");
+    expect(searchInput).toHaveAttribute("data-lpignore", "true");
   });
 
   it("toggles selection via checkboxes", () => {

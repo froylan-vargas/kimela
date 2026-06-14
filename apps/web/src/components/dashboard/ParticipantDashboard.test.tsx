@@ -47,13 +47,13 @@ describe("ParticipantDashboard", () => {
     const sessionsTab = screen.getByRole("tab", { name: "Partidos" });
     const positionsTab = screen.getByRole("tab", { name: "Posiciones" });
 
-    expect(sessionsTab).toHaveAttribute("aria-selected", "true");
-    expect(positionsTab).toHaveAttribute("aria-selected", "false");
-
-    fireEvent.click(positionsTab);
-
     expect(sessionsTab).toHaveAttribute("aria-selected", "false");
     expect(positionsTab).toHaveAttribute("aria-selected", "true");
+
+    fireEvent.click(sessionsTab);
+
+    expect(sessionsTab).toHaveAttribute("aria-selected", "true");
+    expect(positionsTab).toHaveAttribute("aria-selected", "false");
   });
 
   it("opens and closes the qimela rules modal", () => {

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ComparisonSession } from "@/lib/apiClient";
 import ComparisonCard from "./ComparisonCard";
 
@@ -31,11 +31,33 @@ const baseSession: ComparisonSession = {
 };
 
 describe("ComparisonCard", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("renders real result score", () => {
     render(<ComparisonCard session={baseSession} currentUserId="me" qimelaId="qimela-1" />);
     expect(screen.getByText("Italia")).toBeInTheDocument();
     expect(screen.getByText("México")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
+  });
+
+  it("renders the match date", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-19T18:00:00Z"));
+
+    render(<ComparisonCard session={baseSession} currentUserId="me" qimelaId="qimela-1" />);
+
+    expect(screen.getByText("lun 20 de abr, 08:00 p.m.")).toBeInTheDocument();
+  });
+
+  it("shows HOY when the match is today", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-20T18:00:00Z"));
+
+    render(<ComparisonCard session={baseSession} currentUserId="me" qimelaId="qimela-1" />);
+
+    expect(screen.getByText("HOY, 08:00 p.m.")).toBeInTheDocument();
   });
 
   it("labels the current user as 'Tú' and shows first", () => {

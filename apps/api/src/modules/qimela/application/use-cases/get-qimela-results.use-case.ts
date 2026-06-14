@@ -1,10 +1,10 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../../../../shared/prisma/prisma.service';
 import { QIMELA_REPOSITORY, QimelaRepository } from '../../domain/qimela.repository';
-import { formatFloatingIso } from '../utils/session-time';
+import { formatFloatingIso, getFloatingNow } from '../utils/session-time';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
-const MAX_COMPARE_USERS = 3;
+const MAX_COMPARE_USERS = 5;
 
 export interface ComparisonContenderDto {
   id: string;
@@ -141,7 +141,14 @@ export class GetQimelaResultsUseCase {
       return { data: [] };
     }
 
-    const sessionIds = sessions.map((s) => s.id);
+    const sortedSessions = this.sortSessionsForResults(
+      sessions,
+      scoreHomeCategoryId,
+      scoreAwayCategoryId,
+      getFloatingNow(),
+    );
+
+    const sessionIds = sortedSessions.map((s) => s.id);
     const [users, picks, pointsRows] = await Promise.all([
       this.prisma.user.findMany({
         where: { id: { in: userIds } },
@@ -176,7 +183,7 @@ export class GetQimelaResultsUseCase {
       pointsRows.map((p) => [pointsKey(p.userId, p.sessionId), p.points] as const),
     );
 
-    const data: ComparisonSessionDto[] = sessions.map((session) => {
+    const data: ComparisonSessionDto[] = sortedSessions.map((session) => {
       const home = session.contenders.find((c) => c.role === 'home')?.contender ?? session.contenders[0]?.contender;
       const away = session.contenders.find((c) => c.role === 'away')?.contender ?? session.contenders[1]?.contender;
 
@@ -227,6 +234,66 @@ export class GetQimelaResultsUseCase {
     this.logger.info(`Returning ${data.length} sessions for phase ${query.phaseId}`);
 
     return { data };
+  }
+
+  private sortSessionsForResults(
+    sessions: SessionRecord[],
+    scoreHomeCategoryId: string | null,
+    scoreAwayCategoryId: string | null,
+    now: Date,
+  ): SessionRecord[] {
+    return [...sessions].sort((a, b) => {
+      const bucketDiff =
+        this.getResultsSortBucket(a, scoreHomeCategoryId, scoreAwayCategoryId, now) -
+        this.getResultsSortBucket(b, scoreHomeCategoryId, scoreAwayCategoryId, now);
+
+      if (bucketDiff !== 0) return bucketDiff;
+
+      if (this.isSameFloatingDay(a.scheduledAt, now)) {
+        return a.scheduledAt.getTime() - b.scheduledAt.getTime();
+      }
+
+      if (this.hasOfficialScore(a, scoreHomeCategoryId, scoreAwayCategoryId)) {
+        return b.scheduledAt.getTime() - a.scheduledAt.getTime();
+      }
+
+      return Math.abs(a.scheduledAt.getTime() - now.getTime()) - Math.abs(b.scheduledAt.getTime() - now.getTime());
+    });
+  }
+
+  private getResultsSortBucket(
+    session: SessionRecord,
+    scoreHomeCategoryId: string | null,
+    scoreAwayCategoryId: string | null,
+    now: Date,
+  ): number {
+    if (this.isSameFloatingDay(session.scheduledAt, now)) return 0;
+    if (this.hasOfficialScore(session, scoreHomeCategoryId, scoreAwayCategoryId)) return 1;
+    return 2;
+  }
+
+  private isSameFloatingDay(a: Date, b: Date): boolean {
+    return (
+      a.getUTCFullYear() === b.getUTCFullYear() &&
+      a.getUTCMonth() === b.getUTCMonth() &&
+      a.getUTCDate() === b.getUTCDate()
+    );
+  }
+
+  private hasOfficialScore(
+    session: SessionRecord,
+    scoreHomeCategoryId: string | null,
+    scoreAwayCategoryId: string | null,
+  ): boolean {
+    if (!scoreHomeCategoryId || !scoreAwayCategoryId) return false;
+
+    const resultByCategoryId = new Map(session.results.map((r) => [r.pickCategoryId, r.value] as const));
+    return (
+      resultByCategoryId.get(scoreHomeCategoryId) !== null &&
+      resultByCategoryId.get(scoreHomeCategoryId) !== undefined &&
+      resultByCategoryId.get(scoreAwayCategoryId) !== null &&
+      resultByCategoryId.get(scoreAwayCategoryId) !== undefined
+    );
   }
 
   private buildUserIds(currentUserId: string, compareUserIds: string[]): string[] {

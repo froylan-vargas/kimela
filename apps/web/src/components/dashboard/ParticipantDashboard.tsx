@@ -17,7 +17,7 @@ export default function ParticipantDashboard({
 }: ParticipantDashboardProps) {
   const [activeMobilePanel, setActiveMobilePanel] = useState<
     "sessions" | "positions"
-  >("sessions");
+  >("positions");
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const { user } = useAuth();
 

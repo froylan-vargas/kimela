@@ -85,13 +85,17 @@ describe("GetQimelaResultsUseCase", () => {
     );
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("rejects when compareUserIds exceeds max", async () => {
     await expect(
       useCase.execute({
         qimelaId: QIMELA_ID,
         userId: USER_ID,
         phaseId: PHASE_ID,
-        compareUserIds: ["a", "b", "c", "d"],
+        compareUserIds: ["a", "b", "c", "d", "e", "f"],
       }),
     ).rejects.toThrow(BadRequestException);
   });
@@ -277,6 +281,113 @@ describe("GetQimelaResultsUseCase", () => {
         where: expect.objectContaining({ qimelaId: QIMELA_ID }),
       }),
     );
+  });
+
+  it("orders phase matches by today first, official scores latest, then closest remaining", async () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-04-20T18:00:00Z").getTime());
+    mockQimelaRepository.findById.mockResolvedValue(makeQimela());
+    mockPrisma.subscription.findFirst.mockResolvedValue({ id: "sub-id" });
+    mockPrisma.phase.findFirst.mockResolvedValue({ id: PHASE_ID });
+    mockPrisma.subscription.findMany.mockResolvedValue([]);
+    mockPrisma.sport.findUnique.mockResolvedValue({ id: SPORT_ID });
+    mockPrisma.pickCategory.findMany.mockResolvedValue([
+      { id: "cat-home", name: "score_home" },
+      { id: "cat-away", name: "score_away" },
+    ]);
+    mockPrisma.session.findMany.mockResolvedValue([
+      {
+        id: "official-older",
+        name: "Official Older",
+        status: "COMPLETED",
+        scheduledAt: new Date("2026-04-10T20:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [
+          { pickCategoryId: "cat-home", value: "1" },
+          { pickCategoryId: "cat-away", value: "0" },
+        ],
+      },
+      {
+        id: "remaining-future-far",
+        name: "Future Far",
+        status: "UPCOMING",
+        scheduledAt: new Date("2026-04-29T20:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [],
+      },
+      {
+        id: "today-late",
+        name: "Today Late",
+        status: "UPCOMING",
+        scheduledAt: new Date("2026-04-20T23:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [],
+      },
+      {
+        id: "official-newer",
+        name: "Official Newer",
+        status: "COMPLETED",
+        scheduledAt: new Date("2026-04-18T20:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [
+          { pickCategoryId: "cat-home", value: "2" },
+          { pickCategoryId: "cat-away", value: "1" },
+        ],
+      },
+      {
+        id: "remaining-past-close",
+        name: "Past Close",
+        status: "UPCOMING",
+        scheduledAt: new Date("2026-04-19T20:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [],
+      },
+      {
+        id: "today-early",
+        name: "Today Early",
+        status: "COMPLETED",
+        scheduledAt: new Date("2026-04-20T10:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [
+          { pickCategoryId: "cat-home", value: "3" },
+          { pickCategoryId: "cat-away", value: "2" },
+        ],
+      },
+      {
+        id: "remaining-future-close",
+        name: "Future Close",
+        status: "UPCOMING",
+        scheduledAt: new Date("2026-04-21T20:00:00Z"),
+        phase: { id: PHASE_ID, name: "Jornada 1" },
+        contenders: [],
+        results: [],
+      },
+    ]);
+    mockPrisma.user.findMany.mockResolvedValue([{ id: USER_ID, name: "Froilan" }]);
+    mockPrisma.userPick.findMany.mockResolvedValue([]);
+    mockPrisma.userSessionPoints.findMany.mockResolvedValue([]);
+
+    const result = await useCase.execute({
+      qimelaId: QIMELA_ID,
+      userId: USER_ID,
+      phaseId: PHASE_ID,
+      compareUserIds: [],
+    });
+
+    expect(result.data.map((session) => session.id)).toEqual([
+      "today-early",
+      "today-late",
+      "official-newer",
+      "official-older",
+      "remaining-past-close",
+      "remaining-future-close",
+      "remaining-future-far",
+    ]);
   });
 
   it("returns sessions without official result and leaves points empty until scoring exists", async () => {

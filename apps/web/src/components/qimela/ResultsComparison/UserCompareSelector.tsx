@@ -20,7 +20,7 @@ export default function UserCompareSelector({
   options,
   selectedUserIds,
   onChange,
-  maxSelectable = 3,
+  maxSelectable = 5,
 }: UserCompareSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");

@@ -34,6 +34,53 @@ function formatPoints(points: number | null) {
   return `${points > 0 ? "+" : ""}${points} Pts`;
 }
 
+function parseFloatingDate(dateString: string) {
+  return new Date(dateString.endsWith("Z") ? dateString : `${dateString}Z`);
+}
+
+function getMexicoDateKey(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const values = new Map(parts.map((part) => [part.type, part.value]));
+  return `${values.get("year")}-${values.get("month")}-${values.get("day")}`;
+}
+
+function getUtcDateKey(date: Date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatMatchDate(dateString: string) {
+  const date = parseFloatingDate(dateString);
+  const time = new Intl.DateTimeFormat("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h12",
+    timeZone: "UTC",
+  }).format(date);
+
+  if (getUtcDateKey(date) === getMexicoDateKey(new Date())) return `HOY, ${time}`;
+
+  const dateParts = new Intl.DateTimeFormat("es-MX", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).formatToParts(date);
+  const values = new Map(dateParts.map((part) => [part.type, part.value]));
+  const weekday = values.get("weekday") ?? "";
+  const day = values.get("day") ?? "";
+  const month = values.get("month") ?? "";
+
+  return `${weekday} ${day} de ${month}, ${time}`;
+}
+
 export default function ComparisonCard({ session, currentUserId, qimelaId }: ComparisonCardProps) {
   const { home, away, actualResult, users } = session;
   const [top5Open, setTop5Open] = useState(false);
@@ -49,6 +96,9 @@ export default function ComparisonCard({ session, currentUserId, qimelaId }: Com
 
   return (
     <article className={styles.card}>
+      <time className={styles.matchDate} dateTime={session.scheduledAt}>
+        {formatMatchDate(session.scheduledAt)}
+      </time>
       <div className={styles.actual}>
         <div className={styles.team}>
           <div className={styles.logo}>

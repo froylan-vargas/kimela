@@ -7,6 +7,8 @@ const options = [
   { userId: "2", userName: "Laura Gómez", initials: "LG" },
   { userId: "3", userName: "Mario Solís", initials: "MS" },
   { userId: "4", userName: "Paola Ruiz", initials: "PR" },
+  { userId: "5", userName: "Diego Luna", initials: "DL" },
+  { userId: "6", userName: "Sofía Mora", initials: "SM" },
 ];
 
 describe("UserCompareSelector", () => {
@@ -47,12 +49,12 @@ describe("UserCompareSelector", () => {
     render(
       <UserCompareSelector
         options={options}
-        selectedUserIds={["1", "2", "3"]}
+        selectedUserIds={["1", "2", "3", "4", "5"]}
         onChange={() => {}}
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: /Comparar con otros/ }));
-    const unselected = screen.getByLabelText(/Paola Ruiz/) as HTMLInputElement;
+    const unselected = screen.getByLabelText(/Sofía Mora/) as HTMLInputElement;
     expect(unselected.disabled).toBe(true);
   });
 

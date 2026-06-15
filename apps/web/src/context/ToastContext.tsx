@@ -25,7 +25,7 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const MAX_TOASTS = 3;
-const AUTO_REMOVE_MS = 4000;
+const AUTO_REMOVE_MS = 7000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);

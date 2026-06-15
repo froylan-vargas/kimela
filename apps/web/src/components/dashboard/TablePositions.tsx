@@ -7,7 +7,7 @@ import { useQimelaPhases } from "@/hooks/useQimelaPhases";
 import PhaseFilter from "@/components/qimela/ResultsComparison/PhaseFilter";
 import styles from "./TablePositions.module.scss";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 7;
 
 interface TablePositionsProps {
   qimelaId: string;

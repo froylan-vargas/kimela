@@ -23,6 +23,8 @@ import { GetQimelaLabelsUseCase } from "../application/use-cases/get-qimela-labe
 import { ApplyLabelUseCase } from "../application/use-cases/apply-label.use-case";
 import { RemoveLabelUseCase } from "../application/use-cases/remove-label.use-case";
 import { GetSessionTop5PicksUseCase } from "../application/use-cases/get-session-top5-picks.use-case";
+import { GetQimelaOpenQuestionsUseCase } from "../application/use-cases/get-qimela-open-questions.use-case";
+import { AnswerOpenQuestionUseCase } from "../application/use-cases/answer-open-question.use-case";
 import { QIMELA_REPOSITORY } from "../domain/qimela.repository";
 import { RULE_REPOSITORY } from "../domain/rule.repository";
 import { QimelaStatus } from "../domain/qimela-status.enum";
@@ -81,6 +83,8 @@ describe("QimelaController", () => {
   let applyLabel: jest.Mocked<ApplyLabelUseCase>;
   let removeLabel: jest.Mocked<RemoveLabelUseCase>;
   let getSessionTop5Picks: jest.Mocked<GetSessionTop5PicksUseCase>;
+  let getQimelaOpenQuestions: jest.Mocked<GetQimelaOpenQuestionsUseCase>;
+  let answerOpenQuestion: jest.Mocked<AnswerOpenQuestionUseCase>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -126,6 +130,14 @@ describe("QimelaController", () => {
           provide: GetSessionTop5PicksUseCase,
           useValue: { execute: jest.fn() },
         },
+        {
+          provide: GetQimelaOpenQuestionsUseCase,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: AnswerOpenQuestionUseCase,
+          useValue: { execute: jest.fn() },
+        },
         { provide: QIMELA_REPOSITORY, useValue: {} },
         { provide: RULE_REPOSITORY, useValue: {} },
         { provide: PrismaService, useValue: {} },
@@ -161,6 +173,8 @@ describe("QimelaController", () => {
     applyLabel = module.get(ApplyLabelUseCase);
     removeLabel = module.get(RemoveLabelUseCase);
     getSessionTop5Picks = module.get(GetSessionTop5PicksUseCase);
+    getQimelaOpenQuestions = module.get(GetQimelaOpenQuestionsUseCase);
+    answerOpenQuestion = module.get(AnswerOpenQuestionUseCase);
   });
 
   // ─── getQimelas ──────────────────────────────────────────────────────────
@@ -318,6 +332,52 @@ describe("QimelaController", () => {
         qimelaId: QIMELA_ID,
         userId: MOCK_USER_ID,
       });
+    });
+  });
+
+  describe("open questions", () => {
+    it("lists open questions for a qimela and current user", async () => {
+      const response = { data: [] };
+      getQimelaOpenQuestions.execute.mockResolvedValue(response);
+
+      const result = await controller.listOpenQuestions(QIMELA_ID, MOCK_USER);
+
+      expect(getQimelaOpenQuestions.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        userId: MOCK_USER_ID,
+      });
+      expect(result).toEqual(response);
+    });
+
+    it("submits an open question answer", async () => {
+      const response = {
+        data: {
+          id: "question-1",
+          prompt: "Pregunta",
+          answered: true,
+          answer: {
+            id: "answer-1",
+            answer: "Respuesta",
+            createdAt: "2026-06-15T12:00:00.000Z",
+          },
+        },
+      };
+      answerOpenQuestion.execute.mockResolvedValue(response);
+
+      const result = await controller.submitOpenQuestionAnswer(
+        QIMELA_ID,
+        "question-1",
+        MOCK_USER,
+        { answer: "Respuesta" },
+      );
+
+      expect(answerOpenQuestion.execute).toHaveBeenCalledWith({
+        qimelaId: QIMELA_ID,
+        questionId: "question-1",
+        userId: MOCK_USER_ID,
+        answer: "Respuesta",
+      });
+      expect(result).toEqual(response);
     });
   });
 

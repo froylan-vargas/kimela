@@ -21,6 +21,12 @@
   min-width: 0;
 }
 
+.sessionsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
 .summaryCard {
   display: flex;
   align-items: center;

@@ -12,6 +12,9 @@ import { ActivatePhaseUseCase } from '../application/use-cases/activate-phase.us
 import { CompletePhaseUseCase } from '../application/use-cases/complete-phase.use-case';
 import { SaveSessionResultsUseCase } from '../application/use-cases/save-session-results.use-case';
 import { CancelSessionResultsUseCase } from '../application/use-cases/cancel-session-results.use-case';
+import { GetOpenQuestionsByEventUseCase } from '../application/use-cases/get-open-questions-by-event.use-case';
+import { CreateOpenQuestionUseCase } from '../application/use-cases/create-open-question.use-case';
+import { SetOpenQuestionVisibilityUseCase } from '../application/use-cases/set-open-question-visibility.use-case';
 import { PgBossModule } from '../../../shared/queue/pgboss.module';
 import { AdminController } from './admin.controller';
 
@@ -30,6 +33,9 @@ import { AdminController } from './admin.controller';
     UploadSessionsUseCase,
     SaveSessionResultsUseCase,
     CancelSessionResultsUseCase,
+    GetOpenQuestionsByEventUseCase,
+    CreateOpenQuestionUseCase,
+    SetOpenQuestionVisibilityUseCase,
   ],
   controllers: [AdminController],
 })

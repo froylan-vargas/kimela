@@ -5,6 +5,7 @@ import type { QimelaEvent, QimelaDetail, Rule, CreateQimelaBody, UpdateQimelaBod
 import type { Phase, CreatePhaseBody, ReorderPhaseEntry } from "@/types/phase";
 import type { Session } from "@/types/session";
 import type { PhaseSessionsGroup, SavePredictionPickInput } from "@/types/prediction";
+import type { AdminOpenQuestion, QimelaOpenQuestion } from "@/types/openQuestion";
 
 export interface QimelaLabel {
   id: string;
@@ -415,6 +416,26 @@ export const qimelasApi = {
       },
     );
   },
+
+  getOpenQuestions(qimelaId: string): Promise<{ data: QimelaOpenQuestion[] }> {
+    return apiFetch<{ data: QimelaOpenQuestion[] }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/open-questions`,
+    );
+  },
+
+  answerOpenQuestion(
+    qimelaId: string,
+    questionId: string,
+    body: { answer: string },
+  ): Promise<{ data: QimelaOpenQuestion }> {
+    return apiFetch<{ data: QimelaOpenQuestion }>(
+      `/qimelas/${encodeURIComponent(qimelaId)}/open-questions/${encodeURIComponent(questionId)}/response`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
+  },
 };
 
 export const inviteApi = {
@@ -514,6 +535,39 @@ export const adminApi = {
   getSessions(eventId: string, phaseId: string): Promise<{ data: Session[] }> {
     return apiFetch<{ data: Session[] }>(
       `/admin/events/${encodeURIComponent(eventId)}/phases/${encodeURIComponent(phaseId)}/sessions`,
+    );
+  },
+
+  getOpenQuestions(eventId: string): Promise<{ data: AdminOpenQuestion[] }> {
+    return apiFetch<{ data: AdminOpenQuestion[] }>(
+      `/admin/events/${encodeURIComponent(eventId)}/open-questions`,
+    );
+  },
+
+  createOpenQuestion(
+    eventId: string,
+    body: { prompt: string },
+  ): Promise<{ data: AdminOpenQuestion }> {
+    return apiFetch<{ data: AdminOpenQuestion }>(
+      `/admin/events/${encodeURIComponent(eventId)}/open-questions`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
+  },
+
+  showOpenQuestion(eventId: string, questionId: string): Promise<{ data: AdminOpenQuestion }> {
+    return apiFetch<{ data: AdminOpenQuestion }>(
+      `/admin/events/${encodeURIComponent(eventId)}/open-questions/${encodeURIComponent(questionId)}/show`,
+      { method: "PATCH", body: JSON.stringify({}) },
+    );
+  },
+
+  hideOpenQuestion(eventId: string, questionId: string): Promise<{ data: AdminOpenQuestion }> {
+    return apiFetch<{ data: AdminOpenQuestion }>(
+      `/admin/events/${encodeURIComponent(eventId)}/open-questions/${encodeURIComponent(questionId)}/hide`,
+      { method: "PATCH", body: JSON.stringify({}) },
     );
   },
 

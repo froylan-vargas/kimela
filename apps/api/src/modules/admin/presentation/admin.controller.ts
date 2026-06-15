@@ -32,10 +32,23 @@ import {
 } from '../application/use-cases/upload-sessions.use-case';
 import { SaveSessionResultsUseCase } from '../application/use-cases/save-session-results.use-case';
 import { CancelSessionResultsUseCase } from '../application/use-cases/cancel-session-results.use-case';
+import {
+  GetOpenQuestionsByEventUseCase,
+  GetOpenQuestionsByEventResponse,
+} from '../application/use-cases/get-open-questions-by-event.use-case';
+import {
+  CreateOpenQuestionUseCase,
+  CreateOpenQuestionResponse,
+} from '../application/use-cases/create-open-question.use-case';
+import {
+  SetOpenQuestionVisibilityUseCase,
+  SetOpenQuestionVisibilityResponse,
+} from '../application/use-cases/set-open-question-visibility.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetEventsRequestDto } from './dtos/get-events-request.dto';
 import { CreatePhaseRequestDto } from './dtos/create-phase-request.dto';
 import { ReorderPhasesRequestDto } from './dtos/reorder-phases-request.dto';
+import { CreateOpenQuestionRequestDto } from './dtos/create-open-question-request.dto';
 import { SaveSessionResultsDto } from '../application/dtos/save-session-results.dto';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
@@ -57,6 +70,9 @@ export class AdminController {
     private readonly uploadSessions: UploadSessionsUseCase,
     private readonly saveSessionResultsUseCase: SaveSessionResultsUseCase,
     private readonly cancelSessionResultsUseCase: CancelSessionResultsUseCase,
+    private readonly getOpenQuestionsByEvent: GetOpenQuestionsByEventUseCase,
+    private readonly createOpenQuestion: CreateOpenQuestionUseCase,
+    private readonly setOpenQuestionVisibility: SetOpenQuestionVisibilityUseCase,
   ) {}
 
   @Get('sports')
@@ -90,6 +106,45 @@ export class AdminController {
     this.logger.info(`POST /admin/events/${eventId}/phases requested`);
 
     return this.createPhase.execute({ eventId, name: body.name, type: body.type });
+  }
+
+  @Get('events/:eventId/open-questions')
+  async listOpenQuestions(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+  ): Promise<GetOpenQuestionsByEventResponse> {
+    this.logger.info(`GET /admin/events/${eventId}/open-questions requested`);
+
+    return this.getOpenQuestionsByEvent.execute(eventId);
+  }
+
+  @Post('events/:eventId/open-questions')
+  async addOpenQuestion(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Body() body: CreateOpenQuestionRequestDto,
+  ): Promise<CreateOpenQuestionResponse> {
+    this.logger.info(`POST /admin/events/${eventId}/open-questions requested`);
+
+    return this.createOpenQuestion.execute({ eventId, prompt: body.prompt });
+  }
+
+  @Patch('events/:eventId/open-questions/:questionId/show')
+  async showOpenQuestion(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('questionId', ParseUUIDPipe) questionId: string,
+  ): Promise<SetOpenQuestionVisibilityResponse> {
+    this.logger.info(`PATCH /admin/events/${eventId}/open-questions/${questionId}/show requested`);
+
+    return this.setOpenQuestionVisibility.execute({ eventId, questionId, status: 'VISIBLE' });
+  }
+
+  @Patch('events/:eventId/open-questions/:questionId/hide')
+  async hideOpenQuestion(
+    @Param('eventId', ParseUUIDPipe) eventId: string,
+    @Param('questionId', ParseUUIDPipe) questionId: string,
+  ): Promise<SetOpenQuestionVisibilityResponse> {
+    this.logger.info(`PATCH /admin/events/${eventId}/open-questions/${questionId}/hide requested`);
+
+    return this.setOpenQuestionVisibility.execute({ eventId, questionId, status: 'HIDDEN' });
   }
 
   @Patch('events/:eventId/phases/reorder')

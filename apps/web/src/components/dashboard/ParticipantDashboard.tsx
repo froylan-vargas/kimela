@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { qimela } from "@/types/qimela";
 import QimelaRulesModal from "@/components/dashboard/QimelaRulesModal";
 import TablePositions from "@/components/dashboard/TablePositions";
+import OpenQuestionsCard from "@/components/qimela/OpenQuestionsCard/OpenQuestionsCard";
 import UpcomingSessions from "@/components/qimela/UpcomingSessions/UpcomingSessions";
 import { useAuth } from "@/hooks/useAuth";
 import styles from "./ParticipantDashboard.module.scss";
@@ -81,7 +82,10 @@ export default function ParticipantDashboard({
             activeMobilePanel === "sessions" ? styles.panelMobileVisible : ""
           }`}
         >
-          <UpcomingSessions qimelaId={qimela.id} />
+          <div className={styles.sessionsStack}>
+            <OpenQuestionsCard qimelaId={qimela.id} />
+            <UpcomingSessions qimelaId={qimela.id} />
+          </div>
         </div>
       </div>
     </section>

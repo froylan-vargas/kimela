@@ -22,12 +22,15 @@ import { GetQimelaLabelsUseCase, GetQimelaLabelsResponse } from '../application/
 import { ApplyLabelUseCase, ApplyLabelResponse } from '../application/use-cases/apply-label.use-case';
 import { RemoveLabelUseCase, RemoveLabelResponse } from '../application/use-cases/remove-label.use-case';
 import { GetSessionTop5PicksUseCase, GetSessionTop5PicksResponse } from '../application/use-cases/get-session-top5-picks.use-case';
+import { GetQimelaOpenQuestionsUseCase, GetQimelaOpenQuestionsResponse } from '../application/use-cases/get-qimela-open-questions.use-case';
+import { AnswerOpenQuestionUseCase, AnswerOpenQuestionResponse } from '../application/use-cases/answer-open-question.use-case';
 import { CurrentUser, CurrentUserPayload } from '../../auth/presentation/decorators/current-user.decorator';
 import { GetQimelasRequestDto } from './dtos/get-qimelas-request.dto';
 import { CreateQimelaRequestDto } from './dtos/create-qimela-request.dto';
 import { UpdateQimelaRequestDto } from './dtos/update-qimela-request.dto';
 import { SavePicksRequestDto } from './dtos/save-picks-request.dto';
 import { CreateLabelRequestDto } from './dtos/create-label-request.dto';
+import { AnswerOpenQuestionRequestDto } from './dtos/answer-open-question-request.dto';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Controller('qimelas')
@@ -57,6 +60,8 @@ export class QimelaController {
     private readonly applyLabel: ApplyLabelUseCase,
     private readonly removeLabel: RemoveLabelUseCase,
     private readonly getSessionTop5Picks: GetSessionTop5PicksUseCase,
+    private readonly getQimelaOpenQuestions: GetQimelaOpenQuestionsUseCase,
+    private readonly answerOpenQuestion: AnswerOpenQuestionUseCase,
   ) {}
 
   @Get()
@@ -241,6 +246,32 @@ export class QimelaController {
   ): Promise<GetUpcomingSessionsResponse> {
     this.logger.info(`GET /qimelas/${qimelaId}/sessions/upcoming requested by user ${user.id}`);
     return this.getUpcomingSessions.execute({ qimelaId, userId: user.id });
+  }
+
+  @Get(':qimelaId/open-questions')
+  async listOpenQuestions(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ): Promise<GetQimelaOpenQuestionsResponse> {
+    this.logger.info(`GET /qimelas/${qimelaId}/open-questions requested by user ${user.id}`);
+    return this.getQimelaOpenQuestions.execute({ qimelaId, userId: user.id });
+  }
+
+  @Post(':qimelaId/open-questions/:questionId/response')
+  @HttpCode(HttpStatus.OK)
+  async submitOpenQuestionAnswer(
+    @Param('qimelaId', ParseUUIDPipe) qimelaId: string,
+    @Param('questionId', ParseUUIDPipe) questionId: string,
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() body: AnswerOpenQuestionRequestDto,
+  ): Promise<AnswerOpenQuestionResponse> {
+    this.logger.info(`POST /qimelas/${qimelaId}/open-questions/${questionId}/response requested by user ${user.id}`);
+    return this.answerOpenQuestion.execute({
+      qimelaId,
+      questionId,
+      userId: user.id,
+      answer: body.answer,
+    });
   }
 
   @Get(':qimelaId/sessions')

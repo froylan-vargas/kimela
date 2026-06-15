@@ -34,6 +34,7 @@ model User {
   sessionPoints           UserSessionPoints[]
   qimelaPoints            UserQimelaPoints[]
   sessionResultAudits     SessionResultAudit[]
+  openQuestionResponses   OpenQuestionResponse[]
 
   @@map("users")
 }
@@ -274,6 +275,11 @@ enum SessionStatus {
   POSTPONED
 }
 
+enum OpenQuestionStatus {
+  HIDDEN
+  VISIBLE
+}
+
 model Event {
   id        String      @id @default(uuid())
   name      String
@@ -288,8 +294,43 @@ model Event {
 
   phases  Phase[]
   qimelas qimela[]
+  openQuestions OpenQuestion[]
 
   @@map("events")
+}
+
+model OpenQuestion {
+  id        String             @id @default(uuid())
+  prompt    String             @db.VarChar(500)
+  status    OpenQuestionStatus @default(HIDDEN)
+  order     Int
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  eventId String @map("event_id")
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  responses OpenQuestionResponse[]
+
+  @@unique([eventId, order])
+  @@index([eventId, status, order])
+  @@map("open_questions")
+}
+
+model OpenQuestionResponse {
+  id        String   @id @default(uuid())
+  answer    String   @db.VarChar(1000)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  questionId String       @map("question_id")
+  question   OpenQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([questionId, userId])
+  @@index([userId])
+  @@map("open_question_responses")
 }
 
 model Phase {

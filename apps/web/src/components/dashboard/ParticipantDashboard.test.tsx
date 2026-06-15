@@ -26,6 +26,12 @@ vi.mock("@/components/qimela/UpcomingSessions/UpcomingSessions", () => ({
   ),
 }));
 
+vi.mock("@/components/qimela/OpenQuestionsCard/OpenQuestionsCard", () => ({
+  default: ({ qimelaId }: { qimelaId: string }) => (
+    <div>Preguntas {qimelaId}</div>
+  ),
+}));
+
 const qimela: qimela = {
   id: "qimela-1",
   name: "familia-ligamx",

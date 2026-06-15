@@ -12,6 +12,7 @@ import PhaseList from "@/components/admin/PhaseList/PhaseList";
 import PhaseForm from "@/components/admin/PhaseForm/PhaseForm";
 import SessionResultsEditor from "@/components/admin/SessionResultsEditor/SessionResultsEditor";
 import SessionUpload from "@/components/admin/SessionUpload/SessionUpload";
+import OpenQuestionsPanel from "@/components/admin/OpenQuestionsPanel/OpenQuestionsPanel";
 import type { Phase } from "@/types/phase";
 import styles from "./page.module.scss";
 
@@ -234,6 +235,8 @@ export default function EventManagementPage({
               </button>
             )}
           </div>
+
+          <OpenQuestionsPanel eventId={eventId} />
         </aside>
 
         {/* ── Main panel ── */}

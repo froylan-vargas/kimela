@@ -1,0 +1,156 @@
+@use "../../../styles/variables" as *;
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-top: 1px solid $color-border;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.title {
+  margin: 0;
+  color: $color-text-main;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  padding: $spacing-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  background: $color-surface-solid;
+  color: $color-text-main;
+  font-family: $font-family-base;
+  font-size: 14px;
+  line-height: 1.4;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.14);
+  }
+}
+
+.saveButton,
+.actionButton {
+  min-height: 36px;
+  border-radius: $radius-sm;
+  font-family: $font-family-base;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+  }
+}
+
+.saveButton {
+  border: 1px solid $color-navy-deep;
+  background: $color-navy-deep;
+  color: $color-text-inverse;
+
+  &:not(:disabled):hover {
+    background: $color-navy;
+    border-color: $color-navy;
+  }
+}
+
+.state {
+  margin: 0;
+  color: $color-text-secondary;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  background: rgba($color-off-white, 0.5);
+}
+
+.itemBody {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.prompt {
+  margin: 0;
+  color: $color-text-main;
+  font-size: 14px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+  color: $color-text-secondary;
+  font-size: 12px;
+}
+
+.status {
+  font-weight: 700;
+}
+
+.actions {
+  flex-shrink: 0;
+}
+
+.actionButton {
+  padding: 0 $spacing-sm;
+  border: 1px solid $color-border;
+  background: $color-surface-solid;
+  color: $color-text-main;
+
+  &:not(:disabled):hover {
+    border-color: $color-primary;
+    background: $color-primary-light;
+  }
+}
+
+@media (max-width: 520px) {
+  .item {
+    flex-direction: column;
+  }
+
+  .actions,
+  .actionButton {
+    width: 100%;
+  }
+}

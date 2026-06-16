@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import PhaseFilter from "@/components/qimela/ResultsComparison/PhaseFilter";
 import UserCompareSelector, {
@@ -32,6 +32,7 @@ export default function QimelaResultsPage() {
 
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
   const [compareUserIds, setCompareUserIds] = useState<string[]>([]);
+  const defaultPhaseInitializedForQimelaId = useRef<string | null>(null);
 
   const {
     data: results,
@@ -47,6 +48,18 @@ export default function QimelaResultsPage() {
       selectQimela(current, current.role);
     }
   }, [qimelaId, qimelas, selectedQimela?.id, selectQimela]);
+
+  useEffect(() => {
+    if (!qimelaId) return;
+    if (defaultPhaseInitializedForQimelaId.current === qimelaId) return;
+    if (!phases || phases.length === 0) return;
+
+    const activePhase = phases.find((phase) => phase.status === "ACTIVE");
+    if (!activePhase) return;
+
+    defaultPhaseInitializedForQimelaId.current = qimelaId;
+    setSelectedPhaseId(activePhase.id);
+  }, [qimelaId, phases]);
 
   const userOptions = useMemo<CompareUserOption[]>(() => {
     if (!leaderboard || !user) return [];
